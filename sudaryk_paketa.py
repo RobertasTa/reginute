@@ -114,7 +114,15 @@ def main():
         "speaker_id_map": {},
         "piper_version": k.get("piper_version", "1.5.0"),
         "language": LANGUAGE,
-        "dataset": "liepa-tts",
+        # ⚠️ 09-04, sugavo PATS Piperio patikrintuvas (`_script/voicefest.py`):
+        # `dataset` Piperio konvencijoje reiškia NE garsyną, o BALSO VARDĄ, ir
+        # jis privalo sutapti (a) su katalogo aplanku ir (b) su vidurine failo
+        # vardo dalimi: `<lang_code>-<dataset>-<quality>.onnx`.
+        # Buvau įrašęs „liepa-tts" (garsyno vardą) — testas
+        # `assertEqual(file_dataset, config["dataset"])` būtų kritęs.
+        # Kaimynas latvis patvirtina: `lv_LV-aivars-medium` → dataset „aivars".
+        # Garsynas įvardytas ten, kur jam vieta — MODEL_CARD ir README.
+        "dataset": VARDAS.split("-")[1],
     }
     js = os.path.join(HF, VARDAS + ".onnx.json")
     with io.open(js, "w", encoding="utf-8") as f:
