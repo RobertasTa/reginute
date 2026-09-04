@@ -77,10 +77,39 @@ pervadinimas atjungtų TTS.
 Diegimas iš paketo vienu skriptu: `bash diegk_i_serveri.sh` (keičia tik
 `--model`/`--config` eilutes, senų failų netrina, SHA256 tikrina konteineryje).
 
-## 4. Prijungimas prie Home Assistant ⏳
+## 4. Prijungimas prie Home Assistant ✅ (09-04, HA Core 2026.9.0, HAOS)
 
-Настройки → Устройства и службы → Wyoming → host:10250 → balsas atsiranda
-kaip `reginute`. Asistentėje „Reginutė": STT = Paprika (10302), TTS = ši.
+**4.1 Wyoming tarnyba:** Настройки → Устройства и службы → Wyoming Protocol →
+„Добавить службу" → `192.168.0.220 : 10250` → sąraše atsiranda TTS `reginute`.
+
+**4.2 Asistentė:** Настройки → Голосовые ассистенты → „Добавить ассистента":
+Название `Reginutė`, Язык литовский; Диалоговая система `Home Assistant`
+(komandoms — vykdo tiesiai, be LLM; laisvam pokalbiui vėliau — Gemma);
+Распознавание речи `Paprika LT` (10302); Синтез речи `reginute`, Голос
+`Reginutė (medium, 22050…)`. Esamos rusiškos asistentės NELIEČIAMOS.
+
+**4.3 Antras žadinimo žodis kolonėlei (HA 2025.10+ funkcija: iki dviejų
+žodžių ir dviejų asistentų per palydovą; Voice PE turi `hey_jarvis` pačiame
+įrenginyje, fw 26.6.0):** Настройки → Голосовые ассистенты → apačioje
+„N устройства Assist" → kolonėlė (**tik SVETAINE**, MIEGAMAS nepaliesta) →
+kortelė **„Настройки"** — laukai, kaip HA ESPHome kodas juos vadina:
+
+| Laukas | Reikšmė | Liesti? |
+|---|---|---|
+| Ассистент | Home Assistant (rusiška) | ne |
+| Фраза активации | Okay Nabu | ne |
+| **Assistant 2** | **Reginutė** | ✅ pakeista |
+| **Wake word 2** | **Hey Jarvis** | ✅ pakeista |
+| Wake word sensitivity | Moderately sensitive | ne |
+
+Įsigalioja iš karto, kolonėlės perkrauti nereikia. ⇒ „Okay Nabu" = rusiškas
+kelias kaip buvo; „Hey Jarvis" = Paprika → HA lt intentai → Reginutė.
+
+⚠️ Kodėl NE trigeris sakinyje („Ok Nabu, Регина, įjunk…"): kolonėlė visą
+sakinį atiduoda ausims VIENU gabalu, viena kalba — rusiškas Whisper
+lietuvišką dalį užrašytų nesąmonėmis. Kalbą renka žadinimo žodis, ne žodis
+sakinyje. (Alternatyva be antro žodžio — dviem įkvėpimais per automatizaciją,
+kuri perjungia „Ассистент" lauką; nepanaudota, nes antras žodis paprastesnis.)
 
 ## 5. Egzaminas — trys keliai, tie patys sakiniai
 
