@@ -124,21 +124,79 @@ the voice files wherever they travel.
 
 ## Attribution
 
-* LIEPA corpus — Vilnius University (project lead Gražina Korvel; corpus
-  maintainer Gediminas Navickas); dataset published as
-  `meldynamics/liepa-tts` on Hugging Face.
-* Stress dictionary derived from
-  [`svogunas/g2p-lt-lexicon`](https://huggingface.co/datasets/svogunas/g2p-lt-lexicon)
-  by **Arūnas Smaliukas** (CC BY 4.0). Nearly every stressed word this voice
-  speaks stands on his work — 176 637 of the 189 247 entries.
-* **Ears: [`paprika-whisper-lt-v3`](https://huggingface.co/kristijonas/paprika-whisper-lt-v3)
-  by [Kristijonas Jakubsonas](https://github.com/kristijonasatpro/paprika)**
-  (CC-BY-4.0 / Apache-2.0). This voice would be half a system without it: you
-  can speak Lithuanian to a house because he made the listening work first.
-* Piper — Michael Hansen and the Open Home Foundation.
-* The whole thing exists because Vilnius University published LIEPA openly
-  instead of keeping it. Ten years of recordings, given away for the price of
-  a citation.
+![Reginutė — lt_LT-reginute1-medium](docs/baneris.png)
+
+CC-BY-4.0 asks for a corpus to be credited. A corpus is made by people, so
+they are named here too. None of them has seen this project; none of the
+institutions below endorses it. The logos above say *thank you*, nothing more.
+
+### The recordings — LIEPA (2013–2015)
+
+The voice is trained on the synthesis part of the **LIEPA** corpus
+(*LIEtuvių šneka valdomos PAslaugos* — "Lithuanian speech-controlled
+services"), which produced a reader speaking in four voices. This is one of
+those four.
+
+* Carried out by **Vilnius University** (Institute of Mathematics and
+  Informatics; Faculty of Philology).
+* Partners: **Institute of the Lithuanian Language**, **Lithuanian University
+  of Educational Sciences** (since 2019 the Education Academy of **Vytautas
+  Magnus University**), **Šiauliai University** (since 2021 the Šiauliai
+  Academy of Vilnius University).
+* Led by **prof. Laimutis Telksnys**, who started asking whether a machine
+  could talk with a person in 1967 — the LIEPA presentations still open with
+  that date. This voice is a late footnote to a question asked 58 years ago.
+* Corpus work and documentation — **Gediminas Navickas** (VU MIF), whose 2025
+  seminar slides are the source for everything stated above.
+* The speaker: **Regina Jokubauskaitė**. Everything anyone hears is her —
+  her timbre, her pace, her way of ending a sentence. The model only learned
+  to rearrange it.
+* Published to Hugging Face as
+  [`meldynamics/liepa-tts`](https://huggingface.co/datasets/meldynamics/liepa-tts)
+  by **MEL DYNAMICS, MB**, under CC-BY-4.0. Without that upload the corpus
+  would still exist and still be unusable.
+
+The family continued: **LIEPA-2** (1 000 h) and **LIEPA-3** (10 000 h, led by
+**dr. Gražina Korvel**), and it is LIEPA-3 that Paprika below is trained on.
+Different corpus, same decision — publish it rather than keep it.
+
+### The dictionary
+
+Stress dictionary derived from
+[`svogunas/g2p-lt-lexicon`](https://huggingface.co/datasets/svogunas/g2p-lt-lexicon)
+by **Arūnas Smaliukas** (CC BY 4.0). Nearly every stressed word this voice
+speaks stands on his work — 176 637 of the 189 247 entries.
+
+### The ears
+
+**[`paprika-whisper-lt-v3`](https://huggingface.co/kristijonas/paprika-whisper-lt-v3)
+by [Kristijonas Jakubsonas](https://github.com/kristijonasatpro/paprika)**
+(CC-BY-4.0 / Apache-2.0). This voice would be half a system without it: you
+can speak Lithuanian to a house because he made the listening work first.
+
+### The pointer
+
+**Linas Petkevičius, PhD** — President of AI Lithuania and Director of the
+Institute of Computer Science at Vilnius University. In a public LinkedIn
+thread about how the LIEPA-3 recordings were being distributed, he wrote the
+comment that laid out who had put the data on Hugging Face and who had
+trained a Lithuanian model on it. That comment is where this project started:
+without it we would not have found Paprika, and would not have gone looking
+for the corpus this voice is made of. He owes us nothing and knew nothing
+about us — which is rather the point. **A single accurate public comment can
+be worth more than a project plan.**
+
+### Piper
+
+**Michael Hansen** and the **Open Home Foundation** — for a text-to-speech
+system small enough to run on a home server and open enough that a language
+with three million speakers can add itself without asking permission.
+
+---
+
+The whole thing exists because Vilnius University published LIEPA openly
+instead of keeping it. Ten years of recordings, given away for the price of
+a citation.
 
 ---
 
