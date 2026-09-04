@@ -77,13 +77,21 @@ Why it matters here, measured on our own bench rather than taken on trust:
 | generic `whisper-large-v3-turbo` | 25.95 % |
 | **Paprika v3** | **7.63 %** |
 
-On the author's own recording of one of us — a non-professional speaker, in a
-normal room — the generic model lost whole sentences, while Paprika made about
-two ending errors in a hundred words.
+⚠️ **Same caveat the author states about his own numbers, and it applies to
+ours:** our test set is LIEPA-derived, i.e. **in-domain** for this model. His
+card says plainly *„there is no valid out-of-domain number"*. Treat 7.63 % as
+in-domain evidence, not as a general claim. On a recording of a
+non-professional speaker in an ordinary room, the generic model lost whole
+sentences while Paprika made about two ending errors in a hundred words — that
+is anecdote, honestly labelled as such.
 
-⚠️ **One thing the author warns about, and he is right:** use long-form
-decoding, not `chunk_length_s`. We reproduced the failure ourselves before we
-understood the warning.
+⚠️ **Use long-form decoding, not `chunk_length_s`** — the author's warning, and
+he is right; we reproduced the failure before we understood it. Note that
+`faster-whisper` (and therefore `wyoming-faster-whisper`, which is how a Home
+Assistant setup usually runs it) takes the chunked path. For short voice
+commands that is harmless — they fit in a single window — but the chunked
+decoder is documented to invent text on silence, so a long recording deserves
+`transcribe_file.py` from his repo instead.
 
 In our house the two halves run side by side as Wyoming services: Paprika as
 speech-to-text, Reginutė as text-to-speech, in a Lithuanian Assist pipeline
