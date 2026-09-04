@@ -117,7 +117,7 @@ kuri perjungia „Ассистент" lauką; nepanaudota, nes antras žodis pap
 |---|---|---|---|
 | A. Grynas Piper (`demo_piper_wheel.py`) | ką gaus žmogus be HA | trijų ausų 4 + žinios | ✅ 09-04 vietoje (Windows, `pw_venv`, piper-tts 1.7.0): e6980, 4 sakiniai po 4,0–5,0 s, RMS −18 dB visi; žinios 34,2 s, pikas −3,4 dBFS, **kirpimo nėra** (0 pavyzdžių ties pilna skale). 👂 Roberto ausis — laukia. ⏳ tas pats ant serverio |
 | B. Wyoming (`testas_wyoming_klientas.py`) | ką gaus HA vartotojas | tie patys | ✅ 09-04 09:27, LXC 214 iš paketo (`diegk_i_serveri.sh`): Info grąžina `reginute1` (lt/lt_LT/lt-LT); 4 sakiniai 20,3 s, pikas −2,9 dBFS; žinios 31,7 s, pikas −3,5 dBFS; **kirpimo nėra**, tyla ~25 %. 👂 Roberto ausis — laukia (Telegrame šalia A) |
-| C. Balsu per kolonėlę | visa grandinė: ausys + smegenys + burna | laisvai | ⏳ Roberto rankos: kolonėlę → asistentė „Reginutė" |
+| C. Balsu per kolonėlę | visa grandinė: ausys + smegenys + burna | laisvai | ✅ **09-04 ~10:00 — PIRMĄ KARTĄ BALSU.** Robertas svetainės Voice PE: „Hey Jarvis, įjunk šviesą vonioje" → lempa įsijungė, Reginutė atsakė lietuviškai „šviesos įjungtos"; išjungimas — „šviesos išjungtos". Paprika Roberto tarimą užrašė teisingai (be nosinių taisymo). Modelis e6980 (dar ne galutinis — sukeičiamas tuo pačiu `diegk_i_serveri.sh`). |
 
 Papildomai (09-04): ✅ `ˋ` U+02CB → id 166, `̩` U+0329 → id 144; sakinys
 „…savu noru, ne viską" fonemizuojasi su `ˋ`, po NFD ženklas lieka, visi
