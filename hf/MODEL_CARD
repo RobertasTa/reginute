@@ -1,0 +1,45 @@
+# Model card for reginute (medium)
+
+* Language: lt_LT (Lithuanian, Lithuania)
+* Speakers: 1
+* Quality: medium
+* Samplerate: 22,050Hz
+
+## Dataset
+
+* URL: https://huggingface.co/datasets/meldynamics/liepa-tts
+* License: CC-BY-4.0
+
+LIEPA corpus, Vilnius University. Speaker Regina Jokubauskaitė (professional
+actress), studio recordings, 5 121 utterances, ~3 hours. Stress and pitch
+accents in the training transcriptions come from the corpus' own annotation,
+sentence by sentence.
+
+## Training
+
+Fine-tuned from the Piper catalogue checkpoint `ru_RU-irina-medium`
+(`rhasspy/piper-checkpoints`), which is itself fine-tuned from
+`en_US-lessac-medium`. Training data licence is CC-BY-4.0; the lineage above is
+stated so that the base-model question (see piper-voices discussion #94) is
+visible rather than hidden.
+
+## Phonemization — please read
+
+This voice uses `phoneme_type: text` with a custom `phoneme_id_map`
+(IPA + three Lithuanian accent marks `ˈ ˌ ˋ`). It does **not** use espeak-ng at
+synthesis time, because espeak-ng misplaces Lithuanian stress in roughly half
+of the words against the corpus' gold annotation.
+
+Text must therefore be phonemized by `phonemize_lithuanian.py` (shipped with
+the voice; proposed as a `PhonemeType.LITHUANIAN` contribution to piper1-gpl)
+together with the stress dictionary `lt_kirciai.tsv`. Plain Piper without the
+phonemizer feeds the model raw letters and will not produce Lithuanian.
+
+Recommended: `normalize_audio=False` (the default `True` clips this voice).
+
+## Attribution
+
+* Stress dictionary derived from `svogunas/g2p-lt-lexicon` by Arūnas Smaliukas
+  (CC BY 4.0) and from the LIEPA annotations.
+* Thanks to Vilnius University (Gražina Korvel, Gediminas Navickas) for
+  publishing the corpus under an open licence.

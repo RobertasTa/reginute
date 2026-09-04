@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+
+# Garso išvestys ir žurnalai
+*.wav
+*.log
+
+# Modelio svoriai NE git'e: 60 MB, kiekvienas pakeitimas išpūstų istoriją.
+# Platinami per GitHub Release ir HF repo. SHA256 — hf/SHA256SUMS.
+hf/*.onnx
+
+# Vietiniai bandymai
+_bandymai/
