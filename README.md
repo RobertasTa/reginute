@@ -37,7 +37,7 @@ include it.
 | `demo_piper_wheel.py` | Proof that the released `piper-tts` wheel + this module + the `.onnx` is enough — no fork. |
 | `test_phonemize_lithuanian.py` | pytest suite for the phonemizer. |
 | `hf/` | The exact package that goes to Hugging Face: `.onnx` (not in git), `.onnx.json`, `MODEL_CARD`, `samples/`, `SHA256SUMS`. |
-| `docs/` | Installation and testing notes, written during the server tests. |
+| `docs/` | Installation and testing notes, written during the server tests. `DU_ASISTENTAI_HA.md` — how one Voice PE speaker runs two languages with two wake words (verified live; LT, EN to follow). |
 | `sudaryk_zodyna.py`, `patikrink_pries_mokyma.py` | Build-side tools (dictionary builder, training-parity check). Contain Windows paths; not needed by users. |
 
 ## Install path A — plain Piper (no Home Assistant) ⏳
