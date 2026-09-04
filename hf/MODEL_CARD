@@ -41,5 +41,11 @@ Recommended: `normalize_audio=False` (the default `True` clips this voice).
 
 * Stress dictionary derived from `svogunas/g2p-lt-lexicon` by Arūnas Smaliukas
   (CC BY 4.0) and from the LIEPA annotations.
-* Thanks to Vilnius University (Gražina Korvel, Gediminas Navickas) for
-  publishing the corpus under an open licence.
+* LIEPA corpus (2013-2015) — Vilnius University (Institute of Mathematics and
+  Informatics; Faculty of Philology), with the Institute of the Lithuanian
+  Language, the Lithuanian University of Educational Sciences and Šiauliai
+  University. Project lead: prof. Laimutis Telksnys. Corpus work and
+  documentation: Gediminas Navickas. Speaker: Regina Jokubauskaitė.
+* Published to Hugging Face as `meldynamics/liepa-tts` by MEL DYNAMICS, MB.
+* Thanks to Vilnius University for publishing the corpus under an open licence
+  instead of keeping it.
