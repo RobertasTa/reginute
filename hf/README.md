@@ -87,6 +87,24 @@ voice.
   This voice is the mouth of a Lithuanian assistant; his model is the ears.
 * **Piper** — Michael Hansen and the Open Home Foundation.
 
+## Known limitations
+
+Listed because you will meet them anyway, and finding them yourself after
+being told everything is fine is worse than reading them here.
+
+| What | Why it happens |
+|---|---|
+| **Single short words sound hurried and thin** — worst with numbers read one at a time | The corpus is sentences: only 93 of 5 121 utterances are short standalone ones. „du" (two) appears alone exactly once, and as a question. Inside a sentence the same words are fine. |
+| **Individual stress errors** — confirmed: `procentas`, `kilovatvalandės` | The dictionary is derived, not hand-checked word by word; in both cases the word family disagrees with itself (`procentas` vs `procentinis`). Expect more in loanwords and compounds. |
+| **Homographs unsolved** — `nãmo` (of the house) vs `namõ` (homewards) | Spelled identically, differ only in accent. A word-level dictionary cannot choose; that needs sentence context. Not a bug we can fix by adding entries. |
+| **Needs the phonemizer** — plain `piper -m …` will not speak Lithuanian | Architectural, not a rough edge. See the section above. |
+| **`length_scale 1.25` is a judgement, not a measurement** | Chosen by ear against recordings of the original speaker. Override freely if you prefer faster. |
+
+None of these block ordinary use: the voice reads news, answers a smart
+speaker and speaks multi-minute articles without a break. They are listed so
+you know what you are getting — the same courtesy the author of the ASR model
+above extends about his own numbers.
+
 ## Status
 
 Trained and in daily use in a real Home Assistant installation (Wyoming TTS,
