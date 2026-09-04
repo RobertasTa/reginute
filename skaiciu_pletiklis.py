@@ -264,11 +264,31 @@ def raidem(m):
 EURAI = ("euras", "eurai", "eurų")
 CENTAI = ("centas", "centai", "centų")
 # Mato vienetai, kuriems reikia to paties derinimo (žr. `isplesk` 0− punktą).
+# Ketvirtas laukas — giminė: "" vyriška, "_f" moteriška („dvi tonos", ne „du").
+# ⚠️ 09-04 antras praplėtimas (Roberto ausis: „2 g, 2 t, 2 cm skamba juokingai"
+# — iki tol lentelėje buvo TIK km/kg/proc, o visi kiti likdavo raide: „du gė").
 VIENETAI = {
-    "km": ("kilometras", "kilometrai", "kilometrų"),
-    "kg": ("kilogramas", "kilogramai", "kilogramų"),
-    "proc": ("procentas", "procentai", "procentų"),
+    "km":  ("kilometras", "kilometrai", "kilometrų", ""),
+    "cm":  ("centimetras", "centimetrai", "centimetrų", ""),
+    "mm":  ("milimetras", "milimetrai", "milimetrų", ""),
+    "kg":  ("kilogramas", "kilogramai", "kilogramų", ""),
+    "ml":  ("mililitras", "mililitrai", "mililitrų", ""),
+    "ha":  ("hektaras", "hektarai", "hektarų", ""),
+    # elektra (Roberto prašymas — „dažnai pasitaiko"):
+    "kW":  ("kilovatas", "kilovatai", "kilovatų", ""),
+    "Wh":  ("vatvalandė", "vatvalandės", "vatvalandžių", "_f"),
+    "kWh": ("kilovatvalandė", "kilovatvalandės", "kilovatvalandžių", "_f"),
+    "proc": ("procentas", "procentai", "procentų", ""),
 }
+# ⛔ 09-04 SĄMONINGAI NEĮTRAUKTI vienaraidžiai: W, A, V, m, g, t, l.
+# Roberto nuostata: „pavojingus aplenk, lai geriau keistai skamba negu
+# primeluotų kitose vietose." Kiekvienas jų lietuviškame tekste turi antrą
+# reikšmę: `V` — romėniškas penketas, `A.` `V.` `W.` — vardų inicialai,
+# `g.` — gatvė, `t.` — iš „t. y.", „t. t.". Skaičiaus reikalavimas PRIEŠ
+# vienetą daugumą tų atvejų atmeta, bet ne visus: „5 A klasė" virstų
+# „penki amperai klasė", „1 t. y." — „viena tona y". Kaina: „2 m" ir „500 g"
+# lieka raidėmis. Grąžinti galima bet kada — eilutė lentelėje ir šablone.
+VIENETU_SABLONAS = "kWh|kW|Wh|km|kg|cm|mm|ml|ha|proc\\."
 
 
 def _skaic_forma(n, formos):
@@ -297,17 +317,18 @@ def isplesk(t):
     def _vienetas(m):
         sk, tr, vnt = m.group(1), m.group(2), m.group(3)
         n = int(tr) if tr else int(sk)
-        formos = VIENETAI[vnt.rstrip(".")]
-        skaic = (f"{kiekinis(int(sk))} kablelis {kiekinis(int(tr))}" if tr
-                 else kiekinis(int(sk)))
+        *formos, gim = VIENETAI[vnt.rstrip(".")]
+        skaic = (f"{kiekinis(int(sk), 'V', gim)} kablelis "
+                 f"{kiekinis(int(tr), 'V', gim)}" if tr
+                 else kiekinis(int(sk), "V", gim))
         # „proc." taškas yra santrumpos, bet sakinio gale jis tarnauja ir kaip
         # sakinio galas — o `synth_reginute` pagal jį skaido frazes. Grąžinam.
         liko = m.string[m.end():]
         galas = "." if (vnt.endswith(".") and
                         (not liko.strip() or re.match(r"\s+[A-ZĄČĘĖĮŠŲŪŽ]", liko))) else ""
         return f"{skaic} {_skaic_forma(n, formos)}{galas}"
-    t = re.sub(r"\b(\d{1,9})(?:,(\d{1,2}))?\s*(km|kg|proc\.)(?=\s|$|[.,;:!?])",
-               _vienetas, t)
+    t = re.sub(r"\b(\d{1,9})(?:,(\d{1,2}))?\s*(" + VIENETU_SABLONAS +
+               r")(?=\s|$|[.,;:!?])", _vienetas, t)
     # 0. santrumpos
     for r, z in SANTRUMPOS:
         t = re.sub(r, z, t)
