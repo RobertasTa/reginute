@@ -67,6 +67,13 @@ voice.
 * **Stress dictionary** — derived from
   [`svogunas/g2p-lt-lexicon`](https://huggingface.co/datasets/svogunas/g2p-lt-lexicon)
   by **Arūnas Smaliukas** (CC BY 4.0), and from the LIEPA annotations.
+* **Ears, not ours but indispensable** —
+  [`kristijonas/paprika-whisper-lt-v3`](https://huggingface.co/kristijonas/paprika-whisper-lt-v3)
+  by **Kristijonas Jakubsonas**
+  ([github.com/kristijonasatpro/paprika](https://github.com/kristijonasatpro/paprika)):
+  Lithuanian ASR fine-tuned on LIEPA-3. Measured on our bench, it cut word
+  error rate from 25.95 % (generic `whisper-large-v3-turbo`) to **7.63 %**.
+  This voice is the mouth of a Lithuanian assistant; his model is the ears.
 * **Piper** — Michael Hansen and the Open Home Foundation.
 
 ## Status

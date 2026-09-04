@@ -59,6 +59,36 @@ ph = LithuanianPhonemizer()
 ⏳ To be verified on the server with the released wheel; exact snippet will be
 pasted from the working test.
 
+## The other half of the chain — ears
+
+A voice assistant needs two halves. This repository is the **mouth**; the
+**ears** are not ours, and we want to say so loudly.
+
+**[`kristijonas/paprika-whisper-lt-v3`](https://huggingface.co/kristijonas/paprika-whisper-lt-v3)**
+by **Kristijonas Jakubsonas** — a Lithuanian fine-tune of `whisper-large-v3-turbo`,
+trained on ~3 281 h of the LIEPA-3 corpus, CC-BY-4.0. Pipelines and tooling:
+**[github.com/kristijonasatpro/paprika](https://github.com/kristijonasatpro/paprika)**
+(Apache-2.0).
+
+Why it matters here, measured on our own bench rather than taken on trust:
+
+| Lithuanian speech → text | WER |
+|---|---|
+| generic `whisper-large-v3-turbo` | 25.95 % |
+| **Paprika v3** | **7.63 %** |
+
+On the author's own recording of one of us — a non-professional speaker, in a
+normal room — the generic model lost whole sentences, while Paprika made about
+two ending errors in a hundred words.
+
+⚠️ **One thing the author warns about, and he is right:** use long-form
+decoding, not `chunk_length_s`. We reproduced the failure ourselves before we
+understood the warning.
+
+In our house the two halves run side by side as Wyoming services: Paprika as
+speech-to-text, Reginutė as text-to-speech, in a Lithuanian Assist pipeline
+next to a Russian one. See `docs/DU_ASISTENTAI_HA.md`.
+
 ## Install path B — Home Assistant via Wyoming ⏳
 
 Runs beside your existing Piper add-on, on its own port; nothing existing is
@@ -89,9 +119,18 @@ the voice files wherever they travel.
 * LIEPA corpus — Vilnius University (project lead Gražina Korvel; corpus
   maintainer Gediminas Navickas); dataset published as
   `meldynamics/liepa-tts` on Hugging Face.
-* Stress dictionary derived from `svogunas/g2p-lt-lexicon` by **Arūnas
-  Smaliukas** (CC BY 4.0).
+* Stress dictionary derived from
+  [`svogunas/g2p-lt-lexicon`](https://huggingface.co/datasets/svogunas/g2p-lt-lexicon)
+  by **Arūnas Smaliukas** (CC BY 4.0). Nearly every stressed word this voice
+  speaks stands on his work — 176 637 of the 189 247 entries.
+* **Ears: [`paprika-whisper-lt-v3`](https://huggingface.co/kristijonas/paprika-whisper-lt-v3)
+  by [Kristijonas Jakubsonas](https://github.com/kristijonasatpro/paprika)**
+  (CC-BY-4.0 / Apache-2.0). This voice would be half a system without it: you
+  can speak Lithuanian to a house because he made the listening work first.
 * Piper — Michael Hansen and the Open Home Foundation.
+* The whole thing exists because Vilnius University published LIEPA openly
+  instead of keeping it. Ten years of recordings, given away for the price of
+  a citation.
 
 ---
 
