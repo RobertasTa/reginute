@@ -1,0 +1,8 @@
+# Vienodi eilučių galai visur: Windows'e kuriama, Linux'e diegiama.
+* text=auto eol=lf
+*.tsv text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.onnx binary
+*.mp3 binary
+*.wav binary
