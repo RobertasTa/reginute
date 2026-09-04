@@ -82,7 +82,9 @@ def kiekinis(n, forma="V", gimine=""):
         if m >= 100:
             s = m // 100
             if s > 1:
-                z.append(VNT[s]["V"])
+                # ⚠️ 09-04, rasta tuo pačiu testu: šimtų DAUGIKLIS derinasi su
+                # linksniu („devynIŲ šimtų", ne „devynI šimtų").
+                z.append(VNT[s].get(f, VNT[s]["V"]))
             z.append(_grupe("šimtas", "šimtai", "šimtų", s, f))
             m %= 100
         if 11 <= m <= 19:
@@ -90,7 +92,14 @@ def kiekinis(n, forma="V", gimine=""):
             m = 0
         elif m >= 10:
             d = m - m % 10
-            z.append(DESIMT_K[d] if f == "K" else DESIMT[d])
+            # ⚠️ 09-04 (Roberto ausis: „skaičius sako blogai"): SUDĖTINIAME
+            # skaitvardyje dešimtys NELINKSNIUOJAMOS — linksniuojasi tik
+            # PASKUTINIS dėmuo. Buvo „devynių eurų devyniasdešimtIES devynių
+            # centų"; taisyklinga — „devyniasdešimt devynių".
+            # Kilmininko forma imama TIK kai dešimtys pačios yra paskutinės
+            # („iš devyniasdešimties"), t. y. kai vienetų nėra.
+            paskutine = (m % 10 == 0)
+            z.append(DESIMT_K[d] if (f == "K" and paskutine) else DESIMT[d])
             m %= 10
         if m:
             z.append(VNT[m][f + gimine] if (f + gimine) in VNT[m] else VNT[m][f])
@@ -254,6 +263,12 @@ def raidem(m):
 # 21 euRAS · 2–9, 22–29 euRAI · 10, 11–19, 20, 30 euRŲ.
 EURAI = ("euras", "eurai", "eurų")
 CENTAI = ("centas", "centai", "centų")
+# Mato vienetai, kuriems reikia to paties derinimo (žr. `isplesk` 0− punktą).
+VIENETAI = {
+    "km": ("kilometras", "kilometrai", "kilometrų"),
+    "kg": ("kilogramas", "kilogramai", "kilogramų"),
+    "proc": ("procentas", "procentai", "procentų"),
+}
 
 
 def _skaic_forma(n, formos):
@@ -272,6 +287,27 @@ GAL_VEIKSMAZODZIAI = r"(kainuoja|kainavo|moka|mokėjo|sumokėjo|gavo|gaus|" \
 
 
 def isplesk(t):
+    # 0−. MATO VIENETAI SU SKAIČIUMI — derinam su skaičiumi.
+    # ⚠️ 09-04 (Roberto ausis: „Jarvis-Reginutė skaičius sako blogai"): lentelėje
+    # `km` visada virsdavo „kilometrų", tad „12 km" skambėdavo teisingai, o
+    # „5 km" → „penki kilometrŲ" ir „100,5 km" → „šimtas kablelis penki
+    # kilometrŲ“. Vienetas privalo derintis su PASKUTINIU ištartu skaičiumi
+    # (dešimtainėje — su trupmenine dalimi, kaip ir sakom: „devyni kablelis
+    # devyniasdešimt devyni eurAI"). Turi eiti PRIEŠ bendrą santrumpų lentelę.
+    def _vienetas(m):
+        sk, tr, vnt = m.group(1), m.group(2), m.group(3)
+        n = int(tr) if tr else int(sk)
+        formos = VIENETAI[vnt.rstrip(".")]
+        skaic = (f"{kiekinis(int(sk))} kablelis {kiekinis(int(tr))}" if tr
+                 else kiekinis(int(sk)))
+        # „proc." taškas yra santrumpos, bet sakinio gale jis tarnauja ir kaip
+        # sakinio galas — o `synth_reginute` pagal jį skaido frazes. Grąžinam.
+        liko = m.string[m.end():]
+        galas = "." if (vnt.endswith(".") and
+                        (not liko.strip() or re.match(r"\s+[A-ZĄČĘĖĮŠŲŪŽ]", liko))) else ""
+        return f"{skaic} {_skaic_forma(n, formos)}{galas}"
+    t = re.sub(r"\b(\d{1,9})(?:,(\d{1,2}))?\s*(km|kg|proc\.)(?=\s|$|[.,;:!?])",
+               _vienetas, t)
     # 0. santrumpos
     for r, z in SANTRUMPOS:
         t = re.sub(r, z, t)
