@@ -32,7 +32,10 @@ VNT = {
         "V_f": "devynios", "G_f": "devynias", "K_f": "devynių", "I_f": "devyniomis"},
 }
 # 11–19: linksniuojasi kaip mot. -a (vienuolika/vienuolikos/vienuolika...)
-PALIKT = {n: "vien dvy try keturio penkio šešio septynio aštuonio devynio".split()[n - 11] + "lika"
+# ⚠️ 09-04 IŠTAISYTA: pirmas dėmuo buvo „vien" → 11 visur skambėjo „VIENLIKA"
+# (ir 111 „šimtas vienlika", ir kelintinis „vienliktas"). Rasta atsitiktinai,
+# tikrinant kainą „11,15 Eur". Klaida būtų iškeliavusi kartu su dovana.
+PALIKT = {n: "vienuo dvy try keturio penkio šešio septynio aštuonio devynio".split()[n - 11] + "lika"
           for n in range(11, 20)}
 
 
@@ -247,6 +250,21 @@ def raidem(m):
     return " - " + " - ".join(RAIDZIU_VARDAI.get(c, c) for c in s) + " - "
 
 
+# Lietuviškas skaitvardžio ir daiktavardžio derinimas (vns. / dgs. / kilm.):
+# 21 euRAS · 2–9, 22–29 euRAI · 10, 11–19, 20, 30 euRŲ.
+EURAI = ("euras", "eurai", "eurų")
+CENTAI = ("centas", "centai", "centų")
+
+
+def _skaic_forma(n, formos):
+    d10, d100 = n % 10, n % 100
+    if d10 == 1 and d100 != 11:
+        return formos[0]
+    if d10 == 0 or 11 <= d100 <= 19:
+        return formos[2]
+    return formos[1]
+
+
 MOT_ZODZIAI = r"(valand|dien|minut|savait|sekund|viet|klas|kart(?!ą))"
 GAL_VEIKSMAZODZIAI = r"(kainuoja|kainavo|moka|mokėjo|sumokėjo|gavo|gaus|" \
                      r"turi|turėjo|siekia|siekė|sudaro|sudarė|uždirba|uždirbo|" \
@@ -267,12 +285,43 @@ def isplesk(t):
     t = re.sub(r"\s*-\s*(?=[.,:;!?])", "", t)
     t = re.sub(r"\s*-\s*$", "", t, flags=re.MULTILINE)
     t = re.sub(r"^\s*-\s*", "", t, flags=re.MULTILINE)
+    # 0c. KAINA: „9,99 Eur" -> „devyni eurai devyniasdešimt devyni centai".
+    # Turi eiti PRIEŠ bendrą kablelio taisyklę, kitaip liktų „kablelis".
+    # (0 punkte `Eur` jau paverstas į „ eurų", tad gaudom ir tą formą.)
+    def _kaina(m):
+        e, c = int(m.group(1)), int(m.group(2))
+        pries = (m.string[:m.start()].rstrip().split() or [""])[-1].lower()
+        kilm = pries in ("nuo", "iki", "ligi")
+        f = "K" if kilm else "V"
+        dalys = [kiekinis(e, f), EURAI[2] if kilm else _skaic_forma(e, EURAI)]
+        if c:
+            dalys += [kiekinis(c, f), CENTAI[2] if kilm else _skaic_forma(c, CENTAI)]
+        return " ".join(dalys)
+    t = re.sub(r"\b(\d+),(\d{1,2})\s*(?:Eur\b|eurų|eurai|euro|euru|€)", _kaina, t)
+    # 0d. Dešimtainis kablelis: „9,99" -> „devyni kablelis devyniasdešimt devyni".
+    # ⚠️ 09-04 (Roberto ausis, Reginos paieška): be šito „9,99 Eur" virsdavo
+    # „devyni,devyniasdešimt devyni eurų" — kablelis likdavo tarp žodžių ir
+    # skambėdavo kaip vienas suklijuotas žodis. Turi eiti PRIEŠ visas skaičių
+    # taisykles, kitaip jos abi puses apdoroja atskirai.
+    t = re.sub(r"\b(\d+),(\d{1,2})\b",
+               lambda m: f"{kiekinis(int(m.group(1)))} kablelis "
+                         f"{kiekinis(int(m.group(2)))}", t)
     # 1. HH:MM -> „penkiolika trisdešimt" (0 min -> tik valanda kelintiniu)
+    # ⚠️ 09-04 PATAISA (Roberto ausis: „skaičius valandą supasakojo be linksnių"):
+    # po „nuo"/„iki"/„ligi" lietuviškai reikia KILMININKO — „nuo aštuntos
+    # valandos", ne „nuo aštuntą valandą". Anksčiau visada buvo galininkas,
+    # todėl parduotuvės darbo laikas skambėjo negramatiškai.
+    NUO_IKI = ("nuo", "iki", "ligi")
+
     def _laikas(m):
         h, mi = int(m.group(1)), int(m.group(2))
+        pries = (m.string[:m.start()].rstrip().split() or [""])[-1].lower()
+        kilm = pries in NUO_IKI
         if mi == 0:
-            return kelintinis(h, "f", "G") + " valandą"
-        return kiekinis(h) + " " + (kiekinis(mi) if mi > 9 else "nulis " + kiekinis(mi))
+            return (kelintinis(h, "f", "K") + " valandos" if kilm
+                    else kelintinis(h, "f", "G") + " valandą")
+        val = kiekinis(h, "K") if kilm else kiekinis(h)
+        return val + " " + (kiekinis(mi) if mi > 9 else "nulis " + kiekinis(mi))
     t = re.sub(r"\b(\d{1,2}):(\d{2})\b", _laikas, t)
     # 2. metai kelintiniu įnag.: 2015 metais / 2015 m.
     t = re.sub(r"\b(1\d{3}|2\d{3})\s*(m\.|metais)\b",
