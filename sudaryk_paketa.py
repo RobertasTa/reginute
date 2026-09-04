@@ -32,7 +32,7 @@ PY = os.path.join(BAZE, ".venv", "Scripts", "python.exe")
 KONFIG = os.path.join(BAZE, "_duomenys", "regina", "regina_priegaides.json")
 CIA = os.path.dirname(os.path.abspath(__file__))
 HF = os.path.join(CIA, "hf")
-VARDAS = "lt_LT-reginute-medium"
+VARDAS = "lt_LT-reginute1-medium"
 
 LANGUAGE = {
     "code": "lt_LT",

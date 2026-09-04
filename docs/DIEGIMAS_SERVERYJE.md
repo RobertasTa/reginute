@@ -19,8 +19,8 @@ ne pavieniai failai iš darbinių katalogų. Prieš kėlimą — `SHA256SUMS` su
 
 ```
 /opt/reginute/
-├── lt_LT-reginute-medium.onnx
-├── lt_LT-reginute-medium.onnx.json
+├── lt_LT-reginute1-medium.onnx
+├── lt_LT-reginute1-medium.onnx.json
 ├── phonemize_lithuanian.py
 ├── lt_kirciai.tsv
 ├── zodziai_trumpi.txt
@@ -53,8 +53,8 @@ WorkingDirectory=/opt/reginute
 Environment=PYTHONPATH=/opt/reginute
 Environment=OMP_NUM_THREADS=2
 ExecStart=/opt/reginute/venv/bin/python3 /opt/reginute/wyoming_reginute.py \
-  --model /opt/reginute/lt_LT-reginute-medium.onnx \
-  --config /opt/reginute/lt_LT-reginute-medium.onnx.json \
+  --model /opt/reginute/lt_LT-reginute1-medium.onnx \
+  --config /opt/reginute/lt_LT-reginute1-medium.onnx.json \
   --dictionary /opt/reginute/lt_kirciai.tsv \
   --uri tcp://0.0.0.0:10250 \
   --length-scale 1.30

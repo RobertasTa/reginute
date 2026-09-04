@@ -18,7 +18,7 @@ HOST="${HOST:-root@192.168.0.95}"
 CT="${CT:-214}"
 TIKSLAS="${TIKSLAS:-/opt/reginute}"
 CIA="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VARDAS="lt_LT-reginute-medium"
+VARDAS="lt_LT-reginute1-medium"
 TMP="/tmp/reginute_pkg"
 
 FAILAI=(

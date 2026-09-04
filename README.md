@@ -1,4 +1,4 @@
-# Reginutė — Lithuanian voice for Piper TTS (`lt_LT-reginute-medium`)
+# Reginutė — Lithuanian voice for Piper TTS (`lt_LT-reginute1-medium`)
 
 > **Status: private, under test.** Nothing here is final until the voice has
 > passed a blind listening test and the full chain has been verified on a real
@@ -51,7 +51,7 @@ pip install piper-tts            # 1.7.x
 from piper import PiperVoice, SynthesisConfig
 from phonemize_lithuanian import LithuanianPhonemizer
 
-voice = PiperVoice.load("lt_LT-reginute-medium.onnx")
+voice = PiperVoice.load("lt_LT-reginute1-medium.onnx")
 ph = LithuanianPhonemizer()
 # … see demo_piper_wheel.py for the full call; normalize_audio must be False
 ```
