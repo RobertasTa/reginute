@@ -87,11 +87,17 @@ kaip `reginute`. Asistentėje „Reginutė": STT = Paprika (10302), TTS = ši.
 | Kelias | Ką tikrina | Sakiniai | Rezultatas |
 |---|---|---|---|
 | A. Grynas Piper (`demo_piper_wheel.py`) | ką gaus žmogus be HA | trijų ausų 4 + žinios | ✅ 09-04 vietoje (Windows, `pw_venv`, piper-tts 1.7.0): e6980, 4 sakiniai po 4,0–5,0 s, RMS −18 dB visi; žinios 34,2 s, pikas −3,4 dBFS, **kirpimo nėra** (0 pavyzdžių ties pilna skale). 👂 Roberto ausis — laukia. ⏳ tas pats ant serverio |
-| B. Wyoming (`testas_wyoming_klientas.py`) | ką gaus HA vartotojas | tie patys | ⏳ |
-| C. Balsu per kolonėlę | visa grandinė: ausys + smegenys + burna | laisvai | ⏳ |
+| B. Wyoming (`testas_wyoming_klientas.py`) | ką gaus HA vartotojas | tie patys | ✅ 09-04 09:27, LXC 214 iš paketo (`diegk_i_serveri.sh`): Info grąžina `reginute1` (lt/lt_LT/lt-LT); 4 sakiniai 20,3 s, pikas −2,9 dBFS; žinios 31,7 s, pikas −3,5 dBFS; **kirpimo nėra**, tyla ~25 %. 👂 Roberto ausis — laukia (Telegrame šalia A) |
+| C. Balsu per kolonėlę | visa grandinė: ausys + smegenys + burna | laisvai | ⏳ Roberto rankos: kolonėlę → asistentė „Reginutė" |
 
-Papildomai: `ˋ` (U+02CB) išgyvena NFD ir Wyoming kelią; SHA256 sutampa
-paketas ↔ serveris.
+Papildomai (09-04): ✅ `ˋ` U+02CB → id 166, `̩` U+0329 → id 144; sakinys
+„…savu noru, ne viską" fonemizuojasi su `ˋ`, po NFD ženklas lieka, visi
+simboliai žemėlapyje. ✅ SHA256 sutampa paketas ↔ konteineris (tikrinta
+`sha256sum -c` konteineryje prieš perjungiant tarnybą).
+ℹ️ A ir B trukmės skiriasi (21,1 s / 20,3 s; žinios 34,2 / 31,7 s) dėl
+skirtingų pauzių nustatymų (demo: `min_zodziu=0` skaido ties kableliu;
+serveris: `--taskas 0.15`, kablelio neskaido) ir tempo 1,25/1,30 — tas pats
+atviras klausimas, kaip 3 skyriuje; vieną receptą fiksuoti prieš HF.
 
 ## 6. Kas nesuveikė ir kaip pataisyta
 
