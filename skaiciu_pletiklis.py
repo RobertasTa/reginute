@@ -1,0 +1,323 @@
+# SKAIČIŲ PLĖTIKLIS v2 — lietuviškas skaitvardžių žvėrynas Reginai.
+# Roberto užsakymas 09-02: „apgalvok ir sutvarkyk iki milijonų, kad mokėtų."
+# Verčia skaičius žodžiais SU TEISINGA FORMA pagal kontekstą PRIEŠ
+# fonemizaciją. Modelio mokyti nereikia — jis taria fonemas (generatyvus).
+#
+# Formos žymimos: V vardininkas, G galininkas, K kilmininkas, I įnagininkas;
+# _f — moteriška giminė. Kelintiniai: kamienas + galūnė pagal kontekstą;
+# sudėtiniuose kelintinis TIK paskutinis dėmuo (du tūkstančiai penktais).
+# Ko sąmoningai nedengiam (fallback į V): vietininkas, retos įvardžiuotinių
+# formos, dvejetiniai (dveji metai) — pildysim iš Roberto perklausų.
+import re
+
+# --- kiekiniai vienetai --------------------------------------------------
+VNT = {
+    1: {"V": "vienas", "G": "vieną", "K": "vieno", "I": "vienu",
+        "V_f": "viena", "G_f": "vieną", "K_f": "vienos", "I_f": "viena"},
+    2: {"V": "du", "G": "du", "K": "dviejų", "I": "dviem",
+        "V_f": "dvi", "G_f": "dvi", "K_f": "dviejų", "I_f": "dviem"},
+    3: {"V": "trys", "G": "tris", "K": "trijų", "I": "trimis",
+        "V_f": "trys", "G_f": "tris", "K_f": "trijų", "I_f": "trimis"},
+    4: {"V": "keturi", "G": "keturis", "K": "keturių", "I": "keturiais",
+        "V_f": "keturios", "G_f": "keturias", "K_f": "keturių", "I_f": "keturiomis"},
+    5: {"V": "penki", "G": "penkis", "K": "penkių", "I": "penkiais",
+        "V_f": "penkios", "G_f": "penkias", "K_f": "penkių", "I_f": "penkiomis"},
+    6: {"V": "šeši", "G": "šešis", "K": "šešių", "I": "šešiais",
+        "V_f": "šešios", "G_f": "šešias", "K_f": "šešių", "I_f": "šešiomis"},
+    7: {"V": "septyni", "G": "septynis", "K": "septynių", "I": "septyniais",
+        "V_f": "septynios", "G_f": "septynias", "K_f": "septynių", "I_f": "septyniomis"},
+    8: {"V": "aštuoni", "G": "aštuonis", "K": "aštuonių", "I": "aštuoniais",
+        "V_f": "aštuonios", "G_f": "aštuonias", "K_f": "aštuonių", "I_f": "aštuoniomis"},
+    9: {"V": "devyni", "G": "devynis", "K": "devynių", "I": "devyniais",
+        "V_f": "devynios", "G_f": "devynias", "K_f": "devynių", "I_f": "devyniomis"},
+}
+# 11–19: linksniuojasi kaip mot. -a (vienuolika/vienuolikos/vienuolika...)
+PALIKT = {n: "vien dvy try keturio penkio šešio septynio aštuonio devynio".split()[n - 11] + "lika"
+          for n in range(11, 20)}
+
+
+def _palikt(n, forma):
+    z = PALIKT[n]
+    if forma == "K":
+        return z[:-1] + "os"
+    return z  # V/G/I sutampa praktikoje
+
+
+DESIMT = {10: "dešimt", 20: "dvidešimt", 30: "trisdešimt",
+          40: "keturiasdešimt", 50: "penkiasdešimt", 60: "šešiasdešimt",
+          70: "septyniasdešimt", 80: "aštuoniasdešimt", 90: "devyniasdešimt"}
+DESIMT_K = {10: "dešimties", 20: "dvidešimties", 30: "trisdešimties",
+            40: "keturiasdešimties", 50: "penkiasdešimties",
+            60: "šešiasdešimties", 70: "septyniasdešimties",
+            80: "aštuoniasdešimties", 90: "devyniasdešimties"}
+
+
+def _grupe(zodis_vns, zodis_dgs, zodis_kilm, n, forma):
+    """šimtas/tūkstantis/milijonas grupės žodis pagal kiekį ir linksnį."""
+    if forma == "K":
+        return zodis_kilm if n != 1 else zodis_vns[:-2] + ("o" if zodis_vns.endswith("as") else "io")
+    if n == 1:
+        return {"V": zodis_vns, "G": zodis_vns[:-1] + "į" if zodis_vns.endswith("is")
+                else zodis_vns[:-2] + "ą", "I": zodis_vns[:-2] + "u"}.get(forma, zodis_vns)
+    # 2-9 -> dgs; 10-19/dešimtys -> kilmininkas
+    if n % 10 == 0 or 11 <= n % 100 <= 19:
+        return zodis_kilm
+    return {"V": zodis_dgs, "G": zodis_dgs[:-2] + "us",
+            "I": zodis_dgs[:-2] + "ais"}.get(forma, zodis_dgs)
+
+
+def kiekinis(n, forma="V", gimine=""):
+    """0–999 999 999 kiekinis nurodyta forma (V/G/K/I), gimine ''|'_f'."""
+    if n == 0:
+        return {"V": "nulis", "G": "nulį", "K": "nulio", "I": "nuliu"}[forma]
+    if n < 0:
+        return "minus " + kiekinis(-n, forma, gimine)
+    dalys = []
+
+    def trejetas(m, f):
+        z = []
+        if m >= 100:
+            s = m // 100
+            if s > 1:
+                z.append(VNT[s]["V"])
+            z.append(_grupe("šimtas", "šimtai", "šimtų", s, f))
+            m %= 100
+        if 11 <= m <= 19:
+            z.append(_palikt(m, f))
+            m = 0
+        elif m >= 10:
+            d = m - m % 10
+            z.append(DESIMT_K[d] if f == "K" else DESIMT[d])
+            m %= 10
+        if m:
+            z.append(VNT[m][f + gimine] if (f + gimine) in VNT[m] else VNT[m][f])
+        return z
+
+    if n >= 1_000_000:
+        mln = n // 1_000_000
+        if mln > 1:
+            dalys += trejetas(mln, "V")
+        dalys.append(_grupe("milijonas", "milijonai", "milijonų", mln, forma if n % 1_000_000 == 0 else "V"))
+        n %= 1_000_000
+    if n >= 1000:
+        t = n // 1000
+        if t > 1:
+            dalys += trejetas(t, "V")
+        dalys.append(_grupe("tūkstantis", "tūkstančiai", "tūkstančių", t,
+                            forma if n % 1000 == 0 else "V"))
+        n %= 1000
+    if n:
+        dalys += trejetas(n, forma)
+    return " ".join(dalys)
+
+
+# --- kelintiniai ---------------------------------------------------------
+KELINT_KAM = {1: "pirm", 2: "antr", 3: "treči", 4: "ketvirt", 5: "penkt",
+              6: "šešt", 7: "septint", 8: "aštunt", 9: "devint", 10: "dešimt",
+              20: "dvidešimt", 30: "trisdešimt", 40: "keturiasdešimt",
+              50: "penkiasdešimt", 60: "šešiasdešimt", 70: "septyniasdešimt",
+              80: "aštuoniasdešimt", 90: "devyniasdešimt"}
+for _n in range(11, 20):
+    KELINT_KAM[_n] = PALIKT[_n][:-1] + "t"
+# galūnės: (gimine, forma) -> galūnė; ivardž. atskirai
+KELINT_GAL = {("m", "V"): "as", ("m", "G"): "ą", ("m", "K"): "o",
+              ("m", "Idgs"): "ais", ("m", "Vdgs"): "i",
+              ("f", "V"): "a", ("f", "G"): "ą", ("f", "K"): "os", ("m", "Kdgs"): "ų"}
+IVARDZ = {("m", "V"): "asis", ("m", "G"): "ąjį", ("f", "V"): "oji",
+          ("f", "G"): "ąją", ("m", "Idgs"): "aisiais"}
+
+
+def kelintinis(n, gimine="m", forma="V", ivardz=False):
+    """Sudėtinis kelintinis: kelintinis TIK paskutinis dėmuo."""
+    if n <= 0:
+        return kiekinis(n)
+    lik = n % 100
+    if lik == 0:
+        lik = n % 1000 if n % 1000 else n  # 1900 -> "šimtųjų"? fallback žemiau
+    baze = n - (n % 100)
+    pask = n % 100
+    priek = ""
+    if pask == 0:                     # apvalūs: 2000-aisiais (fallback kiekinis+gal)
+        kam = KELINT_KAM.get(n // (10 ** (len(str(n)) - 1)))
+        return kiekinis(n) + ("-aisiais" if forma == "Idgs" else "")
+    if pask > 20 and pask % 10:
+        priek = DESIMT[pask - pask % 10] + " "
+        pask = pask % 10
+    kam = KELINT_KAM[pask]
+    gal = (IVARDZ if ivardz else KELINT_GAL).get((gimine, forma))
+    if gal is None:
+        gal = KELINT_GAL[("m", "V")]
+    zodis = priek + kam + gal
+    return (kiekinis(baze) + " " if baze else "") + zodis
+
+
+# --- santrumpos ----------------------------------------------------------
+SANTRUMPOS = [(r"\bproc\.", " procentai"), (r"\bval\.(?=\s|$)", " valandos"),
+              (r"\bEur\b", " eurų"), (r"\bmln\.", " milijonai"),
+              (r"\bkm\b", " kilometrų"), (r"\bkg\b", " kilogramų"),
+              (r"\bLR\b", "Lietuvos Respublikos")]
+
+# --- RAIDINES SANTRUMPOS (Roberto radinys 09-03) -------------------------
+# „MTL" Reginute isbardavo kaip vientisa zodi, o Ona kiekviena raide taria
+# atskirai su mazute pauze — todel ju girdisi. Perrasom raidziu vardais.
+RAIDZIU_VARDAI = {
+    "A": "a", "Ą": "a nosinė", "B": "bė", "C": "cė", "Č": "čė", "D": "dė",
+    "E": "e", "Ę": "e nosinė", "Ė": "ė", "F": "ef", "G": "gė", "H": "ha",
+    "I": "i", "Į": "i nosinė", "Y": "ilgoji i", "J": "jot", "K": "ka",
+    "L": "el", "M": "em", "N": "en", "O": "o", "P": "pė", "Q": "kū",
+    "R": "er", "S": "es", "Š": "eš", "T": "tė", "U": "u", "Ų": "u nosinė",
+    "Ū": "ilgoji u", "V": "vė", "W": "dviguba vė", "X": "iks", "Z": "zė",
+    "Ž": "žė",
+}
+# Skaitomos kaip ZODIS, ne raidemis — neliesti.
+# ⭐ JAV ir FIBA irodyti duomenimis (09-03, Roberto pastaba): LIEPA garsyno
+# tekstuose „ES" israsyta kaip „E ES", „NMA" kaip „EN EM A", bet „JAV"
+# paliktas NEISSKAIDYTAS, o g2p zodynas ji raso j' e v' = „jav" sulietai.
+# ⇒ pilni raidziu vardai (em, es, el, te, ve) — norma (patvirtina ir LIEPA,
+# ir zodynas: TV -> „te ve", KGB -> „ka ge be", LRT -> „el er te"),
+# BET JAV yra tikra isimtis.
+SANTRUMPOS_ZODZIU = {
+    "NATO", "UNESCO", "UNICEF", "SODRA", "LIEPA", "COVID", "AIDS", "LED",
+    "PIN", "WIFI", "USB", "PDF", "GPS", "JAV", "FIBA", "NASA", "DELFI",
+}
+
+
+_ZODZIU_SARASAS = None
+
+
+def _yra_tikras_zodis(s):
+    """Ar tai NORMALUS lietuviskas zodis, tik parasytas didziosiomis?
+    Tikrinam g2p zodyne (232 913 zodziu) — taip apsaugom „ORAI", „KARAS",
+    „NAUJA" nuo skaldymo i raides (Roberto ispejimas 09-03: naujienose
+    santrumpos daznos, bet ir pabrezimai didziosiomis pasitaiko)."""
+    global _ZODZIU_SARASAS
+    if _ZODZIU_SARASAS is None:
+        import io
+        import os
+        _ZODZIU_SARASAS = set()
+        # 09-03: kelias nebe kietas — serveryje (LXC 214) pilno žodyno nėra,
+        # o be jo apsauga nustotų veikti TYLIAI ir „ORAI" virstų „o er a i".
+        # Šalia modulio guli `piper_lt\zodziai_trumpi.txt` (33 895 žodžiai po
+        # 4–6 raides — tik tiek ir tereikia, nes tikrinam 4–5 didžiąsias).
+        cia = os.path.dirname(os.path.abspath(__file__))
+        for kelias in (os.path.join(r"D:\_Balsas Lietuviksas", "_modeliai",
+                                    "g2p-lt", "lexicon.tsv"),
+                       os.path.join(cia, "piper_lt", "zodziai_trumpi.txt"),
+                       os.path.join(cia, "zodziai_trumpi.txt")):
+            if os.path.exists(kelias):
+                for eil in io.open(kelias, encoding="utf-8"):
+                    _ZODZIU_SARASAS.add(eil.split("\t", 1)[0].strip())
+                break
+    return s.lower() in _ZODZIU_SARASAS
+
+
+def raidem(m):
+    """AAA -> „a a a" (kiekviena raide atskiru zodziu; tarpas duoda pauze)."""
+    s = m.group(0)
+    if s in SANTRUMPOS_ZODZIU:
+        return s
+    # Zodyno patikra TIK nuo 4 raidziu: trumpesniuose (ES, JAV, VU, DI)
+    # sutapimu su tikrais zodziais daug, bet didziosiomis jie praktiskai
+    # visada yra santrumpos. Nuo 4 raidziu jau tiketi tikri zodziai
+    # („ORAI", „KARAS") — juos saugom.
+    if len(s) >= 4 and _yra_tikras_zodis(s):
+        return s
+    # 09-03 Roberto ausis: „ES ištarė neaiškiai… gal pauzės per trumpos".
+    # Ona tarp raidžių daro pauzeles. Brūkšnelis = trumpa pauzė sintezėje
+    # (sintezuok_zinias: KABLELIS; synth_reginute: 0,10 s) — raidės tampa
+    # atskirais gabalais, o ne suplaktu žodžiu.
+    # Brūkšneliai ir IŠ ABIEJŲ PUSIŲ: be jų pirmoji/paskutinė raidė prilimpa
+    # prie gretimo žodžio („vė - em - i primena") ir netenka pauzės.
+    # Pertekliniai brūkšneliai (sakinio gale, prieš skyrybą) valomi isplesk().
+    # ⭐ 09-03 vakare, 4 ratas — GRĮŽTA PRIE MOKYMO DUOMENŲ (Roberto priekaištas
+    # „į Piper vėl su kitokiom formulėm"). LIEPA tekstuose raidės rašomos
+    # PAPRASTAIS ŽODŽIAIS SAKINIO VIDURYJE, be jokių skyriklių:
+    #   „Rusijos ir Europos Sąjungos E ES."  -> mokyme: ˌea ˈes
+    #   „Kurio kodas įsiterpė į mūsų DĖ EN ER." -> dʲˈee ˈen ˈer
+    #   „U. A. Bė Stragutės mėsa"            -> ˋu. ˌa. bʲˈee
+    # Regina jas taip ir įrašė, ir modelis taip jų mokėsi. Buvau įdėjęs
+    # brūkšnelius („ - "), kad atsirastų pauzės — bet tai IŠSKIRIA santrumpą į
+    # atskirą trumpą gabalą, kokio mokymo duomenyse NIEKADA nebuvo.
+    # ⭐ 09-03 VĖLAI — GRĮŽTA PAUZELĖS, bet dabar pagrįstos KITU kriterijumi.
+    # Anksčiau jas nuėmiau, nes ASR matavimas rodė, kad su pauzėmis mašina
+    # trumpinį atpažįsta blogiau (6/11 prieš 8/11). Bet ASR matuoja MAŠINOS
+    # atkūrimą, o kolonėlė kalba ŽMOGUI. Roberto ausis ir radijo diktoriaus
+    # maniera: „VMI su mažom pauzelėm tarp raidžių gaunasi geriau".
+    # ⇒ žmogaus aiškumas viršesnis; pauzė 0,10 s (`synth_reginute.pauze["-"]`).
+    return " - " + " - ".join(RAIDZIU_VARDAI.get(c, c) for c in s) + " - "
+
+
+MOT_ZODZIAI = r"(valand|dien|minut|savait|sekund|viet|klas|kart(?!ą))"
+GAL_VEIKSMAZODZIAI = r"(kainuoja|kainavo|moka|mokėjo|sumokėjo|gavo|gaus|" \
+                     r"turi|turėjo|siekia|siekė|sudaro|sudarė|uždirba|uždirbo|" \
+                     r"skyrė|skirs|prarado|laimėjo|surinko)"
+
+
+def isplesk(t):
+    # 0. santrumpos
+    for r, z in SANTRUMPOS:
+        t = re.sub(r, z, t)
+    # 0b. RAIDINES santrumpos: 2-5 didziosios is eiles -> raidziu vardai.
+    # Tik VIEN didziosios (kad neliestu „Vilnius"), ir ne is eiles su
+    # mazosiomis (kad „ESU" sakinio pradzioje neliktu perkirstas).
+    t = re.sub(r"\b[A-ZĄČĘĖĮŠŲŪŽ]{2,5}\b", raidem, t)
+    # raidžių brūkšnelių valymas: dvigubi -> vienas; prieš skyrybą ir
+    # eilutės galuose -> lauk (kad neliktų „… - ." ar „- em")
+    t = re.sub(r"(?:\s*-\s*){2,}", " - ", t)
+    t = re.sub(r"\s*-\s*(?=[.,:;!?])", "", t)
+    t = re.sub(r"\s*-\s*$", "", t, flags=re.MULTILINE)
+    t = re.sub(r"^\s*-\s*", "", t, flags=re.MULTILINE)
+    # 1. HH:MM -> „penkiolika trisdešimt" (0 min -> tik valanda kelintiniu)
+    def _laikas(m):
+        h, mi = int(m.group(1)), int(m.group(2))
+        if mi == 0:
+            return kelintinis(h, "f", "G") + " valandą"
+        return kiekinis(h) + " " + (kiekinis(mi) if mi > 9 else "nulis " + kiekinis(mi))
+    t = re.sub(r"\b(\d{1,2}):(\d{2})\b", _laikas, t)
+    # 2. metai kelintiniu įnag.: 2015 metais / 2015 m.
+    t = re.sub(r"\b(1\d{3}|2\d{3})\s*(m\.|metais)\b",
+               lambda m: kelintinis(int(m.group(1)), "m", "Idgs") + " metais", t)
+    t = re.sub(r"\b(1\d{3}|2\d{3})\s*metų\b",
+               lambda m: kelintinis(int(m.group(1)), "m", "Kdgs") + " metų", t)
+    t = re.sub(r"\b(1\d{3}|2\d{3})-(ai|ų|į)?[a-zų]*\b",
+               lambda m: kelintinis(int(m.group(1)), "m", "Idgs", ivardz=True), t)
+    # 3. mot. giminės galininkas: „15 valandą/vietą/klasę" -> kelintinė
+    t = re.sub(r"\b(\d{1,3})\s+(" + MOT_ZODZIAI + r"[ąę])",
+               lambda m: kelintinis(int(m.group(1)), "f", "G") + " " + m.group(2), t)
+    # 3b. vyr. kelintinis G: „23 kartą" -> „dvidešimt trečią kartą"
+    t = re.sub(r"\b(\d{1,3})\s+(kartą|numerį|aukštą|etapą|turą|sezoną|puslapį)\b",
+               lambda m: kelintinis(int(m.group(1)), "m", "G") + " " + m.group(2), t)
+    # 4. mot. kiekiniai: „2 valandas/dienas" -> „dvi valandas"
+    t = re.sub(r"\b(\d{1,4})\s+(" + MOT_ZODZIAI + r"(as|os|es|ių|ę))",
+               lambda m: kiekinis(int(m.group(1)),
+                                  "G" if m.group(2).endswith(("as", "es", "ę")) else "V",
+                                  "_f") + " " + m.group(2), t)
+    # 5. galininkas po veiksmažodžio: „kainuoja 25 eurus"
+    t = re.sub(GAL_VEIKSMAZODZIAI + r"\s+(\d{1,9})\b",
+               lambda m: m.group(1) + " " + kiekinis(int(m.group(2)), "G"), t)
+    # 6. vyriškas galininkas su daiktavardžiu: „3 mėnesius/eurus/kartus"
+    t = re.sub(r"\b(\d{1,9})\s+([a-ząčęėįšųūž]+(?:us|į|ą))\b",
+               lambda m: kiekinis(int(m.group(1)), "G") + " " + m.group(2), t)
+    # 7. „minus N" temperatūrai jau natūralu; likę skaičiai -> V
+    t = re.sub(r"\b\d{1,9}\b", lambda m: kiekinis(int(m.group(0))), t)
+    return re.sub(r"\s{2,}", " ", t)
+
+
+if __name__ == "__main__":
+    import sys
+    sys.stdout.reconfigure(encoding="utf-8")
+    testai = [
+        "dar 2015 metais priimto sprendimo",
+        "1998 metų sausį", "2026-aisiais",
+        "ilgiau kaip 3 mėnesius iš eilės",
+        "susitiksim 15:00, o vakarienė 19:30",
+        "užėmė 3 vietą, o 2 valandas laukė",
+        "kainuoja 25 eurus, o bauda siekia 150 Eur",
+        "mieste gyvena 2 mln. žmonių, tai 45 proc.",
+        "nuvažiavo 12 km ir nešė 80 kg",
+        "temperatūra minus 5 laipsniai",
+        "gavo 1234567 eurų palikimą",
+        "jau 23 kartą laimėjo 7 vietą",
+    ]
+    for x in testai:
+        print(f"{x:44s} -> {isplesk(x)}")
