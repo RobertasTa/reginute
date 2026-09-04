@@ -67,11 +67,22 @@ during the live install; English version follows once it has worked once).
 
 ## Licence
 
-* **Code** in this repository: GPL-3.0 (same as piper1-gpl, see `LICENSE`).
-* **Voice files** (`hf/`): CC-BY-4.0, derived from the LIEPA corpus
-  (CC-BY-4.0). Lineage stated honestly in `hf/MODEL_CARD`: fine-tuned from the
-  Piper catalogue checkpoint `ru_RU-irina-medium`, which was itself fine-tuned
-  from `en_US-lessac`.
+Copyright © 2026 Robertas Tarasevičius.
+
+Two licences, because this repository holds two different kinds of thing:
+
+| What | Licence | File |
+|---|---|---|
+| **Code** — phonemizer, expander, Wyoming server, tooling | **GPL-3.0-only** (same as piper1-gpl) | `LICENSE` |
+| **Voice** — `.onnx`, `.onnx.json`, samples (shipped via Release / Hugging Face, not in git) | **CC-BY-4.0** | `LICENSE-VOICE` |
+
+The voice inherits CC-BY-4.0 from the LIEPA corpus. Lineage stated openly in
+`hf/MODEL_CARD` and `hf/README.md`: fine-tuned from the Piper catalogue
+checkpoint `ru_RU-irina-medium`, which was itself fine-tuned from
+`en_US-lessac-medium`.
+
+⚠️ CC-BY-4.0 requires attribution — see the section below, and keep it with
+the voice files wherever they travel.
 
 ## Attribution
 
