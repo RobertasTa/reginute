@@ -46,6 +46,25 @@ MS_UZ_TEMPO_VIENETA = 36.9
 LYGINIMO_PAKLAIDA = 0.06    # arčiau nei 6 % — nebetaisom
 LYGINIMO_BANDYMAI = 2
 
+# ⭐⭐⭐ 09-04 (Roberto ausis: „2 tyliai, 16 greit, 6 kliūva") — TIKSLAS BUVO
+# VIENAS VISIEMS, o turi būti du. Pamatuota TIKROS Reginos 5121 įraše
+# (`kaip_taria_regina.py`), ms vienai fonemai:
+#     ilgi (30+ fonemų)  37,8 · vidutiniai (15–29) 46,3 · trumpi (<15) 63,6
+# Ji trumpą gabalą taria 68 % LĖČIAU už ilgą. ⚠️ 09-03 komentaras aukščiau
+# teigia priešingai („žmogus trumpą frazę meta greičiau") — ta prielaida buvo
+# iš galvos, o ne iš duomenų, ir šitiems duomenims ji NETEISINGA.
+# Dabartinis 36,9 × 1,25 = 46,1 sutampa su VIDUTINIŲ etalonu (46,3) iki
+# dešimtosios — tad jis buvo teisingas, tik taikomas ir trumpiems. Iš to:
+# „du" gaudavo 47,4 ms (0,75× jos), „šeši" 54,9 (0,86×), o `length_scale`
+# atsimušdavo į apatinę ribą 0,60. Todėl ir „tyliai" — per tiek laiko balsas
+# nespėja išsiskleisti.
+# ⛔ Lyginimo IŠJUNGTI negalima: be jo (grynas ls=1,25) „šeši" eina 1,80×
+# lėčiau už ją, nes modelis trumpų gabalų beveik nematė (93 prieš 4963).
+# Vidutinių ir ilgų NELIEČIAM — jie patikrinti Roberto ausimi (trijų ausų
+# testas 09-03). Keičiasi TIK trumpieji.
+TRUMPI_FON = 15             # fonemų: žemiau šios ribos galioja kitas tikslas
+MS_TRUMPIEMS_UZ_VIENETA = 50.9   # 63,6 / 1,25 — kad `length_scale` liktų vairas
+
 # ⭐ 09-03 PAMATUOTA IR ATMESTA: raidines santrumpas buvau iškėlęs į atskirus
 # gabalus su pauzėmis ir lėtinimu. `trumpiniu_matavimas.py` (Paprika klauso
 # 24 failų) parodė, kad tai KENKIA:
@@ -165,11 +184,14 @@ class ReginuteSynth:
         ls = self.length_scale
         a = self._sintezuok(fonemos, ls)
         if self.lyginti_greiti:
+            # 09-04: trumpam gabalui — savas tikslas (žr. MS_TRUMPIEMS_UZ_VIENETA)
+            tikslas = (MS_TRUMPIEMS_UZ_VIENETA * self.length_scale
+                       if len(fonemos) < TRUMPI_FON else self.tikslinis_ms)
             for _ in range(LYGINIMO_BANDYMAI):
                 ms = 1000 * len(a) / self.sr / len(fonemos)
-                if abs(ms - self.tikslinis_ms) < self.tikslinis_ms * LYGINIMO_PAKLAIDA:
+                if abs(ms - tikslas) < tikslas * LYGINIMO_PAKLAIDA:
                     break
-                ls = max(0.6, min(2.0, ls * self.tikslinis_ms / ms))
+                ls = max(0.6, min(2.0, ls * tikslas / ms))
                 a = self._sintezuok(fonemos, ls)
             if len(a):
                 self.zurnalas.append((frag, len(a) / self.sr,
