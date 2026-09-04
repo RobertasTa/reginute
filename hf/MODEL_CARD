@@ -37,6 +37,38 @@ phonemizer feeds the model raw letters and will not produce Lithuanian.
 
 Recommended: `normalize_audio=False` (the default `True` clips this voice).
 
+## Known limitations
+
+Listed because you will meet them anyway, and finding them yourself after
+being told everything is fine is worse than reading them here.
+
+* **Single short words come out hurried and thin.** The corpus is made of
+  sentences: only 93 of its 5 121 utterances are short standalone ones, and
+  the word "du" (two) appears alone exactly once — as a question. Numbers
+  read one at a time are the worst case; inside a sentence the same words are
+  fine. A short phrase ending in a full stop is a pattern the model has
+  barely seen.
+* **The stress dictionary has individual errors.** It is derived, not
+  hand-checked word by word. Two confirmed: `procentas` and
+  `kilovatvalandės` carry the stress on the wrong syllable, and in both
+  cases the word family disagrees with itself (`procentas` vs
+  `procentinis`). Expect more of the same kind, mostly in loanwords and
+  compounds.
+* **Homographs are not solved and cannot be, by a dictionary.** Lithuanian
+  `nãmo` ("of the house") and `namõ` ("homewards") are spelled identically
+  and differ only in accent. A word-level lookup has no way to choose; that
+  needs sentence context.
+* **The voice needs the phonemizer.** Plain `piper -m lt_LT-reginute1-medium.onnx`
+  will not speak Lithuanian — see the phonemization section above. This is
+  the one limitation that is architectural rather than a rough edge.
+* **`length_scale` is a judgement, not a measurement.** The default 1.25 was
+  chosen by ear against recordings of the original speaker. Other listeners
+  may prefer faster; override it freely.
+
+None of these block ordinary use — the voice reads news, answers a smart
+speaker and speaks long articles without a break. They are listed so that
+you know what you are getting.
+
 ## Attribution
 
 * Stress dictionary derived from `svogunas/g2p-lt-lexicon` by Arūnas Smaliukas
