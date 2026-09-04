@@ -63,7 +63,16 @@ LYGINIMO_BANDYMAI = 2
 # Vidutinių ir ilgų NELIEČIAM — jie patikrinti Roberto ausimi (trijų ausų
 # testas 09-03). Keičiasi TIK trumpieji.
 TRUMPI_FON = 15             # fonemų: žemiau šios ribos galioja kitas tikslas
-MS_TRUMPIEMS_UZ_VIENETA = 50.9   # 63,6 / 1,25 — kad `length_scale` liktų vairas
+MS_TRUMPIEMS_UZ_VIENETA = 50.9
+# ⚠️ 50,9 gautas dalijant tikros Reginos 63,6 iš 1,25 — TUO METU toks buvo
+# numatytasis `length_scale`. Nuo 09-04 numatytasis suvienodintas su tarnyba
+# (1,30; anksčiau .onnx.json sakė 1,25, o tarnyba dirbo su 1,30, tad Robertas
+# vertino vieną tempą, o svetimas gautų kitą). Vadinasi tikrasis tikslas
+# trumpiems dabar yra 50,9 × 1,30 = 66,2 ms, o ne 63,6.
+# ⛔ Konstantos NEPERSKAIČIUOJU į 48,9: būtent 66,2 ms rezultatą Robertas
+# išklausė per kolonėlę ir patvirtino („visur kitur gerai išilgėjo, viskas
+# normoj"). Skaičius, kurį patvirtino ausis, nekeičiamas dėl gražesnės
+# aritmetikos.
 
 # ⭐ 09-03 PAMATUOTA IR ATMESTA: raidines santrumpas buvau iškėlęs į atskirus
 # gabalus su pauzėmis ir lėtinimu. `trumpiniu_matavimas.py` (Paprika klauso
@@ -119,7 +128,7 @@ def nukirpk_tyla(a: np.ndarray, sr: int, slenkstis_db: float = -45.0,
 
 
 class ReginuteSynth:
-    def __init__(self, voice: PiperVoice, phonemizer, length_scale: float = 1.25,
+    def __init__(self, voice: PiperVoice, phonemizer, length_scale: float = 1.30,
                  kablelis: float = 0.25, taskas: float = 0.45,
                  expand_text=None, min_zodziu: int = MIN_ZODZIU,
                  santrumpu_letumas: float = SANTRUMPOS_LETUMAS,
