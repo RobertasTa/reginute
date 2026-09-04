@@ -36,10 +36,46 @@ python3 -m venv /opt/reginute/venv
 /opt/reginute/venv/bin/pip install piper-tts wyoming
 ```
 
-## 3. Tarnyba (systemd) ⏳
+## 3. Tarnyba (systemd) — tikras failas iš LXC 214 (09-04)
 
-`wyoming-reginute.service`, portas **10250** (ne 10200), `--length-scale`
-pagal `.onnx.json` numatytąjį. ⏳ vienetų failas bus įklijuotas iš veikiančio.
+`/etc/systemd/system/wyoming-reginute.service`, portas **10250** (esamas
+`wyoming-piper` lieka ant 10200):
+
+```ini
+[Unit]
+Description=Wyoming Reginute (lietuviskas Piper balsas)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/reginute
+Environment=PYTHONPATH=/opt/reginute
+Environment=OMP_NUM_THREADS=2
+ExecStart=/opt/reginute/venv/bin/python3 /opt/reginute/wyoming_reginute.py \
+  --model /opt/reginute/lt_LT-reginute-medium.onnx \
+  --config /opt/reginute/lt_LT-reginute-medium.onnx.json \
+  --dictionary /opt/reginute/lt_kirciai.tsv \
+  --uri tcp://0.0.0.0:10250 \
+  --length-scale 1.30
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Konteineris: unprivileged, 2 branduoliai, 1 GB RAM (balsas ima ~330 MB),
+4 GB diskas. `OMP_NUM_THREADS=2` — kad nesigrumtų su kitais LXC.
+
+⚠️ **Atviras klausimas:** tarnyba tempą ima iš `--length-scale 1.30` (Roberto
+ausis serveriui 09-03), o paketo `.onnx.json` sako 1.25 (kadrų receptas).
+Vieną iš jų fiksuoti kopetėlių testu prieš HF (PIPER plano 9.1).
+Balso vardas paliktas `reginute1` — HA asistentė „Reginutė" jį jau naudoja;
+pervadinimas atjungtų TTS.
+
+Diegimas iš paketo vienu skriptu: `bash diegk_i_serveri.sh` (keičia tik
+`--model`/`--config` eilutes, senų failų netrina, SHA256 tikrina konteineryje).
 
 ## 4. Prijungimas prie Home Assistant ⏳
 
