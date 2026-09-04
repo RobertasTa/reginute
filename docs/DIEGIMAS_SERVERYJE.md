@@ -50,7 +50,7 @@ kaip `reginute`. Asistentėje „Reginutė": STT = Paprika (10302), TTS = ši.
 
 | Kelias | Ką tikrina | Sakiniai | Rezultatas |
 |---|---|---|---|
-| A. Grynas Piper (`demo_piper_wheel.py`) | ką gaus žmogus be HA | trijų ausų 4 + žinios | ⏳ |
+| A. Grynas Piper (`demo_piper_wheel.py`) | ką gaus žmogus be HA | trijų ausų 4 + žinios | ✅ 09-04 vietoje (Windows, `pw_venv`, piper-tts 1.7.0): e6980, 4 sakiniai po 4,0–5,0 s, RMS −18 dB visi; žinios 34,2 s, pikas −3,4 dBFS, **kirpimo nėra** (0 pavyzdžių ties pilna skale). 👂 Roberto ausis — laukia. ⏳ tas pats ant serverio |
 | B. Wyoming (`testas_wyoming_klientas.py`) | ką gaus HA vartotojas | tie patys | ⏳ |
 | C. Balsu per kolonėlę | visa grandinė: ausys + smegenys + burna | laisvai | ⏳ |
 
