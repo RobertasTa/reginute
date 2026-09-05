@@ -2,10 +2,12 @@
 
 *In English: [README_EN.md](README_EN.md)*
 
-> **Būsena: privatu, testuojama.** Kol balsas nepraėjo klausymo testo ir kol
-> visa grandinė nepatikrinta ant tikro Home Assistant, niekas čia nėra
-> galutinis. Žingsniai su ⏳ dar nepatikrinti — šis aprašas rašomas **darant**,
-> ne po to.
+> **Būsena.** Grandinė patikrinta gyvai: balsas kalba per gryną `piper`
+> komandą, per Wyoming serverį ir per Home Assistant kolonėlę, lietuviškai,
+> šalia rusiško asistento. Paketas praeina **Piperio paties katalogo patikrą**
+> (`_script/voicefest.py`). Kas dar nefiksuota — galutinis mokymo pjūvis:
+> modelis vis dar mokosi, ir į Hugging Face keliaus tas, kurį patvirtins ausis.
+> Šis aprašas rašytas **darant**, ne po to.
 
 Reginutė — lietuviškas balsas [Piper](https://github.com/OHF-Voice/piper1-gpl)
 sintezatoriui, išmokytas iš Vilniaus universiteto **LIEPA** garsyno (diktorė
@@ -41,27 +43,53 @@ modulis turi stovėti prieš modelį. Abu diegimo keliai žemiau jį įtraukia.
 | `svarus_checkpoint.py` | Mokymo pjūvis be optimizatoriaus (807 → 269 MB), kad kitas galėtų auginti savo balsą nuo šito, o ne nuo rusiško. |
 | `hf/` | Tikslus paketas, keliaujantis į Hugging Face: `.onnx` (git'e nėra), `.onnx.json`, `MODEL_CARD`, `samples/`, `SHA256SUMS`. |
 | `docs/` | Diegimo ir testavimo užrašai, rašyti serverio testų metu. `DU_ASISTENTAI_HA.md` — kaip viena Voice PE kolonėlė kalba dviem kalbomis su dviem žadinimo žodžiais (patikrinta gyvai). |
+| `AI_CONSULTANT_BRIEF.md` | Jei ką nors klausit dirbtinio intelekto apie šitą balsą — duokit jam pirma šitą failą. Ten surašyta, ko negalima teigti (pvz. „pirmas lietuviškas TTS" — netiesa) ir kokios yra žinomos ribos. |
 | `sudaryk_zodyna.py`, `patikrink_pries_mokyma.py` | Statybos įrankiai (žodyno sudarymas, mokymo atitikties patikra). Turi Windows kelius; vartotojui nereikalingi. |
 
-## Diegimas A — grynas Piper (be Home Assistant) ⏳
+## Diegimas A — grynas Piper (be Home Assistant)
+
+Reikia išleisto `piper-tts` rato — jokio forko, jokių pataisų.
 
 ```bash
-pip install piper-tts            # 1.7.x
-# šalia savo skripto pasidėkite phonemize_lithuanian.py, lt_kirciai.tsv
-# ir du hf/ balso failus
+pip install piper-tts             # 1.7.x
 ```
+
+Vienam katalogui reikia penkių failų: `lt_LT-reginute1-medium.onnx` ir
+`.onnx.json` (iš Release arba Hugging Face), o šalia jų —
+`phonemize_lithuanian.py`, `lt_kirciai.tsv` ir `skaiciu_pletiklis.py`
+(kartu su `zodziai_trumpi.txt`).
 
 ```python
-from piper import PiperVoice, SynthesisConfig
+from piper import PiperVoice
 from phonemize_lithuanian import LithuanianPhonemizer
+from skaiciu_pletiklis import isplesk
+from synth_reginute import ReginuteSynth, i_int16
+import wave
 
-voice = PiperVoice.load("lt_LT-reginute1-medium.onnx")
-ph = LithuanianPhonemizer()
-# … pilnas kvietimas — demo_piper_wheel.py; normalize_audio privalo būti False
+voice = PiperVoice.load("lt_LT-reginute1-medium.onnx",
+                        config_path="lt_LT-reginute1-medium.onnx.json")
+synth = ReginuteSynth(voice, LithuanianPhonemizer(),
+                      length_scale=1.30, expand_text=isplesk)
+
+garsas = synth.synthesize("Laba diena. Kompensacija nuo 2000 eurų.")
+with wave.open("isvestis.wav", "wb") as w:
+    w.setnchannels(1); w.setsampwidth(2); w.setframerate(synth.sr)
+    w.writeframes(i_int16(garsas))
 ```
 
-⏳ Tikrinama serveryje su išleistu ratu; tikslus pavyzdys bus įklijuotas iš
-veikiančio testo.
+Tą patį vienu paleidimu daro `demo_piper_wheel.py`:
+
+```bash
+python demo_piper_wheel.py lt_LT-reginute1-medium.onnx \
+    lt_LT-reginute1-medium.onnx.json "Laba diena." isvestis.wav
+```
+
+⚠️ **`normalize_audio` privalo likti `False`** (`ReginuteSynth` tai daro už
+jus). Piperio numatytasis `True` šitam balsui pakelia piką iki 1,0 ir kerpa.
+
+⚠️ **Be `skaiciu_pletiklis` skaičiai skambės blogai** — espeak-ng lietuviškus
+skaitmenis skaito ne tais linksniais, o laiką kaip paprastą skaičių.
+`ReginuteSynth` jį iškviečia pats, jei paduodate `expand_text=isplesk`.
 
 ## Kita grandinės pusė — ausys
 
@@ -101,10 +129,28 @@ Mūsų namuose abi pusės sukasi greta kaip Wyoming tarnybos: Paprika — šneka
 tekstą, Reginutė — tekstas į šneką, lietuviškame Assist konvejeryje šalia
 rusiško. Žr. `docs/DU_ASISTENTAI_HA.md`.
 
-## Diegimas B — Home Assistant per Wyoming ⏳
+## Diegimas B — Home Assistant per Wyoming
 
-Sukasi šalia jūsų esamo Piper priedo, savo porte; nieko esamo neliečia. Pilnas
-receptas — `docs/DIEGIMAS_SERVERYJE.md`, rašytas gyvo diegimo metu.
+Sukasi šalia jūsų esamo Piper priedo, savo porte; nieko esamo neliečia.
+
+```bash
+pip install piper-tts wyoming
+python3 wyoming_reginute.py \
+    --model lt_LT-reginute1-medium.onnx \
+    --config lt_LT-reginute1-medium.onnx.json \
+    --dictionary lt_kirciai.tsv \
+    --uri tcp://0.0.0.0:10250 \
+    --length-scale 1.30
+```
+
+Home Assistant: **Settings → Devices & Services → Add integration → Wyoming
+Protocol**, įrašykite serverio adresą ir portą 10250. Balsas atsiras kaip
+`reginute1`.
+
+Pilnas receptas su systemd tarnyba ir LXC konteinerio parametrais —
+`docs/DIEGIMAS_SERVERYJE.md`, rašytas gyvo diegimo metu.
+Kaip viena kolonėlė kalba dviem kalbomis (du žadinimo žodžiai, du asistentai)
+— `docs/DU_ASISTENTAI_HA.md`.
 
 ## Licencija
 
