@@ -116,6 +116,36 @@ speaker and speaks multi-minute articles without a break. They are listed so
 you know what you are getting — the same courtesy the author of the ASR model
 above extends about his own numbers.
 
+## For catalogue maintainers (piper-voices / piper1-gpl)
+
+Nothing here is a new convention — each point follows something already
+merged into Piper.
+
+1. **Order:** the piper1-gpl PR adding `PhonemeType.LITHUANIAN` first, then
+   the piper-voices PR. The catalogue `.onnx.json` says
+   `"phoneme_type": "lithuanian"`; a Piper without the phonemizer refuses to
+   load the voice with a clear error instead of feeding it raw letters. The
+   same pattern as `he_IL-saspeech-medium` (`hebrew`, piper1-gpl #244),
+   `zh_CN-chaowen-medium` (`pinyin`, #271) and `ja_JA-hi_fi_captain-medium`
+   (`japanese`, #274): the phoneme type names a phonemizer that lives in
+   Piper, and the catalogue folder holds only the model and the config.
+2. **The phoneme id map** is Piper's default with one symbol appended
+   (`ˋ` = 166); ˈ and ˌ are the default 120 and 121, PAD/BOS/EOS unchanged.
+3. **The stress dictionary** (`lt_kirciai.tsv`, 3 MB) is resolved through
+   `--data-dir` (or next to the model) and is deliberately *not* in the
+   catalogue folder — no catalogue voice ships extra files. Two merged
+   precedents for delivering such data: bundled in the wheel via
+   `package_data` like the Hebrew models (`piper/hebrew/nakdimon.onnx`,
+   20 MB, #244) — the option proposed in the piper1-gpl PR — or an archive in
+   `rhasspy/piper-checkpoints/<lang>/_resources/` downloaded on first use like
+   g2pW (#271/#269). Until one of them is in place, take the TSV from this
+   repo.
+4. **`samples/speaker_0.mp3`** was generated the way
+   `piper-samples/_script/generate-samples.sh` does it (first line of
+   `test_sentences/lt.txt`, sent to piper-samples separately), through the
+   phonemizer. Regenerating it with a Piper that lacks the phonemizer fails;
+   with a `text` config it produces noise — please keep the shipped one.
+
 ## Status
 
 Trained and in daily use in a real Home Assistant installation (Wyoming TTS,

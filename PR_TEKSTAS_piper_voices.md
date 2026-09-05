@@ -56,11 +56,14 @@ Written down here so nothing depends on an email thread.
    no catalogue voice ships extra files, and I did not want to start. It
    lives in the voice repo; the phonemizer resolves it through `--data-dir`
    (or next to the model) and fails with a clear message if it is missing.
-   For making that automatic there are two precedents in Piper — bundling
-   in the package the way the Hebrew models are (they are 25 MB, this is 3),
-   or a `_resources` archive in `piper-checkpoints` that Piper downloads on
-   first use the way g2pW is. I've asked Ihor which he prefers; if you have a
-   preference for the catalogue side, say so and I'll do it that way.
+   For making that automatic there are two merged precedents in piper1-gpl —
+   bundling in the package the way the Hebrew models are (#244:
+   `piper/hebrew/nakdimon.onnx` 20 MB + `piper/tashkeel` 4.6 MB via
+   `package_data`; this is 3 MB), or a `_resources` archive in
+   `piper-checkpoints` that Piper downloads on first use the way g2pW is
+   (#271/#269, `zh/zh_CN/_resources/g2pw.tar.gz`). My suggestion is the first,
+   and it is asked in the piper1-gpl PR; if you have a preference for the
+   catalogue side, say so and I'll do it that way.
 4. `_script/voicefest.py` has the `lt_LT` language line and `voices.json`
    has the entry with md5/sizes from the shipped files, so nothing needs
    regenerating.
