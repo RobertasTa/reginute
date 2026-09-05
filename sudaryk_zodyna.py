@@ -1,13 +1,15 @@
-# KIRČIŲ ŽODYNO SUDARYMAS Piperio fonemizatoriui (09-03, Roberto „rašyk").
-# Sujungia į VIENĄ failą lt_kirciai.tsv (žodis <TAB> balsių grupės nr <TAB>
-# priegaidės ženklas) tris šaltinius ta pačia pirmumo tvarka, kaip sintezėje:
-#   1. RANKINIAI (fonemizuok_teisingai.py) — Roberto ausies pataisymai
-#   2. liepa-tts anotacija (liepa_kirciu_zodynas.json, 12 604 ž., CC-BY-4.0)
-#   3. svogunas/g2p-lt-lexicon (233 390 ž., CC-BY-4.0) — per tą patį
-#      skaitytuvą kircio_grupe_is_zodyno(), kad kodavimo taisyklės
-#      (Aa→ˈ, aA→ˌ, „A J"→ˌ, gretimi balsiai = viena grupė) būtų vienoje vietoje.
-# Runtime modulis (phonemize_lithuanian.py) tada tik IEŠKO — jokios g2p logikos.
-# Leisti su mokymo venv:  .venv\Scripts\python.exe _irankiai\piper_lt\sudaryk_zodyna.py
+# Builds the stress dictionary used by the phonemizer.
+#
+# It merges three sources into one file (word <TAB> vowel group index <TAB>
+# pitch accent mark), in the same order of precedence the synthesis uses:
+#   1. manual corrections - words fixed after listening
+#   2. the liepa-tts corpus annotation (12 604 words, CC-BY-4.0)
+#   3. svogunas/g2p-lt-lexicon (233 390 words, CC-BY-4.0), read through the
+#      same decoder, so that the encoding rules (which capital marks which
+#      accent, adjacent vowels counting as one group) live in one place only.
+#
+# The runtime module then only LOOKS THINGS UP - it contains no g2p logic.
+# Run it with the training environment.
 import io
 import os
 import sys

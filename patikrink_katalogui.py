@@ -1,23 +1,22 @@
 # -*- coding: utf-8 -*-
-"""Paleidžia PIPERIO PATĮ patikrintuvą (`_script/voicefest.py`) ant mūsų paketo.
+"""Runs PIPER'S OWN catalogue checker (`_script/voicefest.py`) on our package.
 
-Kodėl atskiras įrankis (09-04): pirmą kartą paleidęs jį RADAU TIKRĄ KLAIDĄ —
-`config["dataset"]` buvo „liepa-tts", o Piperio konvencijoje tas laukas reiškia
-NE garsyną, o BALSO VARDĄ, ir privalo sutapti su aplanku bei vidurine failo
-vardo dalimi (`<lang_code>-<dataset>-<quality>.onnx`). Testas
-`assertEqual(file_dataset, config["dataset"])` būtų kritęs pateikimo metu.
-⇒ nuo šiol tai darom PATYS, prieš pateikdami.
+Worth having as a tool: the very first run found a real error. `dataset` was
+set to the corpus name, but in Piper's convention that field is the VOICE
+name and must match both the folder and the middle part of the filename
+(`<lang_code>-<dataset>-<quality>.onnx`). Their assertion would have failed
+during submission - better to find that here.
 
-⚠️ Skripto NEVEŽAM su savimi (jis yra `rhasspy/piper-voices`, MIT) — kaskart
-parsisiunčiam šviežią, kad tikrintume tuo, ką Piperis naudoja ŠIANDIEN.
+The checker is not vendored (it lives in `rhasspy/piper-voices`, MIT); a
+fresh copy is fetched each time, so we test against what Piper uses today.
 
-⚠️ VIENINTELIS dalykas, kurio patys pataisyti negalim: `voicefest.py` turi savo
-kalbų sąrašą (56 kalbos), ir **`lt_LT` jo NĖRA** (estų ir latvių yra).
-Testui jį įdedam LOKALIAI; tikram pateikimui šią eilutę turės pridėti Michael
-Hansen — ji paruošta žemiau ir įrašyta į README, kad jam liktų vienas
-įklijavimas.
+One thing cannot be fixed on our side: `voicefest.py` carries its own list of
+56 languages, and `lt_LT` is not in it (Estonian and Latvian are). It is added
+LOCALLY for the test; for the real submission that one line has to be added
+upstream, and it is prepared below and quoted in the README so that it is a
+single paste.
 
-  .venv\\Scripts\\python.exe _irankiai\\piper_lt\\patikrink_katalogui.py
+  python patikrink_katalogui.py
 """
 from __future__ import annotations
 
@@ -49,8 +48,8 @@ def main() -> int:
         if os.path.exists(pav):
             shutil.copyfile(pav, os.path.join(balsas, "samples", "speaker_0.mp3"))
 
-        # 2. Šviežias voicefest.py
-        print("Siunčiu voicefest.py …", flush=True)
+        # 2. A fresh voicefest.py
+        print("Downloading voicefest.py ...", flush=True)
         try:
             with urllib.request.urlopen(URL, timeout=60) as r:
                 skriptas = r.read().decode("utf-8")
@@ -65,7 +64,7 @@ def main() -> int:
         kelias = os.path.join(tmp, "_script", "voicefest.py")
         io.open(kelias, "w", encoding="utf-8").write(skriptas)
 
-        # 3. Paleidžiam jų testą
+        # 3. Run their test
         r = subprocess.run([sys.executable, "voicefest.py"],
                            cwd=os.path.dirname(kelias),
                            capture_output=True, text=True, timeout=600)
