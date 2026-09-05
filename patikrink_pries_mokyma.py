@@ -1,9 +1,12 @@
-# PATIKRA: ar naujas Piperio modulis phonemize_lithuanian atkuria MOKYMO
-# fonemas (su kirčiais!) — t. y. ar modelis per Piperį gaus tą pačią įvestį,
-# kokią matė mokydamasis. Skirtumai = žodyno (runtime) ir anotacijos (auksas,
-# per sakinį) neatitikimai: homografai, žodžiai, kurių anotacija turėjo, o
-# žodynas išsprendė kitaip.
-# Leisti su piper-tts ratu:  _darbal\pw_venv\Scripts\python.exe _irankiai\piper_lt\patikrink_pries_mokyma.py [N]
+# Parity check: does phonemize_lithuanian reproduce the phonemes the model
+# was TRAINED on, accents included? In other words, will the model receive
+# through Piper the same input it saw while learning?
+#
+# Differences are disagreements between the runtime dictionary (one entry per
+# spelling) and the corpus annotation (per sentence, in context): homographs,
+# and words the annotation resolved one way and the dictionary another.
+#
+# Run it with the piper-tts wheel:  python patikrink_pries_mokyma.py [N]
 import csv
 import io
 import os

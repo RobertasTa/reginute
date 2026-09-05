@@ -1,23 +1,25 @@
-# PAKETO STATYTOJAS: iš geriausio mokymo pjūvio sudeda `hf/` katalogą — tiksliai
-# tą failų rinkinį, kuris keliauja ir į serverį, ir į Hugging Face.
+# Package builder: assembles the `hf/` directory from the best training
+# checkpoint - exactly the set of files that goes both to the server and to
+# Hugging Face, so that what was tested is what is shipped.
 #
-# Kodėl atskiras įrankis (09-04, Robertas: „pradėk konstruoti, bo pamirši"):
-#   1. geriausias pjūvis renkamas pagal val_mel iš VISŲ lightning_logs/version_*,
-#      ne pagal naujausią .onnx (09-03 pamoka: kadre nuėjo e6074 vietoj e5894);
-#   2. `.onnx.json` gaminamas iš mokymo konfigūracijos + oficialaus katalogo
-#      laukų (nusižiūrėta nuo ru_RU-irina-medium.onnx.json: audio.quality,
-#      language{code,family,region,name_native,name_english,country_english},
-#      dataset, inference) — kad Hansenui nereikėtų nieko taisyti ranka;
-#   3. SHA256SUMS — kad paketas, serveris ir HF būtų baitas į baitą tas pats.
+# Why a tool rather than doing it by hand:
+#   1. the best checkpoint is chosen by val_mel across ALL training runs, not
+#      by taking the newest .onnx - those are not the same thing, and picking
+#      the newest once sent out a worse model than the one already on disk;
+#   2. the `.onnx.json` is built from the training config plus the fields the
+#      official catalogue uses (audio.quality, language{...}, dataset,
+#      inference), so that nobody downstream has to edit it by hand;
+#   3. SHA256SUMS, so the package, the server and Hugging Face are provably
+#      the same bytes.
 #
-# Leisti su MOKYMO venv (jame yra piper.train eksportui):
-#   .venv\Scripts\python.exe _irankiai\piper_lt\sudaryk_paketa.py
-#   .venv\Scripts\python.exe _irankiai\piper_lt\sudaryk_paketa.py --onnx _darbal\regina_e6885.onnx
-#   .venv\Scripts\python.exe _irankiai\piper_lt\sudaryk_paketa.py --length-scale 1.30
+# Run it with the TRAINING environment (it needs piper.train for the export):
+#   python sudaryk_paketa.py
+#   python sudaryk_paketa.py --onnx <path to a specific .onnx>
+#   python sudaryk_paketa.py --length-scale 1.30
 #
-# ⚠️ 09-05: numatytasis tempas buvo 1.25, nors 09-04 sutarta 1.30 VISUR
-# (Robertas vertino vieną greitį, o svetimas būtų gavęs kitą). Paleidus šį
-# skriptą be argumento paketas būtų TYLIAI grįžęs prie 1.25 — ištaisyta.
+# The default length_scale used to be 1.25 while the agreed speed was 1.30,
+# so running this without arguments would have quietly produced a package at
+# the old speed.
 import argparse
 import glob
 import hashlib
@@ -105,7 +107,7 @@ def main():
     shutil.copyfile(onnx, tikslas)
     print(f"1) {VARDAS}.onnx  <- {os.path.basename(onnx)}  ({kilme}; {os.path.getsize(tikslas)/1e6:.1f} MB)")
 
-    # 2. Konfigūracija — mokymo + katalogo laukai
+    # 2. Config: training fields plus the ones the catalogue expects
     k = json.load(io.open(KONFIG, encoding="utf-8"))
     cfg = {
         "audio": {"sample_rate": k["audio"]["sample_rate"], "quality": "medium"},
@@ -121,14 +123,13 @@ def main():
         "speaker_id_map": {},
         "piper_version": k.get("piper_version", "1.5.0"),
         "language": LANGUAGE,
-        # ⚠️ 09-04, sugavo PATS Piperio patikrintuvas (`_script/voicefest.py`):
-        # `dataset` Piperio konvencijoje reiškia NE garsyną, o BALSO VARDĄ, ir
-        # jis privalo sutapti (a) su katalogo aplanku ir (b) su vidurine failo
-        # vardo dalimi: `<lang_code>-<dataset>-<quality>.onnx`.
-        # Buvau įrašęs „liepa-tts" (garsyno vardą) — testas
-        # `assertEqual(file_dataset, config["dataset"])` būtų kritęs.
-        # Kaimynas latvis patvirtina: `lv_LV-aivars-medium` → dataset „aivars".
-        # Garsynas įvardytas ten, kur jam vieta — MODEL_CARD ir README.
+        # Caught by Piper's own catalogue checker: in Piper's convention
+        # `dataset` is NOT the corpus name but the VOICE name, and it has to
+        # match both the catalogue folder and the middle part of the filename
+        # (`<lang_code>-<dataset>-<quality>.onnx`). Putting the corpus name
+        # here would fail their assertion. The Latvian voice confirms the
+        # convention: lv_LV-aivars-medium has dataset "aivars".
+        # The corpus is credited where it belongs - MODEL_CARD and README.
         "dataset": VARDAS.split("-")[1],
     }
     js = os.path.join(HF, VARDAS + ".onnx.json")
@@ -138,19 +139,20 @@ def main():
     print(f"2) {VARDAS}.onnx.json  ({len(cfg['phoneme_id_map'])} simboliai, "
           f"length_scale {args.length_scale})")
 
-    # 3. SHA256SUMS — viskam, kas hf/ kataloge, išskyrus patį sąrašą
-    # ⚠️ 09-05 (rasta darant pateikimo repeticiją): į sąrašą buvo patekusi
-    # atsarginė kopija `.onnx.json.pries_09-04`, o kartu su ja būtų nuėjusi ir
-    # į HF. Katalogas turi turėti TIK tai, kas keliauja žmonėms — todėl darbinė
-    # liekana ne praleidžiama tyliai, o SUSTABDO paketą: tyliai praleistas
-    # failas kitą kartą vėl gulėtų nepastebėtas.
+    # 3. SHA256SUMS for everything in hf/ except the list itself.
+    # Found while rehearsing the submission: a backup copy of the config had
+    # ended up in the directory and would have gone to Hugging Face with the
+    # rest. The directory must hold ONLY what ships, so a leftover file stops
+    # the build instead of being skipped quietly - a file that is silently
+    # ignored is a file that will still be there next time.
     liekanos = [fn for _, _, ff in os.walk(HF) for fn in ff
                 if ".pries_" in fn or fn.endswith((".bak", ".tmp", ".orig"))]
     if liekanos:
         raise SystemExit("⛔ hf/ guli darbinės liekanos — išnešk jas prieš "
                          "sudarant paketą:\n   " + "\n   ".join(liekanos))
-    # Checkpoint (jei jau padarytas) privalo būti iš TO PATIES pjūvio, kaip
-    # modelis — kitaip žmogus augintų balsą ne nuo to, ką girdi.
+    # If a checkpoint is already here, it must come from the SAME run as the
+    # model - otherwise someone would grow a voice from something nobody has
+    # listened to.
     if e is not None:
         for _, _, ff in os.walk(HF):
             for fn in ff:
