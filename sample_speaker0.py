@@ -70,6 +70,25 @@ def main():
         shutil.copyfile(src_tsv, dst_tsv)
         print("lt_kirciai.tsv atnaujintas pr_testas/lithuanian/")
 
+    # `python -m piper -c CONFIG` is parsed but IGNORED by the CLI (PiperVoice.load
+    # is called without config_path) - the config is always guessed as
+    # <model>.onnx.json. Found 09-05: the first sample was synthesized in TEXT
+    # mode from raw letters. So the model is synthesized from pr_testas/, where
+    # the json beside it says phoneme_type "lithuanian"; that json is rebuilt
+    # from the package json (only the phoneme_type differs) and the onnx is the
+    # package onnx byte for byte.
+    pr_onnx = os.path.join(DATA_DIR, VARDAS + ".onnx")
+    if not os.path.exists(pr_onnx) or sha256(pr_onnx) != sha256(a.onnx):
+        shutil.copyfile(a.onnx, pr_onnx)
+        print("onnx nukopijuotas į pr_testas/")
+    import json
+    cfg = json.load(io.open(a.onnx + ".json", encoding="utf-8"))
+    assert cfg["phoneme_type"] == "text"
+    cfg["phoneme_type"] = "lithuanian"
+    with io.open(PR_CONFIG, "w", encoding="utf-8") as f:
+        json.dump(cfg, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+
     with io.open(LT_TXT, encoding="utf-8") as f:
         sentence = f.readline().strip()          # head -n1
     print("Sakinys:", sentence)
@@ -77,9 +96,13 @@ def main():
     os.makedirs(os.path.dirname(a.out), exist_ok=True)
     # The wav lives OUTSIDE hf/ - anything inside hf/ ships (and lands in SHA256SUMS).
     wav = os.path.join(r"D:\_Balsas Lietuviksas\_darbal", "speaker_0_sample.wav")
-    cmd = [PR_PY, "-m", "piper", "-m", a.onnx, "-c", PR_CONFIG, "--data-dir", DATA_DIR,
+    cmd = [PR_PY, "-m", "piper", "-m", pr_onnx, "--data-dir", DATA_DIR,
            "--output-file", wav]
-    r = subprocess.run(cmd, input=sentence.encode("utf-8"), capture_output=True)
+    # Windows: a piped stdin is decoded with the locale codepage (cp1257 here),
+    # not UTF-8 - the first sample of 09-05 went out as garbage because of it
+    # ("žirniai į sieną", Robertas). Force UTF-8 for the child process.
+    aplinka = dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
+    r = subprocess.run(cmd, input=sentence.encode("utf-8"), capture_output=True, env=aplinka)
     if r.returncode != 0:
         sys.stderr.write(r.stderr.decode("utf-8", "replace"))
         sys.exit("piper nepavyko")
