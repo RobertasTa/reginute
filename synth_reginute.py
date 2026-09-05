@@ -82,7 +82,13 @@ MS_TRUMPIEMS_UZ_VIENETA = 50.9
 #     lėčiau + pauzės                     7/11
 # Lėtinimas be pauzių nekeičia nieko (8/11), tad ir jo nebelieka. Raidės eina
 # paprastais žodžiais sakinio viduje — lygiai taip, kaip jas įrašė Regina.
-SANTRUMPOS_LETUMAS = 1.0
+# ⭐⭐ 09-05 GRĮŽTA, ir vėl dėl to paties: ASR matavimas viršuje tikrino, ar
+# MAŠINA atpažįsta, o Robertas klausėsi AUSIMI. Jo palyginimas 1.0 / 1.15 /
+# 1.30 (`klausymui\VMI_LET_*.wav`, santrumpa vienu gabalu be vidinių pauzių):
+# **„1_15 paliekam"**. Kartu su `skaiciu_pletiklis.raidem` pakeitimu (raidės
+# tarpais, brūkšneliai tik iš šonų) tai duoda abu dalykus, kurių jis prašė:
+# raidės neatpyškina po vieną, bet ir neskuba.
+SANTRUMPOS_LETUMAS = 1.15
 
 
 def valyk_teksta(t: str) -> str:

@@ -155,6 +155,25 @@ def load_dictionary(path: Union[str, Path]) -> Dict[str, Tuple[int, str]]:
     return entries
 
 
+def _load_default_expander() -> Optional[Callable[[str], str]]:
+    """The bundled number/abbreviation expander, or None if it is not there.
+
+    Kept optional on purpose: this module must still work when it is dropped
+    next to a model on its own, which is how most people will first meet it.
+    """
+    try:
+        from .skaiciu_pletiklis import isplesk  # inside the piper package
+        return isplesk
+    except ImportError:
+        pass
+    try:
+        from skaiciu_pletiklis import isplesk   # standalone, next to the model
+        return isplesk
+    except ImportError:
+        _LOGGER.debug("skaiciu_pletiklis not found; digits left to espeak-ng")
+        return None
+
+
 class LithuanianPhonemizer:
     """espeak-ng IPA per word + dictionary pitch accent."""
 
@@ -162,16 +181,32 @@ class LithuanianPhonemizer:
         self,
         dictionary_path: Union[str, Path] = DEFAULT_DICTIONARY_PATH,
         espeak_data_dir: Union[str, Path] = ESPEAK_DATA_DIR,
-        expand_text: Optional[Callable[[str], str]] = None,
+        expand_text: Union[Callable[[str], str], None, str] = "auto",
     ) -> None:
         """
         :param dictionary_path: stress dictionary (TSV, see load_dictionary).
         :param espeak_data_dir: espeak-ng data directory.
-        :param expand_text: optional text normalizer run first (numbers,
-            abbreviations); espeak-ng handles digits itself when None.
+        :param expand_text: text normalizer run before phonemization.
+            "auto" (default) loads the bundled Lithuanian expander when it is
+            available; None disables normalization; or pass your own callable.
+
+        Why normalization is on by default: left to itself, espeak-ng reads
+        Lithuanian digits with the wrong case endings ("5000 eurų" comes out
+        as *"penki tūkstantčei"*) and reads clock times as plain numbers
+        ("15:00" as *"tūkstantis penkišimtai:"*). espeak does the same kind of
+        normalization inside its own phonemizer, so this is the Piper norm
+        rather than an exception - and without it, this voice would sound
+        clearly worse for anyone using plain `piper` than it does in the
+        author's own setup.
+
+        Running it twice is harmless: the expander is idempotent (measured on
+        27 sentences), so callers that already normalize - the Wyoming server
+        does - lose nothing.
         """
         self.dictionary = load_dictionary(dictionary_path)
         self.espeak = EspeakPhonemizer(espeak_data_dir)
+        if expand_text == "auto":
+            expand_text = _load_default_expander()
         self.expand_text = expand_text
         self._cache: Dict[str, str] = {}
 
