@@ -18,3 +18,14 @@ hf/*.ckpt
 
 # Vietiniai bandymai
 _bandymai/
+
+# 09-05: katalogo PR darbinis katalogas (voicefest.py/voices.json iš main + mūsų įrašas)
+_pr_work/
+
+# 09-05: fonemizatoriaus failų KOPIJOS hf/ (sudaryk_paketa.py 2b deda jas į HF paketą).
+# Originalai gyvena šaknyje ir yra git'e; kopijos — tik HF įkėlimui.
+hf/phonemize_lithuanian.py
+hf/skaiciu_pletiklis.py
+hf/lt_kirciai.tsv
+hf/zodziai_trumpi.txt
+hf/synth_reginute.py
