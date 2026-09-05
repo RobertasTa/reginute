@@ -52,6 +52,12 @@ Two configs exist for the same model, on purpose:
 * **this repo / older Piper:** `"phoneme_type": "text"` — you phonemize with
   the module and pass IPA to Piper (`synth_reginute.py` does exactly that).
 
+This is the same arrangement as the Hebrew (piper1-gpl #244), Chinese pinyin
+(#271) and Japanese (#274) voices: the phoneme type names a phonemizer inside
+Piper, and the catalogue folder holds only the model and the config. See the
+voice repo README, section "For catalogue maintainers", for the merge order
+and the two precedents for shipping the dictionary.
+
 The module also normalizes text first (`skaiciu_pletiklis.py`, picked up
 automatically when present, `expand_text=None` to disable): Lithuanian number
 case endings, clock times, units and letter-by-letter abbreviations. Without
