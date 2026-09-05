@@ -84,7 +84,7 @@ voice.
   Published to Hugging Face as
   [`meldynamics/liepa-tts`](https://huggingface.co/datasets/meldynamics/liepa-tts)
   by **MEL DYNAMICS, MB**.
-  (LIEPA-3, led by **dr. Gražina Korvel**, is a different and much larger
+  (LIEPA-3, led by **prof. Gražina Korvel**, is a different and much larger
   corpus — it is what the ASR model below is trained on, not this voice.)
 * **Stress dictionary** — derived from
   [`svogunas/g2p-lt-lexicon`](https://huggingface.co/datasets/svogunas/g2p-lt-lexicon)

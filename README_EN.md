@@ -218,7 +218,7 @@ those four.
   would still exist and still be unusable.
 
 The family continued: **LIEPA-2** (1 000 h) and **LIEPA-3** (10 000 h, led by
-**dr. Gražina Korvel**), and it is LIEPA-3 that Paprika below is trained on.
+**prof. Gražina Korvel**), and it is LIEPA-3 that Paprika below is trained on.
 Different corpus, same decision — publish it rather than keep it.
 
 ### The dictionary
