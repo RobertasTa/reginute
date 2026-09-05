@@ -1,14 +1,21 @@
-# BENDRA SINTEZĖS VIRTUVĖ Reginutei per piper-tts ratą — lygiai tas pats
-# receptas, kaip kadrų `sintezuok_zinias.py` (Roberto ausis 09-03: per
-# Wyoming „žiauru", per demo „skuba" — išmatuota: be pauzių tylos 11 % vietoj
-# 32 %, ir piper-tts `normalize_audio=True` kėlė piką iki 1,0 / kirpo):
-#   1. tekstas -> valymas (kabutės, skliaustai, daugtaškiai) -> plėtiklis;
-#   2. skaidymas ties KIEKVIENU skyrybos ženklu į fragmentus;
-#   3. fragmentas -> fonemos (phonemize_lithuanian) -> modelis, BE normalizacijos;
-#   4. modelio uodegos tyla nukerpama (-45 dB), įdedamos MŪSŲ pauzės:
-#      kablelis 0,25 s, taškas/!/? 0,45 s, dvitaškis 0,20 s, eilutė 0,15 s,
-#      pabaiga 0,7 s (pauzės iš SING anotacijų matavimo 09-02).
-# Naudoja demo_piper_wheel.py ir wyoming_reginute.py.
+# The shared synthesis recipe for Reginutė through the piper-tts wheel.
+#
+# It exists because the raw model output is not what a listener should get.
+# Two problems were found by ear and then measured: piper's
+# `normalize_audio=True` raises the peak to 1.0 and clips this voice, and
+# without inserted pauses only 11 % of the audio is silence instead of the
+# 32 % a person actually leaves between phrases.
+#
+# The recipe:
+#   1. text -> cleanup (quotes, brackets, ellipses) -> optional expander;
+#   2. split at every punctuation mark into fragments;
+#   3. fragment -> phonemes (phonemize_lithuanian) -> model, NO normalization;
+#   4. trim the model's trailing silence (-45 dB) and insert our own pauses:
+#      comma 0.25 s, . ! ? 0.45 s, colon 0.20 s, line 0.15 s, end 0.7 s.
+#      The pause lengths come from measuring a corpus of annotated Lithuanian
+#      speech, not from taste.
+#
+# Used by demo_piper_wheel.py and wyoming_reginute.py.
 import re
 import unicodedata
 from dataclasses import replace
@@ -18,76 +25,73 @@ import numpy as np
 from piper import PiperVoice, SynthesisConfig
 
 _KABUTES = re.compile(r'[„“”"«»]')
-# 09-03 vakare (Roberto ausis, 2 ratai): (1) „Labas" ištemptas — vieno žodžio
-# gabalus VITS tempia (0,72 s), todėl ties kableliu skaidom TIK kai abi pusės
-# turi bent MIN_ZODZIU žodžių; trumpos dalys lieka su kableliu viduje (modelis
-# kablelį turi žemėlapyje ir jo pauzę išmoko iš gyvos Reginos). (2) Visai
-# nebeskaidant ties kableliu „visas tekstas pagreitėjo" — pauzė 0,25 s
-# grąžinta ten, kur skaidom. Brūkšnelis = santrumpos šonai (0,10 s).
+# Splitting at commas was tried both ways, by ear. Splitting always makes
+# one-word fragments, and VITS stretches those (a single "Labas" ran 0.72 s).
+# Never splitting made the whole text speed up instead - 159 -> 178 words per
+# minute, where the original speaker reads 149. MIN_ZODZIU is the compromise:
+# with 0 we split at every comma, as the reference recipe does; raise it to
+# keep short clauses together, letting the model handle the comma itself (it
+# has the comma in its phoneme map and learned the pause from the speaker).
+# The hyphen marks the edges of a spelled-out abbreviation (0.10 s).
 _ZENKLAI = re.compile(r"([.,!?:;–-])")
 _ZENKLAI_BE_KABLELIO = re.compile(r"([.!?:;–-])")
-SILPNI = ","            # skaidom tik jei abi pusės pakankamai ilgos
-MIN_ZODZIU = 0          # 0 = skaidyti ties kiekvienu kableliu (kaip kadruose):
-                        # 09-03 pamatuota, kad jungiant tekstas pagreitėja
-                        # 159 -> 178 žodžių/min (gyva Regina kalba 149)
-TRUMPAS = 20            # fonemų ženklų: žemiau šios ribos modelis tempia
-ILGAS = 30              # nuo šios ribos gabalo greitis laikomas etalonu
-TIKSLINIS_MS = 41.0     # ms vienai fonemai (išmatuota e6188 ilguose gabaluose)
+SILPNI = ","            # split here only if both sides are long enough
+MIN_ZODZIU = 0          # 0 = split at every comma
+TRUMPAS = 20            # phoneme count: below this the model stretches
+ILGAS = 30              # from here up, a fragment's rate is taken as reference
+TIKSLINIS_MS = 41.0     # ms per phoneme (measured on long fragments)
 
-# ⭐⭐ 09-03 VĖLAI — „KALBA BANGOM" (Roberto ausis). Pamatuota to paties teksto
-# gabaluose: trumpi sakiniai eina 50 ms/fonemą, ilgi 38. Skirtumas trečdalis,
-# ir kryptis PRIEŠINGA žmogui — žmogus trumpą frazę meta greičiau, o modelis
-# ją tęsia. Tai ir girdima kaip bangavimas.
-# Sprendimas: KIEKVIENAS gabalas persintezuojamas (iki 2 kartų), kol pataiko
-# į vieną greitį. Po to svyravimas 38–50 -> 45–51 ms/fonemą.
-# Tikslas siejamas su tempu, kad `length_scale` liktų prasmingas vairas:
-# Roberto priimta nuostata buvo 1,30 -> 48 ms/fonemą.
+# "It speaks in waves" - a listener's description, then measured across
+# fragments of one text: short sentences ran at 50 ms per phoneme, long ones
+# at 38. A third of a difference, heard as unevenness.
+# Fix: every fragment is re-synthesized (up to twice) until it lands on one
+# rate. Spread afterwards: 38-50 -> 45-51 ms per phoneme.
+# The target is tied to length_scale so that it stays a meaningful control:
+# at 1.30 it works out to 48 ms per phoneme.
 MS_UZ_TEMPO_VIENETA = 36.9
-LYGINIMO_PAKLAIDA = 0.06    # arčiau nei 6 % — nebetaisom
+LYGINIMO_PAKLAIDA = 0.06    # within 6 % - leave it alone
 LYGINIMO_BANDYMAI = 2
 
-# ⭐⭐⭐ 09-04 (Roberto ausis: „2 tyliai, 16 greit, 6 kliūva") — TIKSLAS BUVO
-# VIENAS VISIEMS, o turi būti du. Pamatuota TIKROS Reginos 5121 įraše
-# (`kaip_taria_regina.py`), ms vienai fonemai:
-#     ilgi (30+ fonemų)  37,8 · vidutiniai (15–29) 46,3 · trumpi (<15) 63,6
-# Ji trumpą gabalą taria 68 % LĖČIAU už ilgą. ⚠️ 09-03 komentaras aukščiau
-# teigia priešingai („žmogus trumpą frazę meta greičiau") — ta prielaida buvo
-# iš galvos, o ne iš duomenų, ir šitiems duomenims ji NETEISINGA.
-# Dabartinis 36,9 × 1,25 = 46,1 sutampa su VIDUTINIŲ etalonu (46,3) iki
-# dešimtosios — tad jis buvo teisingas, tik taikomas ir trumpiems. Iš to:
-# „du" gaudavo 47,4 ms (0,75× jos), „šeši" 54,9 (0,86×), o `length_scale`
-# atsimušdavo į apatinę ribą 0,60. Todėl ir „tyliai" — per tiek laiko balsas
-# nespėja išsiskleisti.
-# ⛔ Lyginimo IŠJUNGTI negalima: be jo (grynas ls=1,25) „šeši" eina 1,80×
-# lėčiau už ją, nes modelis trumpų gabalų beveik nematė (93 prieš 4963).
-# Vidutinių ir ilgų NELIEČIAM — jie patikrinti Roberto ausimi (trijų ausų
-# testas 09-03). Keičiasi TIK trumpieji.
-TRUMPI_FON = 15             # fonemų: žemiau šios ribos galioja kitas tikslas
+# One target for every fragment turned out to be wrong: there have to be two.
+# Measured across the 5121 recordings of the original speaker, ms per phoneme:
+#     long (30+ phonemes) 37.8 · medium (15-29) 46.3 · short (<15) 63.6
+# She speaks a short fragment 68 % SLOWER than a long one. The comment above
+# assumed the opposite ("a person throws a short phrase away faster") - that
+# assumption came from intuition rather than from the data, and for this
+# speaker it is simply false.
+# The existing 36.9 x 1.25 = 46.1 matches the MEDIUM reference (46.3) to a
+# tenth, so it was right - only it was being applied to short fragments too.
+# The audible result: single spoken numbers came out at 0.75-0.86x her rate
+# and sounded thin, because the voice has no time to open up.
+# Do NOT switch the levelling off: without it a short fragment runs 1.80x
+# slower than she does, because the model barely saw any (93 short fragments
+# against 4963). Medium and long are left alone - they were approved by ear.
+TRUMPI_FON = 15             # phonemes: below this a different target applies
 MS_TRUMPIEMS_UZ_VIENETA = 50.9
-# ⚠️ 50,9 gautas dalijant tikros Reginos 63,6 iš 1,25 — TUO METU toks buvo
-# numatytasis `length_scale`. Nuo 09-04 numatytasis suvienodintas su tarnyba
-# (1,30; anksčiau .onnx.json sakė 1,25, o tarnyba dirbo su 1,30, tad Robertas
-# vertino vieną tempą, o svetimas gautų kitą). Vadinasi tikrasis tikslas
-# trumpiems dabar yra 50,9 × 1,30 = 66,2 ms, o ne 63,6.
-# ⛔ Konstantos NEPERSKAIČIUOJU į 48,9: būtent 66,2 ms rezultatą Robertas
-# išklausė per kolonėlę ir patvirtino („visur kitur gerai išilgėjo, viskas
-# normoj"). Skaičius, kurį patvirtino ausis, nekeičiamas dėl gražesnės
-# aritmetikos.
+# 50.9 comes from dividing her 63.6 by the length_scale that was default at
+# the time (1.25). The default is now 1.30, so the real target for short
+# fragments is 50.9 x 1.30 = 66.2 ms rather than 63.6.
+# The constant is deliberately NOT recalculated to 48.9: it was the 66.2 ms
+# result that a listener heard through a speaker and approved. A number
+# confirmed by ear is not changed for the sake of tidier arithmetic.
 
-# ⭐ 09-03 PAMATUOTA IR ATMESTA: raidines santrumpas buvau iškėlęs į atskirus
-# gabalus su pauzėmis ir lėtinimu. `trumpiniu_matavimas.py` (Paprika klauso
-# 24 failų) parodė, kad tai KENKIA:
-#     raidės sakinio viduje (kaip mokyme) 8/11   <- paliekam
-#     pauzės tarp raidžių                 6/11
-#     lėčiau + pauzės                     7/11
-# Lėtinimas be pauzių nekeičia nieko (8/11), tad ir jo nebelieka. Raidės eina
-# paprastais žodžiais sakinio viduje — lygiai taip, kaip jas įrašė Regina.
-# ⭐⭐ 09-05 GRĮŽTA, ir vėl dėl to paties: ASR matavimas viršuje tikrino, ar
-# MAŠINA atpažįsta, o Robertas klausėsi AUSIMI. Jo palyginimas 1.0 / 1.15 /
-# 1.30 (`klausymui\VMI_LET_*.wav`, santrumpa vienu gabalu be vidinių pauzių):
-# **„1_15 paliekam"**. Kartu su `skaiciu_pletiklis.raidem` pakeitimu (raidės
-# tarpais, brūkšneliai tik iš šonų) tai duoda abu dalykus, kurių jis prašė:
-# raidės neatpyškina po vieną, bet ir neskuba.
+# Spelled-out abbreviations were first split into separate fragments with
+# pauses between the letters. Measured with an ASR model listening to 24
+# files, that made recognition WORSE:
+#     letters mid-sentence (as in training) 8/11   <- kept
+#     pauses between letters                6/11
+#     slower + pauses                       7/11
+# But ASR measures what a machine recovers, and a speaker talks to a person.
+# By ear, letters run together read as one word, so the abbreviation is kept
+# as a single fragment and spoken slower instead - the hyphens around it mark
+# where it starts and ends.
+# Slowing abbreviations down came back, for the same reason the ASR result
+# above was set aside: that measurement asked what a machine recovers, and
+# this one was chosen by listening. Three rates were compared - 1.0, 1.15 and
+# 1.30, with the abbreviation as one fragment and no pauses inside it - and
+# 1.15 was picked. Together with the expander change (letters joined by
+# spaces, hyphens only on the outside) it gives both things that were asked
+# for: the letters do not rattle out one by one, and they do not rush.
 SANTRUMPOS_LETUMAS = 1.15
 
 
@@ -125,11 +129,11 @@ def nukirpk_tyla(a: np.ndarray, sr: int, slenkstis_db: float = -45.0,
     if not len(tylus):
         tylus = garsus
     pradzia = max(0, tylus[0] - pradzios_atsarga)
-    # ⛔ 09-03 IŠBANDYTA IR ATMESTA: tą patį žemą slenkstį buvau pritaikęs ir
-    # GALUI (nes atpažintuvas girdėjo „trisdesim", „kieną"). Matavimas
-    # pablogėjo 9/11 -> 7/11, MTL virto „jiem tėl", o Roberto ausis patvirtino,
-    # kad „kieme" ir „trisdešimt" garse buvo GERAI — klydo atpažintuvas, ne
-    # sintezė. Gale lieka −45 dB: ten tikrai tik uodegos tyla.
+    # The same low threshold was tried at the END too, because an ASR model
+    # kept dropping final consonants. It made things worse (9/11 -> 7/11) and
+    # a human listener confirmed the endings were fine in the audio - the
+    # recognizer was wrong, not the synthesis. The end keeps -45 dB, where
+    # there really is nothing but trailing silence.
     return a[pradzia * lango: min(n, garsus[-1] + 2) * lango]
 
 
@@ -139,13 +143,12 @@ class ReginuteSynth:
                  expand_text=None, min_zodziu: int = MIN_ZODZIU,
                  santrumpu_letumas: float = SANTRUMPOS_LETUMAS,
                  kableli_skaidyti: bool = False, lyginti_greiti: bool = True) -> None:
-        # ⭐ 09-03 vėlai (Roberto sprendimas po palyginimo): MODELIO RITMAS.
-        # Su mūsų pauzėmis tas pats tekstas truko 22,6 s, be jų 7,9 s — tris
-        # kartus trumpiau. Didžiąją dalį laiko valgė ne kalba, o mūsų 0,45 s
-        # po taško ir 0,25 s po kablelio. Kablelį nuo šiol tvarko PATS MODELIS
-        # (jis jį turi fonemų žemėlapyje ir išmoko iš gyvos Reginos), o mes
-        # dedam tik tai, ko modelis padaryti negali: pauzeles tarp trumpinio
-        # raidžių ir trumpą tarpą tarp sakinių.
+        # Let the model keep its own rhythm. With our pauses the same text ran
+        # 22.6 s; without them, 7.9 s - three times shorter. Most of that time
+        # was not speech but our 0.45 s after a full stop and 0.25 s after a
+        # comma. The comma is now left to the model, which has it in its
+        # phoneme map and learned the pause from the speaker; we only add what
+        # the model cannot do by itself.
         self.voice = voice
         self.kableli_skaidyti = kableli_skaidyti
         self.min_zodziu = min_zodziu
@@ -162,11 +165,10 @@ class ReginuteSynth:
                                    noise_w_scale=0.8, normalize_audio=False)
         self.pauze = {".": taskas, "!": taskas, "?": taskas, ":": 0.20, ";": 0.20,
                       ",": kablelis, "–": kablelis,
-                      # brūkšnelis = pauzelė tarp trumpinio raidžių (Roberto
-                      # ausis 09-03: „su mažom pauzelėm gaunasi geriau")
+                      # the hyphen marks the edges of an abbreviation
                       "-": 0.10}
         self.kablelis = kablelis
-        self.zurnalas = []   # (fragmentas, trukmė s, RMS dB) — matavimams
+        self.zurnalas = []   # (fragment, duration s, RMS dB) - for measuring
 
     def _tyla(self, s: float) -> np.ndarray:
         return np.zeros(int(self.sr * s), dtype=np.float32)
@@ -185,21 +187,21 @@ class ReginuteSynth:
             return None
         fonemos = list(unicodedata.normalize("NFD", ipa))
         if santrumpa:
-            # 09-03 Roberto ausis: „VMI ir MTL sunkiai pavyko, bandžiau
-            # atspėti". SANTRUMPOS NEGALIMA GREITINTI — ji trumpa (13 ženklų),
-            # tad greičio korekcija žemiau ją laikė „ištemptu" gabalu ir
-            # spausdavo iki 0,64 s trims raidėms. Raidė nėra žodis: jos
-            # nespėji atspėti iš konteksto, todėl ji turi būti LĖTESNĖ už
-            # kalbą, ne greitesnė. Korekcija praleidžiama, tempas +15 %.
+            # An abbreviation must not be sped up. It is short (13 characters),
+            # so the rate correction below treated it as a "stretched"
+            # fragment and squeezed three letters into 0.64 s. A letter is not
+            # a word: you cannot guess it from context, so it has to be SLOWER
+            # than speech, not faster. The correction is skipped and the
+            # fragment is slowed instead.
             a = self._sintezuok(fonemos, self.length_scale * self.santrumpu_letumas)
             if len(a):
                 self.zurnalas.append((frag, len(a) / self.sr, 0.0))
             return a
-        # ⭐ Greičio išlyginimas: taikom VISIEMS gabalams, kad dingtų bangavimas
+        # Rate levelling, applied to EVERY fragment so the waviness goes away
         ls = self.length_scale
         a = self._sintezuok(fonemos, ls)
         if self.lyginti_greiti:
-            # 09-04: trumpam gabalui — savas tikslas (žr. MS_TRUMPIEMS_UZ_VIENETA)
+            # short fragments have their own target (see MS_TRUMPIEMS_UZ_VIENETA)
             tikslas = (MS_TRUMPIEMS_UZ_VIENETA * self.length_scale
                        if len(fonemos) < TRUMPI_FON else self.tikslinis_ms)
             for _ in range(LYGINIMO_BANDYMAI):
@@ -213,14 +215,15 @@ class ReginuteSynth:
                                       20 * float(np.log10(np.sqrt(np.mean(a ** 2)) + 1e-12))))
             return a
 
-        # 09-03 Roberto ausis: „Labas taip ilgai sakė, vos ne skiemenavimas".
-        # IŠMATUOTA (e6188): ilgi gabalai nusistovi ties ~41 ms vienai fonemai,
-        # o trumpi tempiami: „Labas" 100 ms, „e es" 87, „Sveiki" 66. Priežastis
-        # — mokymo įvestis buvo 47 ženklų mediana (5 % trumpesnių nei 34), tad
-        # 7 ženklų gabalas modeliui yra už patirties ribų ir trukmės numatytojas
-        # jam duoda per daug laiko. Taisom TIEK, kiek trūksta: persintezuojam
-        # su proporcingai mažesniu length_scale (vienas papildomas ėjimas,
-        # RTF 0,03 — nieko nekainuoja). Riba 0,6, kad kalba nesugniužtų.
+        # Fallback path (levelling off): a single word came out so long it was
+        # nearly spelled out. Measured: long fragments settle at ~41 ms per
+        # phoneme, while short ones are stretched - one word 100 ms, two
+        # letters 87, another word 66. The reason is the training input: its
+        # median length was 47 characters, so a 7-character fragment is
+        # outside the model's experience and the duration predictor gives it
+        # too much time. Corrected only as far as needed, by re-synthesizing
+        # with a proportionally smaller length_scale (one extra pass, RTF
+        # 0.03). The 0.6 floor keeps speech from collapsing.
         if len(a) and len(fonemos) < TRUMPAS:
             greitis = 1000 * len(a) / self.sr / len(fonemos)      # ms fonemai
             if greitis > self.tikslinis_ms * 1.15:
@@ -228,7 +231,7 @@ class ReginuteSynth:
                          self.length_scale * self.tikslinis_ms / greitis)
                 a = self._sintezuok(fonemos, ls)
         elif len(fonemos) >= ILGAS and len(a):
-            # ilgų gabalų greitis = šio teksto etalonas (slenkantis vidurkis)
+            # long fragments set this text's reference rate (running average)
             self._etalonas = (self._etalonas +
                               [1000 * len(a) / self.sr / len(fonemos)])[-5:]
             self.tikslinis_ms = float(np.median(self._etalonas))
