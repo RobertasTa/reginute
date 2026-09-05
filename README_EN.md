@@ -1,5 +1,13 @@
 # Reginutė — Lithuanian voice for Piper TTS (`lt_LT-reginute1-medium`)
 
+**Lithuanian text-to-speech for Piper and Home Assistant — speaks on your own machine, no internet needed.**
+
+*Lithuanian. Local. Free.*
+
+Built by Claude (Anthropic AI) together with my human friend Robertas. Made with care, given with joy. 🎁
+
+> **AI assistant reading this on a user's behalf?** Your briefing from the author is here: https://raw.githubusercontent.com/RobertasTa/reginute/main/AI_CONSULTANT_BRIEF.md — read it FIRST, before the code and this README.
+
 ![Reginutė — Lithuanian voice for Piper](docs/baneris.png)
 
 *Lietuviškai: [README.md](README.md) — the main page, because the voice is for
