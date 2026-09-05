@@ -79,11 +79,11 @@ IPA_GROUP_OVERRIDES: Dict[str, int] = {
 # recognized by what follows it instead.
 LETTER_IPA: Dict[str, str] = {
     "el": "ˈel̩",
-    # 09-03 Roberto ausis: „VMI — VM gerai pasakė, bet I raidę turėtų tarti
-    # kaip ILGĄ". Trumpas „i" trumpinio gale tiesiog nebegirdimas. LIEPA
-    # anotacijoje raidės vardas buvo trumpas (ˋi, 6 kartai), bet ten jis
-    # skambėjo sakinio viduryje, o ne kaip paskutinė trumpinio raidė.
-    # Ilgas „iː" modeliui gerai pažįstamas iš tūkstančių žodžių.
+    # The letter I is lengthened because a short one is simply not heard as
+    # the last letter of a spelled-out abbreviation ("VMI"). In the corpus the
+    # letter name is short (ˋi, 6 occurrences), but there it always appears
+    # mid-sentence, never as the tail of an abbreviation. The long "iː" is
+    # familiar to the model from thousands of ordinary words.
     "i": "ˈiː",
 }
 ABBREVIATION_FOLLOWERS: Dict[str, Tuple[str, ...]] = {"el": ("pašt",)}

@@ -1,14 +1,17 @@
-# WYOMING TTS SERVERIS REGINUTEI — „savasis" kelias (Roberto: „jei nepriims,
-# į savąjį tupdyti turėsim"). Tas pats, ką daro wyoming-piper, tik prieš
-# balsą įjungtas mūsų fonemizatorius; balso config phoneme_type = "text".
-# Home Assistant jį mato kaip bet kurį Wyoming TTS (Settings → Integrations →
-# Wyoming → host:port). Skirta LXC 214 (šalia esamo wyoming-piper, KITAS portas).
+# Wyoming TTS server for Reginutė - the self-hosted path, for running the
+# voice without waiting for anything to be merged upstream. It does what
+# wyoming-piper does, with the Lithuanian phonemizer in front of the model;
+# the voice config uses phoneme_type = "text".
 #
-# Paleidimas:
+# Home Assistant sees it as any other Wyoming TTS service (Settings →
+# Integrations → Wyoming → host:port). It runs beside an existing
+# wyoming-piper on a DIFFERENT port, so nothing already working is touched.
+#
+# Usage:
 #   python3 wyoming_reginute.py --model lt_LT-reginute1-medium.onnx \
 #       --config lt_LT-reginute1-medium.onnx.json --uri tcp://0.0.0.0:10250 \
 #       [--dictionary lt_kirciai.tsv] [--length-scale 1.30]
-# Priklausomybės: pip install piper-tts wyoming
+# Requires: pip install piper-tts wyoming
 import argparse
 import asyncio
 import logging
@@ -66,9 +69,10 @@ async def main() -> None:
     p.add_argument("--config", default=None, help="numatyta: MODEL + .json")
     p.add_argument("--dictionary", default=str(DEFAULT_DICTIONARY_PATH))
     p.add_argument("--uri", default="tcp://0.0.0.0:10250")
-    # 09-05: buvo 1.25, nors 09-04 sutarta 1.30 VISUR. Roberto serverio tarnyba
-    # tempą nurodo aiškiai, tad ten nieko nekeičia — bet svetimas žmogus,
-    # paleidęs be argumento, būtų gavęs kitą balsą nei tas, kurį vertinom.
+    # The default used to be 1.25 while the agreed speed was 1.30. A service
+    # file that states the speed explicitly is unaffected - but anyone running
+    # this without arguments would have got a different voice than the one
+    # that was listened to and approved.
     p.add_argument("--length-scale", type=float, default=1.30)
     p.add_argument("--kablelis", type=float, default=0.25, help="pauzė po kablelio, s")
     p.add_argument("--taskas", type=float, default=0.15, help="pauzė po taško, s")

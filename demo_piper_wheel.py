@@ -1,10 +1,12 @@
-# ĮRODYMAS GALAS Į GALĄ: mūsų modulis + IŠLEISTAS piper-tts ratas (1.7.0, be
-# jokių mūsų lopų) + Reginutės ONNX -> WAV. Tai lygiai ta grandinė, kurią
-# gautų „grynas Piper" vartotojas, kol PR dar nesulietas: balsas su
-# phoneme_type "text", o priekyje — phonemize_lithuanian + synth_reginute
-# (pauzės ir tylos kirpimas kaip kadruose, BE piper normalizacijos).
-# Leisti su piper-tts ratu:
-#   _darbal\pw_venv\Scripts\python.exe _irankiai\piper_lt\demo_piper_wheel.py ONNX JSON "tekstas" out.wav [tempas]
+# End-to-end proof: this module + the RELEASED piper-tts wheel (1.7.0, with no
+# patches of ours) + the Reginutė ONNX -> WAV. This is exactly the chain a
+# plain Piper user gets while the phonemizer PR is still open: a voice with
+# phoneme_type "text", with phonemize_lithuanian and synth_reginute in front
+# (pauses and silence trimming as in the reference recipe, and WITHOUT piper's
+# audio normalization, which clips this voice).
+#
+# Run it with the piper-tts wheel:
+#   python demo_piper_wheel.py ONNX JSON "text" out.wav [length_scale]
 import os
 import sys
 import time

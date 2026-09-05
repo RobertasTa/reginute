@@ -1,22 +1,24 @@
-# ŠVARUS CHECKPOINT PAKETUI — kad kiti galėtų auginti savo balsą iš Reginutės.
+# Strip a training checkpoint down to what another person can use, so that the
+# next Lithuanian voice can start from this one instead of from a Russian
+# checkpoint - which is where this one had to start.
 #
-# Kilmė: PIPER_PATEIKIMO_PLANAS 9.1 (Roberto radinys HF #62): Hansenas prie
-# balso laiko ir PyTorch pjūvį (`piper-checkpoints`), o bacca87 skelbė atskirą
-# `-checkpoint` repo. Be jo mūsų balsą galima tik NAUDOTI, o su juo — tęsti:
-# kito diktoriaus balsą treniruoti nuo Reginutės, o ne nuo rusiškos Irinos.
+# The Piper catalogue keeps a PyTorch checkpoint beside each voice
+# (rhasspy/piper-checkpoints). Without it a voice can only be USED; with it,
+# it can be continued.
 #
-# Ką nuima ir kodėl:
-#   optimizer_states  537 MB — Adam momentai; reikalingi TIK tam pačiam
-#                     mokymui tęsti tuo pačiu kompiuteriu, kitam žmogui bevertis
-#   loops/callbacks/lr_schedulers — Lightning vidinė būsena (epochų skaitliukai)
-# Ką PALIEKA:
-#   state_dict (model_g 90 MB + model_d 178 MB) — ir generatorių, IR
-#     diskriminatorių: be `model_d` tolesnis mokymas prastesnis (GAN reikia
-#     abiejų), o kaip tik tam šis failas ir skirtas
-#   hyper_parameters — be jų Piperis nežino, kokia architektūra buvo mokyta
+# Removed:
+#   optimizer_states  537 MB - Adam moments, useful only for resuming this
+#                     exact run on this exact machine; worthless to anyone else
+#   loops/callbacks/lr_schedulers - Lightning's own bookkeeping
+# Kept:
+#   state_dict (model_g 90 MB + model_d 178 MB) - both the generator AND the
+#     discriminator: a GAN needs both to continue training, and continuing is
+#     the entire point of this file
+#   hyper_parameters - without them Piper cannot tell what architecture was
+#     trained
 #
-#   .venv\Scripts\python.exe _irankiai\piper_lt\svarus_checkpoint.py
-#   ... --ckpt <kelias>   (be argumento — geriausias pjūvis pagal val_mel)
+#   python svarus_checkpoint.py
+#   python svarus_checkpoint.py --ckpt <path>   (default: best by val_mel)
 import argparse
 import glob
 import os
@@ -42,24 +44,26 @@ def geriausias_ckpt():
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--ckpt", help="konkretus pjūvis (be jo — geriausias pagal val_mel)")
-    p.add_argument("--isvestis", default=os.path.join(BAZE, "_irankiai", "piper_lt", "hf"))
+    p.add_argument("--ckpt", help="a specific checkpoint (default: best by val_mel)")
+    p.add_argument("--output", "--isvestis", dest="isvestis",
+                   default=os.path.join(BAZE, "_irankiai", "piper_lt", "hf"),
+                   help="where to write the stripped checkpoint")
     args = p.parse_args()
 
     import torch
 
     if args.ckpt:
-        kelias, aprasas = os.path.abspath(args.ckpt), "nurodytas ranka"
+        kelias, aprasas = os.path.abspath(args.ckpt), "given on the command line"
         e = int(re.search(r"epoch=(\d+)", os.path.basename(kelias)).group(1))
         val = float(re.search(r"val_mel=(\d+\.\d+)", os.path.basename(kelias)).group(1))
     else:
         g = geriausias_ckpt()
         if not g:
-            raise SystemExit("Nerasta nė vieno pjūvio")
+            raise SystemExit("No checkpoints found")
         val, e, kelias = g
-        aprasas = "geriausias pagal val_mel"
+        aprasas = "best by val_mel"
 
-    print(f"Imam: {os.path.basename(kelias)} ({aprasas})")
+    print(f"Using: {os.path.basename(kelias)} ({aprasas})")
     ck = torch.load(kelias, map_location="cpu", weights_only=False)
 
     svarus = {k: v for k, v in ck.items() if k not in NUIMAM}
@@ -69,20 +73,20 @@ def main():
 
     buvo = os.path.getsize(kelias) / 1048576
     liko = os.path.getsize(isv) / 1048576
-    print(f"Nuimta: {', '.join(NUIMAM)}")
+    print(f"Removed: {', '.join(NUIMAM)}")
     print(f"{buvo:.0f} MB -> {liko:.0f} MB   ({isv})")
 
-    # patikra: ar tikrai atsidaro ir ar svoriai vietoje
+    # Verify: the file must open again, with the weights still in it.
     t = torch.load(isv, map_location="cpu", weights_only=False)
     sd = t.get("state_dict", {})
     g_yra = sum(1 for k in sd if k.startswith("model_g"))
     d_yra = sum(1 for k in sd if k.startswith("model_d"))
-    print(f"Patikra: state_dict {len(sd)} tenzorių (model_g {g_yra}, model_d {d_yra}), "
-          f"hyper_parameters {'YRA' if 'hyper_parameters' in t else 'NĖRA'}, "
-          f"epocha {t.get('epoch')}")
+    print(f"Check: state_dict {len(sd)} tensors (model_g {g_yra}, model_d {d_yra}), "
+          f"hyper_parameters {'yes' if 'hyper_parameters' in t else 'MISSING'}, "
+          f"epoch {t.get('epoch')}")
     if not g_yra or "hyper_parameters" not in t:
-        raise SystemExit("⛔ Patikra nepavyko — failo NENAUDOTI")
-    print(f"val_mel {val:.4f} — įrašyti į MODEL_CARD kartu su epocha {e}")
+        raise SystemExit("Verification failed - DO NOT ship this file")
+    print(f"val_mel {val:.4f} - record it in MODEL_CARD together with epoch {e}")
 
 
 if __name__ == "__main__":
