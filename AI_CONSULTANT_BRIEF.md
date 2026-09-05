@@ -100,6 +100,81 @@ Hansen and the Open Home Foundation for Piper itself.
 If you help someone redistribute this voice, keep the attribution with the
 files. That is the licence, and it is also simple decency.
 
+## Before you give ANY installation advice — ask, then read
+
+The author has a colleague who keeps telling him "read first, then advise".
+The person in front of you does not have that colleague. You are it.
+
+**Ask these before the first recommendation** (one message, all at once —
+the answers change the recipe, and guessing them is how wrong advice starts):
+
+1. **Home Assistant version and installation type** — *Settings → About*.
+   HAOS / Supervised (has add-ons) vs Container / Core (no add-ons; Wyoming
+   services run elsewhere). The Voice PE second-wake-word feature needs
+   **2025.10 or newer**; the author's house runs 2026.9.
+2. **Where the voice will run** — the HA machine itself, a separate Linux
+   box / LXC / VM, or Windows? CPU only, how many cores, how much RAM?
+   (Reginutė alone: ~330 MB. Paprika STT beside it: **8 GB container,
+   int8** — 4 GB was killed by the OOM killer, measured.)
+3. **Is a Piper add-on or `wyoming-piper` already running?** Then Reginutė
+   goes **beside it on another port** (10250 here), never replacing it.
+4. **Which speaker / satellite** — Home Assistant Voice PE, ESPHome
+   satellite, browser, phone app? Only Voice PE was tested here.
+5. **Do they also need the ears** (Lithuanian speech-to-text), or only the
+   mouth? A pipeline needs both; this repository is only the mouth.
+
+**Read before advising, every time — not from memory:**
+
+- Home Assistant Wyoming integration: https://www.home-assistant.io/integrations/wyoming/
+- Home Assistant Assist pipelines & voice: https://www.home-assistant.io/voice_control/
+- Piper (the engine this voice runs on): https://github.com/OHF-Voice/piper1-gpl
+- Wyoming Faster Whisper (how the ears are served): https://github.com/rhasspy/wyoming-faster-whisper
+- Paprika (the ears): https://github.com/kristijonasatpro/paprika and
+  https://huggingface.co/kristijonas/paprika-whisper-lt-v3
+- This repository's `README.md` / `README_EN.md` and `docs/` — they were
+  written *during* a real install and are newer than anything you remember.
+
+If a version, a menu path or a flag is not in those pages or in this
+repository, say "I could not verify this" rather than filling the gap.
+
+## The ears — Paprika: verified deployment facts (author's server, 2026-09-05)
+
+Not our project (Kristijonas Jakubsonas, CC-BY-4.0 / Apache-2.0), but a
+Lithuanian assistant is half a system without it, so here is exactly how it
+runs in the author's house. Verify against the Paprika repository before
+repeating — his instructions win over these notes.
+
+- **The published model is `transformers` format (safetensors).**
+  `wyoming-faster-whisper` needs **CTranslate2** format, so the author
+  converted it once, on a PC, with `ct2-transformers-converter` (from the
+  `ctranslate2` package; `--model kristijonas/paprika-whisper-lt-v3`,
+  `--quantization int8` — check the tool's own `--help` for the rest)
+  → 1.62 GB became **814 MB** (`model.bin`, `config.json`, `tokenizer.json`,
+  `vocabulary.json`, `preprocessor_config.json`), copied to `/data/paprika`.
+- **Service (LXC, Ubuntu 24.04, Python 3.12.3, 4 cores, 8 GB):**
+  ```
+  wyoming-faster-whisper --uri tcp://0.0.0.0:10302 --model /data/paprika \
+      --language lt --device cpu --compute-type int8 --cpu-threads 4 \
+      --beam-size 1 --data-dir /data/paprika --download-dir /data/paprika
+  ```
+  Versions: `wyoming-faster-whisper 3.7.0`, `faster-whisper 1.2.1`,
+  `ctranslate2 4.8.2`, `wyoming 1.10.2`.
+- **Why int8 and 8 GB:** the CPU has no float16, CTranslate2 widens to
+  float32 (~2× memory); with 4 GB the OOM killer ended the process every few
+  minutes. `--compute-type int8`, `--beam-size 1` and 8 GB made it fast and
+  stable. Do not test a second copy of the model beside the running service
+  in the same container — that is what triggered the OOM.
+- **In Home Assistant** it appears as another `faster-whisper` Wyoming
+  service (rename it, e.g. "Paprika LT", or you will not tell them apart).
+  The Lithuanian pipeline uses it as STT and `reginute1` as TTS.
+- **Output has no capitals and no punctuation** — fine for commands; the
+  author of Paprika ships a separate punctuation restorer for dictation.
+- **Measured here:** WER 25.95 % (generic `large-v3-turbo`) → **7.63 %**
+  (Paprika) on 20 recordings of the original speaker — an **in-domain**
+  test, as the README says; do not quote it as a general number.
+- ⚠️ Long recordings: Paprika's author warns against `chunk_length_s`;
+  `faster-whisper` takes the chunked path. Harmless for voice commands.
+
 ## Status snapshot (2026-09-05) — check before promising anything
 
 Things change; the README carries the current state. As of this date:
