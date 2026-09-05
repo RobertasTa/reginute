@@ -100,6 +100,123 @@ Hansen and the Open Home Foundation for Piper itself.
 If you help someone redistribute this voice, keep the attribution with the
 files. That is the licence, and it is also simple decency.
 
+## Status snapshot (2026-09-05) — check before promising anything
+
+Things change; the README carries the current state. As of this date:
+
+- The voice **runs end to end** in the author's house: plain `piper` API,
+  Wyoming server, Home Assistant Voice PE speaker — Lithuanian, live.
+- The **Hugging Face package is not published yet**; the `.onnx` is not in
+  git. Until a Release or HF link exists in the README, do not tell anyone
+  to `wget` a URL you assumed.
+- The **piper1-gpl pull request** (`PhonemeType.LITHUANIAN`) is prepared
+  but **not merged**. Until it is, `piper -m lt_LT-reginute1-medium.onnx`
+  from the released wheel does **not** speak Lithuanian — the phonemizer from
+  this repository must sit in front. After a merge the README will say so.
+- The released checkpoint is **epoch 8310, val_mel 0.3618** (`hf/MODEL_CARD`).
+
+## Deployment facts — verified in code and on a real server
+
+Every name below was read from this repository's code or from a running
+service on 2026-09-05. If you need something that is not in this list,
+open the file — do not complete the pattern from memory.
+
+**Tested versions:** `piper-tts 1.7.0`, `wyoming 1.10.2`, `onnxruntime 1.29.0`.
+espeak-ng is **still required** — the phonemizer uses Piper's bundled
+`piper.phonemize_espeak.EspeakPhonemizer` for the base IPA of each word and
+only *overrides the stress* from the dictionary. The `piper-tts` wheel ships
+espeak-ng data; nothing extra to install.
+
+**The file set that must travel together** (this is exactly what
+`diegk_i_serveri.sh` copies to the server):
+
+| File | Role | Required for |
+|---|---|---|
+| `lt_LT-reginute1-medium.onnx` | model (63 MB, Release/HF, not in git) | both paths |
+| `lt_LT-reginute1-medium.onnx.json` | config: `phoneme_type: text`, 167-entry `phoneme_id_map`, `sample_rate 22050`, `inference: length_scale 1.3, noise_scale 0.667, noise_w 0.8` | both |
+| `phonemize_lithuanian.py` | the phonemizer | both |
+| `lt_kirciai.tsv` | stress dictionary, 189 247 lines, TSV: word, vowel-group index, accent mark | both |
+| `skaiciu_pletiklis.py` + `zodziai_trumpi.txt` | number/abbreviation expander; picked up automatically when present | both (optional but strongly recommended) |
+| `synth_reginute.py` | `ReginuteSynth` — sentence splitting, pauses, rate levelling, silence trim, `normalize_audio=False` | both |
+| `wyoming_reginute.py` | Wyoming TTS server | path B only |
+
+**Public API (exact names):**
+
+- `phonemize_lithuanian.LithuanianPhonemizer(dictionary_path=DEFAULT_DICTIONARY_PATH, espeak_data_dir=ESPEAK_DATA_DIR, expand_text="auto")`
+  with methods `phonemize_word(word) -> str`, `phonemize_sentence(sentence) -> str`,
+  `phonemize(text) -> List[List[str]]` (Piper's phonemizer shape).
+  `expand_text=None` disables normalization; `"auto"` loads `skaiciu_pletiklis.isplesk` if it is importable.
+- `synth_reginute.ReginuteSynth(voice, phonemizer, length_scale=1.30, kablelis=…, taskas=…, expand_text=…, min_zodziu=…, santrumpu_letumas=…, kableli_skaidyti=…)`
+  with `.synthesize(text) -> np.ndarray` (float), `.gabalai(text)` (streaming
+  chunks), `.sr` (22050); helper `synth_reginute.i_int16(array) -> bytes`.
+- `skaiciu_pletiklis.isplesk(text) -> str` — idempotent.
+- The accent marks are `ˈ` U+02C8, `ˌ` U+02CC, `ˋ` U+02CB. The id map is
+  Piper's default 166 symbols **unchanged** plus `ˋ` = id 166. PAD/BOS/EOS
+  are 0/1/2 as in every Piper voice.
+
+**Path A — plain Piper, no Home Assistant.** `pip install piper-tts`, put the
+file set in one directory, then the Python snippet in `README_EN.md`
+("Install path A"), or:
+
+```
+python demo_piper_wheel.py lt_LT-reginute1-medium.onnx lt_LT-reginute1-medium.onnx.json "Laba diena." out.wav [length_scale]
+```
+
+**Path B — Home Assistant via Wyoming.** `pip install piper-tts wyoming`, then
+`python3 wyoming_reginute.py --model … --config … --uri tcp://0.0.0.0:10250`.
+All flags, with their real defaults:
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--model` | *(required)* | path to `.onnx` |
+| `--config` | `<model>.json` | path to `.onnx.json` |
+| `--dictionary` | `lt_kirciai.tsv` next to the module | stress dictionary |
+| `--uri` | `tcp://0.0.0.0:10250` | listen address |
+| `--length-scale` | `1.30` | speaking rate (higher = slower) |
+| `--kablelis` | `0.25` | pause after a comma, s |
+| `--taskas` | `0.15` | pause after a full stop, s |
+| `--kableli-skaidyti` | off | also split synthesis at commas |
+| `--santrumpu-letumas` | `1.15` | extra slowness for spelled-out abbreviations |
+| `--min-zodziu` | `0` | comma split only when both sides have ≥ N words |
+| `--voice-name` | `reginute1` | the voice name Home Assistant sees |
+| `--no-expand` | off | disable the number/abbreviation expander |
+| `--debug` | off | log level |
+
+The server refuses a config that is not `phoneme_type: text`
+(`SystemExit: "Balso config turi būti phoneme_type=text"`). It reports itself
+to Home Assistant as TTS program `reginute`, voice `reginute1`, languages
+`lt`, `lt_LT`, `lt-LT`. The `.onnx` is loaded once (~330 MB RAM); a container
+with 2 cores and 1 GB RAM is what the author runs (`OMP_NUM_THREADS=2`).
+
+In Home Assistant: *Settings → Devices & Services → Add integration → Wyoming
+Protocol → host, port 10250*; then in the Assist pipeline choose TTS
+`reginute` / voice `reginute1`. A full systemd unit and the container notes are
+in `docs/DIEGIMAS_SERVERYJE.md`; running a second language beside an existing
+one on the same speaker (two wake words, two pipelines) is
+`docs/DU_ASISTENTAI_HA.md` — both written during the actual install.
+
+**Testing without a speaker:** `testas_wyoming_klientas.py tcp://HOST:10250 "tekstas" out.wav`
+sends `Describe` + `Synthesize` exactly as Home Assistant does and writes a WAV.
+
+**Symptom → cause (all of these were actually met):**
+
+| What the user hears / sees | Cause | Fix |
+|---|---|---|
+| Gibberish, letter names, or nothing Lithuanian | model fed raw text — phonemizer not in front, or a Piper build that ignores it | use `ReginuteSynth`/`wyoming_reginute.py`, not bare `piper` |
+| Distorted, clipped loud passages | `normalize_audio=True` (Piper default) | `ReginuteSynth` sets it `False`; keep it |
+| Numbers with wrong endings, "15:00" read as a number | expander not present | keep `skaiciu_pletiklis.py` + `zodziai_trumpi.txt` beside the model |
+| Speaker answers in another language / silence for Lithuanian text | the Assist pipeline's TTS still points to another engine | select `reginute` in the pipeline; another engine may fail on Lithuanian letters |
+| `SystemExit … phoneme_type=text` | wrong `.onnx.json` | use the JSON shipped with this model |
+| Single short words sound hurried | training data (model card, limitations) | not a config error; state it |
+
+**What does NOT exist (do not invent it):** no `pip install reginute`, no
+Home Assistant add-on, no Docker image, no entry in the `piper-voices`
+catalogue yet, no multi-speaker option (`Speakers: 1`), no custom wake word
+("Regina") — the author uses the speaker's built-in *Hey Jarvis*. The training
+pipeline is **not** in this repository; `sudaryk_zodyna.py` and
+`patikrink_pries_mokyma.py` are build-side tools with the author's Windows
+paths and are not needed by users.
+
 ## Where to look
 
 | Question | File |
