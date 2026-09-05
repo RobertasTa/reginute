@@ -4,10 +4,13 @@
 Lithuanians. This English version exists so that nobody has to read it through
 a translator.*
 
-> **Status: private, under test.** Nothing here is final until the voice has
-> passed a blind listening test and the full chain has been verified on a real
-> Home Assistant installation. Steps marked ⏳ have not been verified yet —
-> this README is written *while* doing, not after.
+> **Status.** The chain has been verified end to end: the voice speaks through
+> the plain `piper` command, through a Wyoming server and through a Home
+> Assistant smart speaker, in Lithuanian, beside a Russian assistant. The
+> package passes **Piper's own catalogue check** (`_script/voicefest.py`).
+> What is not fixed yet is the final training checkpoint: the model is still
+> training, and the one that goes to Hugging Face will be the one a listener
+> picks. This README is written *while* doing, not after.
 
 Reginutė is a Lithuanian voice for [Piper](https://github.com/OHF-Voice/piper1-gpl),
 trained on the **LIEPA** speech corpus of Vilnius University (speaker Regina
@@ -42,26 +45,53 @@ include it.
 | `test_phonemize_lithuanian.py` | pytest suite for the phonemizer. |
 | `hf/` | The exact package that goes to Hugging Face: `.onnx` (not in git), `.onnx.json`, `MODEL_CARD`, `samples/`, `SHA256SUMS`. |
 | `docs/` | Installation and testing notes, written during the server tests. `DU_ASISTENTAI_HA.md` — how one Voice PE speaker runs two languages with two wake words (verified live; LT, EN to follow). |
+| `AI_CONSULTANT_BRIEF.md` | If you ask an AI about this voice, give it this file first. It lists what must not be claimed (e.g. "the first Lithuanian TTS" — untrue) and the known limitations. |
 | `sudaryk_zodyna.py`, `patikrink_pries_mokyma.py` | Build-side tools (dictionary builder, training-parity check). Contain Windows paths; not needed by users. |
 
-## Install path A — plain Piper (no Home Assistant) ⏳
+## Install path A — plain Piper (no Home Assistant)
+
+The released `piper-tts` wheel is enough — no fork, no patches.
 
 ```bash
-pip install piper-tts            # 1.7.x
-# copy phonemize_lithuanian.py, lt_kirciai.tsv and the two hf/ voice files next to your script
+pip install piper-tts             # 1.7.x
 ```
+
+One directory needs five files: `lt_LT-reginute1-medium.onnx` and its
+`.onnx.json` (from the Release or Hugging Face), and beside them
+`phonemize_lithuanian.py`, `lt_kirciai.tsv` and `skaiciu_pletiklis.py`
+(together with `zodziai_trumpi.txt`).
 
 ```python
-from piper import PiperVoice, SynthesisConfig
+from piper import PiperVoice
 from phonemize_lithuanian import LithuanianPhonemizer
+from skaiciu_pletiklis import isplesk
+from synth_reginute import ReginuteSynth, i_int16
+import wave
 
-voice = PiperVoice.load("lt_LT-reginute1-medium.onnx")
-ph = LithuanianPhonemizer()
-# … see demo_piper_wheel.py for the full call; normalize_audio must be False
+voice = PiperVoice.load("lt_LT-reginute1-medium.onnx",
+                        config_path="lt_LT-reginute1-medium.onnx.json")
+synth = ReginuteSynth(voice, LithuanianPhonemizer(),
+                      length_scale=1.30, expand_text=isplesk)
+
+audio = synth.synthesize("Laba diena. Kompensacija nuo 2000 eurų.")
+with wave.open("out.wav", "wb") as w:
+    w.setnchannels(1); w.setsampwidth(2); w.setframerate(synth.sr)
+    w.writeframes(i_int16(audio))
 ```
 
-⏳ To be verified on the server with the released wheel; exact snippet will be
-pasted from the working test.
+The same in one command, via `demo_piper_wheel.py`:
+
+```bash
+python demo_piper_wheel.py lt_LT-reginute1-medium.onnx \
+    lt_LT-reginute1-medium.onnx.json "Laba diena." out.wav
+```
+
+⚠️ **`normalize_audio` must stay `False`** (`ReginuteSynth` does that for
+you). Piper's default of `True` raises the peak to 1.0 and clips this voice.
+
+⚠️ **Without `skaiciu_pletiklis` the numbers come out wrong** — espeak-ng
+reads Lithuanian digits with the wrong case endings and clock times as plain
+numbers. `ReginuteSynth` calls it for you when given `expand_text=isplesk`.
 
 ## The other half of the chain — ears
 
@@ -101,11 +131,29 @@ In our house the two halves run side by side as Wyoming services: Paprika as
 speech-to-text, Reginutė as text-to-speech, in a Lithuanian Assist pipeline
 next to a Russian one. See `docs/DU_ASISTENTAI_HA.md`.
 
-## Install path B — Home Assistant via Wyoming ⏳
+## Install path B — Home Assistant via Wyoming
 
 Runs beside your existing Piper add-on, on its own port; nothing existing is
-touched. Full recipe in `docs/DIEGIMAS_SERVERYJE.md` (Lithuanian, being written
-during the live install; English version follows once it has worked once).
+touched.
+
+```bash
+pip install piper-tts wyoming
+python3 wyoming_reginute.py \
+    --model lt_LT-reginute1-medium.onnx \
+    --config lt_LT-reginute1-medium.onnx.json \
+    --dictionary lt_kirciai.tsv \
+    --uri tcp://0.0.0.0:10250 \
+    --length-scale 1.30
+```
+
+In Home Assistant: **Settings → Devices & Services → Add integration →
+Wyoming Protocol**, then the host and port 10250. The voice appears as
+`reginute1`.
+
+Full recipe with a systemd unit and container settings in
+`docs/DIEGIMAS_SERVERYJE.md` (Lithuanian, written during the live install).
+How one speaker runs two languages with two wake words:
+`docs/DU_ASISTENTAI_HA.md`.
 
 ## Licence
 
