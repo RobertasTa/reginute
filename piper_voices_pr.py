@@ -102,6 +102,21 @@ def main():
     cfg = json.load(io.open(failai[f"{KELIAS}/{VARDAS}.onnx.json"], encoding="utf-8"))
     assert cfg["dataset"] == "reginute1" and cfg["audio"]["quality"] == "medium" \
         and cfg["language"]["code"] == "lt_LT", "onnx.json laukai neatitinka katalogo"
+    # The catalogue config says "lithuanian", not "text" (Robertas 09-05 night).
+    # With "text" a stock Piper feeds the model raw letters and the voice is
+    # noise even after the piper1-gpl PR lands; with "lithuanian" an old Piper
+    # fails to load it with a clear error. Our own HF repo keeps "text" + the
+    # module (that path phonemizes outside Piper).
+    assert cfg["phoneme_type"] == "text"
+    cfg["phoneme_type"] = "lithuanian"
+    p = os.path.join(WORK, VARDAS + ".onnx.json")
+    with io.open(p, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(cfg, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+    failai[f"{KELIAS}/{VARDAS}.onnx.json"] = p
+    # The dictionary travels next to the model; the phonemizer looks there first.
+    failai[f"{KELIAS}/lt_kirciai.tsv"] = os.path.join(HF, "lt_kirciai.tsv")
+    assert os.path.exists(failai[f"{KELIAS}/lt_kirciai.tsv"])
     with io.open(TEKSTAS, encoding="utf-8") as f:
         eilutes = f.read().split("\n", 1)
     pavadinimas, aprasas = eilutes[0].strip(), eilutes[1].strip()
@@ -119,7 +134,8 @@ def main():
         "speaker_id_map": cfg.get("speaker_id_map", {}),
         "files": {
             k: {"size_bytes": os.path.getsize(v), "md5_digest": md5(v)}
-            for k, v in failai.items() if not k.endswith(".mp3")   # sample į files neįeina (voicefest.py)
+            for k, v in failai.items()
+            if k.endswith((".onnx", ".onnx.json", "MODEL_CARD"))   # voicefest.py konvencija: tik šie trys
         },
         "aliases": [],
     }

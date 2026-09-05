@@ -37,9 +37,20 @@ synthesis time, because espeak-ng misplaces Lithuanian stress in roughly half
 of the words against the corpus' gold annotation.
 
 Text must therefore be phonemized by `phonemize_lithuanian.py` (shipped with
-the voice; proposed as a `PhonemeType.LITHUANIAN` contribution to piper1-gpl)
+the voice; submitted as a `PhonemeType.LITHUANIAN` contribution to piper1-gpl)
 together with the stress dictionary `lt_kirciai.tsv`. Plain Piper without the
 phonemizer feeds the model raw letters and will not produce Lithuanian.
+
+Two configs exist for the same model, on purpose:
+
+* **piper-voices catalogue:** `"phoneme_type": "lithuanian"` — Piper runs the
+  phonemizer itself (needs a Piper that includes the piper1-gpl contribution;
+  an older Piper refuses to load the voice with a clear error rather than
+  producing noise). Put `lt_kirciai.tsv` next to the model or pass
+  `--data-dir`; `piper.download_voices` fetches only `.onnx` and `.onnx.json`,
+  so take the TSV from the same catalogue folder or from this repo.
+* **this repo / older Piper:** `"phoneme_type": "text"` — you phonemize with
+  the module and pass IPA to Piper (`synth_reginute.py` does exactly that).
 
 The module also normalizes text first (`skaiciu_pletiklis.py`, picked up
 automatically when present, `expand_text=None` to disable): Lithuanian number
