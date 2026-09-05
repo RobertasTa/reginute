@@ -213,7 +213,7 @@ iš tų keturių.
   nepanaudojamas.
 
 Šeima tęsėsi: **LIEPA-2** (1 000 val.) ir **LIEPA-3** (10 000 val., vadovė
-**dr. Gražina Korvel**) — būtent iš LIEPA-3 išmokyta žemiau minima Paprika.
+**prof. Gražina Korvel**) — būtent iš LIEPA-3 išmokyta žemiau minima Paprika.
 Kitas garsynas, tas pats sprendimas: paskelbti, o ne pasilikti.
 
 ### Žodynas
