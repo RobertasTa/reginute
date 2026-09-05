@@ -27,7 +27,10 @@ August 2026; Lithuanian never has.
 - Sample rate: 22 050 Hz · Quality: medium · Speakers: 1
 - Files: `lt_LT-reginute1-medium.onnx` + `lt_LT-reginute1-medium.onnx.json`
   (**must stay together**) + `phonemize_lithuanian.py` + `lt_kirciai.tsv`
-  (see below — the voice does not speak without them)
+  (see below — the voice does not speak without them) + `skaiciu_pletiklis.py`
+  with `zodziai_trumpi.txt` (text normalizer) + `synth_reginute.py` (the
+  recommended wrapper: sentence splitting, pauses, `normalize_audio=False`);
+  `SHA256SUMS` covers all of them
 
 ## ⚠️ This voice needs its phonemizer
 

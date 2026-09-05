@@ -139,6 +139,17 @@ def main():
     print(f"2) {VARDAS}.onnx.json  ({len(cfg['phoneme_id_map'])} simboliai, "
           f"length_scale {args.length_scale})")
 
+    # 2b. The phonemizer and its dictionary. README and MODEL_CARD promise them
+    # next to the model ("the voice does not speak without them"), and until
+    # 09-05 nothing copied them in - hf/ shipped a voice that could not talk.
+    # zodziai_trumpi.txt: skaiciu_pletiklis looks for it beside itself;
+    # synth_reginute.py: the recommended wrapper (brief: "both").
+    for fn in ("phonemize_lithuanian.py", "skaiciu_pletiklis.py", "lt_kirciai.tsv",
+               "zodziai_trumpi.txt", "synth_reginute.py"):
+        shutil.copyfile(os.path.join(CIA, fn), os.path.join(HF, fn))
+    print("2b) phonemize_lithuanian.py, skaiciu_pletiklis.py, lt_kirciai.tsv, "
+          "zodziai_trumpi.txt, synth_reginute.py -> hf/")
+
     # 3. SHA256SUMS for everything in hf/ except the list itself.
     # Found while rehearsing the submission: a backup copy of the config had
     # ended up in the directory and would have gone to Hugging Face with the
