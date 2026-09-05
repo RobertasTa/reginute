@@ -1,16 +1,22 @@
-# SKAIČIŲ PLĖTIKLIS v2 — lietuviškas skaitvardžių žvėrynas Reginai.
-# Roberto užsakymas 09-02: „apgalvok ir sutvarkyk iki milijonų, kad mokėtų."
-# Verčia skaičius žodžiais SU TEISINGA FORMA pagal kontekstą PRIEŠ
-# fonemizaciją. Modelio mokyti nereikia — jis taria fonemas (generatyvus).
+# Lithuanian number and abbreviation expansion, run before phonemization.
 #
-# Formos žymimos: V vardininkas, G galininkas, K kilmininkas, I įnagininkas;
-# _f — moteriška giminė. Kelintiniai: kamienas + galūnė pagal kontekstą;
-# sudėtiniuose kelintinis TIK paskutinis dėmuo (du tūkstančiai penktais).
-# Ko sąmoningai nedengiam (fallback į V): vietininkas, retos įvardžiuotinių
-# formos, dvejetiniai (dveji metai) — pildysim iš Roberto perklausų.
+# Lithuanian numerals inflect for case and gender, so "5000 eurų" is not one
+# string but several depending on the sentence around it. Left to espeak-ng,
+# digits come out with the wrong endings ("penki tūkstantčei"), and clock
+# times are read as plain numbers. None of this is the model's problem: the
+# text simply has to reach it already written out the way a person would say
+# it.
+#
+# Case codes used throughout: V nominative, G accusative, K genitive,
+# I instrumental; the _f suffix marks feminine forms. In compound ordinals
+# only the LAST part takes the ordinal ending ("du tūkstančiai penktais").
+#
+# Deliberately not covered (these fall back to the nominative): the locative,
+# rare pronominal forms, and collective numerals ("dveji metai"). They are
+# added when a real sentence needs them, not in advance.
 import re
 
-# --- kiekiniai vienetai --------------------------------------------------
+# --- cardinal units -------------------------------------------------------
 VNT = {
     1: {"V": "vienas", "G": "vieną", "K": "vieno", "I": "vienu",
         "V_f": "viena", "G_f": "vieną", "K_f": "vienos", "I_f": "viena"},
@@ -31,10 +37,10 @@ VNT = {
     9: {"V": "devyni", "G": "devynis", "K": "devynių", "I": "devyniais",
         "V_f": "devynios", "G_f": "devynias", "K_f": "devynių", "I_f": "devyniomis"},
 }
-# 11–19: linksniuojasi kaip mot. -a (vienuolika/vienuolikos/vienuolika...)
-# ⚠️ 09-04 IŠTAISYTA: pirmas dėmuo buvo „vien" → 11 visur skambėjo „VIENLIKA"
-# (ir 111 „šimtas vienlika", ir kelintinis „vienliktas"). Rasta atsitiktinai,
-# tikrinant kainą „11,15 Eur". Klaida būtų iškeliavusi kartu su dovana.
+# 11-19 inflect like feminine -a nouns (vienuolika / vienuolikos / ...).
+# The first stem used to be "vien" instead of "vienuo", so 11 came out as a
+# non-word everywhere - inside 111 and in the ordinal too. It was found by
+# accident while checking a price, and would otherwise have shipped.
 PALIKT = {n: "vienuo dvy try keturio penkio šešio septynio aštuonio devynio".split()[n - 11] + "lika"
           for n in range(11, 20)}
 
@@ -43,7 +49,7 @@ def _palikt(n, forma):
     z = PALIKT[n]
     if forma == "K":
         return z[:-1] + "os"
-    return z  # V/G/I sutampa praktikoje
+    return z  # V/G/I coincide in practice
 
 
 DESIMT = {10: "dešimt", 20: "dvidešimt", 30: "trisdešimt",
@@ -55,19 +61,17 @@ DESIMT_K = {10: "dešimties", 20: "dvidešimties", 30: "trisdešimties",
             80: "aštuoniasdešimties", 90: "devyniasdešimties"}
 
 
-# ⚠️ 09-05: „tūkstantis" yra i-kamienas su t→č kaita, ir bendrinė galūnių
-# logika jam netinka — ji davė „tūkstantiį", „tūkstantio", „tūkstantu"
-# („kainuoja 1000 eurų" -> „tūkstantiį eurų"). Aiškios formos:
+# "tūkstantis" is an i-stem with a t/č alternation, so the general ending
+# rules below produce non-words for it ("tūkstantiį", "tūkstantio"). Its
+# singular forms are therefore spelled out:
 TUKSTANTIS_VNS = {"V": "tūkstantis", "G": "tūkstantį",
                   "K": "tūkstančio", "I": "tūkstančiu"}
 
 
 def _grupe(zodis_vns, zodis_dgs, zodis_kilm, n, forma):
-    """šimtas/tūkstantis/milijonas grupės žodis pagal kiekį ir linksnį."""
-    # ⚠️ 09-05: vienaskaitos reikalauja ne tik 1, bet ir 21, 31 … 91
-    # („dvidešimt vienas tūkstantis", ne „tūkstančiai"). Ta pati riba buvo
-    # žinoma ir milijonuose („skirs 21 mln." davė „dvidešimt vieną milijonUS")
-    # — uždarom abu vienoje vietoje. 11 — išimtis (vienuolika tūkstančių).
+    """The group word (hundred/thousand/million) for a count and a case."""
+    # The singular is required not only by 1 but by 21, 31 ... 91 as well
+    # ("dvidešimt vienas tūkstantis", not the plural). 11 is the exception.
     vienas = (n % 10 == 1 and n % 100 != 11)
     if vienas and zodis_vns == "tūkstantis":
         return TUKSTANTIS_VNS.get(forma, zodis_vns)
@@ -76,7 +80,7 @@ def _grupe(zodis_vns, zodis_dgs, zodis_kilm, n, forma):
     if vienas:
         return {"V": zodis_vns, "G": zodis_vns[:-1] + "į" if zodis_vns.endswith("is")
                 else zodis_vns[:-2] + "ą", "I": zodis_vns[:-2] + "u"}.get(forma, zodis_vns)
-    # 2-9 -> dgs; 10-19/dešimtys -> kilmininkas
+    # 2-9 take the plural; 10-19 and the tens take the genitive
     if n % 10 == 0 or 11 <= n % 100 <= 19:
         return zodis_kilm
     return {"V": zodis_dgs, "G": zodis_dgs[:-2] + "us",
@@ -84,7 +88,7 @@ def _grupe(zodis_vns, zodis_dgs, zodis_kilm, n, forma):
 
 
 def kiekinis(n, forma="V", gimine=""):
-    """0–999 999 999 kiekinis nurodyta forma (V/G/K/I), gimine ''|'_f'."""
+    """0-999 999 999 as a cardinal in the given case (V/G/K/I) and gender."""
     if n == 0:
         return {"V": "nulis", "G": "nulį", "K": "nulio", "I": "nuliu"}[forma]
     if n < 0:
@@ -96,8 +100,8 @@ def kiekinis(n, forma="V", gimine=""):
         if m >= 100:
             s = m // 100
             if s > 1:
-                # ⚠️ 09-04, rasta tuo pačiu testu: šimtų DAUGIKLIS derinasi su
-                # linksniu („devynIŲ šimtų", ne „devynI šimtų").
+                # The multiplier in front of "hundred" agrees with the case
+                # too ("devynIŲ šimtų", not "devynI šimtų").
                 z.append(VNT[s].get(f, VNT[s]["V"]))
             z.append(_grupe("šimtas", "šimtai", "šimtų", s, f))
             m %= 100
@@ -106,12 +110,11 @@ def kiekinis(n, forma="V", gimine=""):
             m = 0
         elif m >= 10:
             d = m - m % 10
-            # ⚠️ 09-04 (Roberto ausis: „skaičius sako blogai"): SUDĖTINIAME
-            # skaitvardyje dešimtys NELINKSNIUOJAMOS — linksniuojasi tik
-            # PASKUTINIS dėmuo. Buvo „devynių eurų devyniasdešimtIES devynių
-            # centų"; taisyklinga — „devyniasdešimt devynių".
-            # Kilmininko forma imama TIK kai dešimtys pačios yra paskutinės
-            # („iš devyniasdešimties"), t. y. kai vienetų nėra.
+            # Inside a compound numeral the tens do NOT inflect - only the
+            # last part does. "devynių eurų devyniasdešimtIES devynių centų"
+            # was wrong; "devyniasdešimt devynių" is right. The genitive form
+            # of the tens is used only when the tens are themselves last,
+            # i.e. when there are no units after them.
             paskutine = (m % 10 == 0)
             z.append(DESIMT_K[d] if (f == "K" and paskutine) else DESIMT[d])
             m %= 10
@@ -121,13 +124,9 @@ def kiekinis(n, forma="V", gimine=""):
 
     if n >= 1_000_000:
         mln = n // 1_000_000
-        # ⚠️ 09-04 (rasta Reginos naujienose): daugiklis prieš „milijonus" buvo
-        # užrakintas vardininku, tad „skirs 5 mln." duodavo „penkI milijonUS".
-        # Ta pati klaida, kaip šįryt su šimtais — daugiklis turi derintis su
-        # linksniu. Kilmininke ir toliau lieka „V" (penki milijonai eurų).
-        # 09-05: „K" pridėtas kartu su tūkstančiais — „nuo 5 mln. eurų" davė
-        # „nuo penki milijonų". 09-04 komentaras apie kilmininką galiojo, kol
-        # tikro kilmininko kelio nebuvo.
+        # The multiplier in front of "million" used to be locked to the
+        # nominative, so "skirs 5 mln." came out with a mismatched case. It
+        # has to agree, exactly like the one in front of "hundred".
         mln_f = forma if forma in ("G", "I", "K") else "V"
         if mln > 1:
             dalys += trejetas(mln, mln_f)
@@ -135,21 +134,15 @@ def kiekinis(n, forma="V", gimine=""):
         n %= 1_000_000
     if n >= 1000:
         t = n // 1000
-        # ⚠️ 09-05 (plano punktas „tūkstančių daugiklis"): ta pati klaida, kaip
-        # šįryt su šimtais ir vakar su milijonais — daugiklis prieš
-        # „tūkstančius" buvo užrakintas vardininku, tad „skirs 5000 eurų"
-        # duodavo „penkI tūkstančius", o „gavo 3000" — „trys tūkstančius".
-        # Sąlyga ta pati, kaip milijonuose (žr. žemiau).
-        # ⚠️ 09-05 antras ratas: „K" į sąlygą įrašytas TIK dabar, kai atsirado
-        # 6b punktas (kilmininkiniai prielinksniai). Iki tol kilmininkas per
-        # `isplesk` buvo nepasiekiamas, ir riba buvo palikta sąmoningai — o
-        # atsiradus keliui ji iškart pasirodė kaip „nuo du tūkstančių eurų".
-        # ⚠️ 09-05 trečias ratas: sąlyga buvo `n % 1000 == 0`, t. y. tūkstančiai
-        # derinosi TIK kai jie paskutinis dėmuo. Todėl „nuo 3500 eurų" duodavo
-        # „nuo trys tūkstančiai penkių šimtų" — lietuviškai skirtingos grupės
-        # (tūkstančiai + šimtai) linksniuojamos VISOS. Tai ne tas pats, kas
-        # 28a taisyklė: ten dešimtys ir vienetai VIENOJE grupėje („devyniasdešimt
-        # devynių"), o čia dvi atskiros grupės.
+        # Same rule for the thousands multiplier, and it took three passes to
+        # get right. First it was locked to the nominative ("penkI
+        # tūkstančius"). Then the genitive was left out, which showed up as
+        # "nuo du tūkstančių eurų" as soon as genitive prepositions were
+        # handled. Finally the agreement was conditioned on the thousands
+        # being the LAST group, so "nuo 3500 eurų" gave "nuo trys tūkstančiai
+        # penkių šimtų" - in Lithuanian separate groups (thousands + hundreds)
+        # are BOTH inflected. That is not the same rule as the tens above:
+        # there the tens and units sit inside one group.
         tukst_f = forma if forma in ("G", "I", "K") else "V"
         if t > 1:
             dalys += trejetas(t, tukst_f)
@@ -160,7 +153,7 @@ def kiekinis(n, forma="V", gimine=""):
     return " ".join(dalys)
 
 
-# --- kelintiniai ---------------------------------------------------------
+# --- ordinals -------------------------------------------------------------
 KELINT_KAM = {1: "pirm", 2: "antr", 3: "treči", 4: "ketvirt", 5: "penkt",
               6: "šešt", 7: "septint", 8: "aštunt", 9: "devint", 10: "dešimt",
               20: "dvidešimt", 30: "trisdešimt", 40: "keturiasdešimt",
@@ -168,7 +161,7 @@ KELINT_KAM = {1: "pirm", 2: "antr", 3: "treči", 4: "ketvirt", 5: "penkt",
               80: "aštuoniasdešimt", 90: "devyniasdešimt"}
 for _n in range(11, 20):
     KELINT_KAM[_n] = PALIKT[_n][:-1] + "t"
-# galūnės: (gimine, forma) -> galūnė; ivardž. atskirai
+# endings: (gender, case) -> ending; the pronominal forms are separate
 KELINT_GAL = {("m", "V"): "as", ("m", "G"): "ą", ("m", "K"): "o",
               ("m", "Idgs"): "ais", ("m", "Vdgs"): "i",
               ("f", "V"): "a", ("f", "G"): "ą", ("f", "K"): "os", ("m", "Kdgs"): "ų"}
@@ -177,7 +170,7 @@ IVARDZ = {("m", "V"): "asis", ("m", "G"): "ąjį", ("f", "V"): "oji",
 
 
 def kelintinis(n, gimine="m", forma="V", ivardz=False):
-    """Sudėtinis kelintinis: kelintinis TIK paskutinis dėmuo."""
+    """Compound ordinal: only the LAST part takes the ordinal ending."""
     if n <= 0:
         return kiekinis(n)
     lik = n % 100
@@ -200,13 +193,13 @@ def kelintinis(n, gimine="m", forma="V", ivardz=False):
     return (kiekinis(baze) + " " if baze else "") + zodis
 
 
-# --- santrumpos ----------------------------------------------------------
+# --- abbreviations --------------------------------------------------------
 SANTRUMPOS = [(r"\bproc\.", " procentai"), (r"\bval\.(?=\s|$)", " valandos"),
               (r"\bEur\b", " eurų"), (r"\bmln\.", " milijonai"),
               (r"\bkm\b", " kilometrų"), (r"\bkg\b", " kilogramų"),
               (r"\bLR\b", "Lietuvos Respublikos")]
 
-# --- RAIDINES SANTRUMPOS (Roberto radinys 09-03) -------------------------
+# --- SPELLED-OUT ABBREVIATIONS --------------------------------------------
 # „MTL" Reginute isbardavo kaip vientisa zodi, o Ona kiekviena raide taria
 # atskirai su mazute pauze — todel ju girdisi. Perrasom raidziu vardais.
 RAIDZIU_VARDAI = {
@@ -228,11 +221,10 @@ RAIDZIU_VARDAI = {
 SANTRUMPOS_ZODZIU = {
     "NATO", "UNESCO", "UNICEF", "SODRA", "LIEPA", "COVID", "AIDS", "LED",
     "PIN", "WIFI", "USB", "PDF", "GPS", "JAV", "FIBA", "NASA", "DELFI",
-    # ⭐ 09-05 Roberto ausis: „girdžiu vė em i, o turėčiau girdėti vmi" ir
-    # „VMI taip dėk į išimčių žurnalą". Antra išimtis po JAV, ir abi rastos
-    # tuo pačiu būdu — ne taisykle, o klausantis. Skaidymas raidėmis lieka
-    # numatytas visiems kitiems (LIEPA tekstuose „E ES", „EN EM A"), o čia
-    # trumpinys jau suaugęs į vieną žodį.
+    # The second exception after JAV, and both were found the same way - by
+    # listening, not by rule. Spelling out the letters stays the default for
+    # everything else (the corpus writes "E ES", "EN EM A"); these two have
+    # grown into single words in everyday speech.
     "VMI",
 }
 
@@ -241,19 +233,20 @@ _ZODZIU_SARASAS = None
 
 
 def _yra_tikras_zodis(s):
-    """Ar tai NORMALUS lietuviskas zodis, tik parasytas didziosiomis?
-    Tikrinam g2p zodyne (232 913 zodziu) — taip apsaugom „ORAI", „KARAS",
-    „NAUJA" nuo skaldymo i raides (Roberto ispejimas 09-03: naujienose
-    santrumpos daznos, bet ir pabrezimai didziosiomis pasitaiko)."""
+    """Is this an ordinary Lithuanian word that merely happens to be written
+    in capitals? Checked against the pronunciation lexicon, so that words like
+    "ORAI" or "KARAS" written for emphasis are not spelled out letter by
+    letter. News text contains both abbreviations and shouted words."""
     global _ZODZIU_SARASAS
     if _ZODZIU_SARASAS is None:
         import io
         import os
         _ZODZIU_SARASAS = set()
-        # 09-03: kelias nebe kietas — serveryje (LXC 214) pilno žodyno nėra,
-        # o be jo apsauga nustotų veikti TYLIAI ir „ORAI" virstų „o er a i".
-        # Šalia modulio guli `piper_lt\zodziai_trumpi.txt` (33 895 žodžiai po
-        # 4–6 raides — tik tiek ir tereikia, nes tikrinam 4–5 didžiąsias).
+        # The path is searched rather than hard-coded: on a small server the
+        # full lexicon is not there, and without a fallback this protection
+        # would fail SILENTLY - "ORAI" would start being read as four letters.
+        # A short word list (33 895 words of 4-6 letters) ships beside the
+        # module, and that is all this check needs.
         cia = os.path.dirname(os.path.abspath(__file__))
         for kelias in (os.path.join(r"D:\_Balsas Lietuviksas", "_modeliai",
                                     "g2p-lt", "lexicon.tsv"),
@@ -267,60 +260,49 @@ def _yra_tikras_zodis(s):
 
 
 def raidem(m):
-    """AAA -> „a a a" (kiekviena raide atskiru zodziu; tarpas duoda pauze)."""
+    """AAA -> the letter names, as one fragment ("vė em i")."""
     s = m.group(0)
     if s in SANTRUMPOS_ZODZIU:
         return s
-    # Zodyno patikra TIK nuo 4 raidziu: trumpesniuose (ES, JAV, VU, DI)
-    # sutapimu su tikrais zodziais daug, bet didziosiomis jie praktiskai
-    # visada yra santrumpos. Nuo 4 raidziu jau tiketi tikri zodziai
-    # („ORAI", „KARAS") — juos saugom.
+    # The lexicon check applies only from 4 letters up. Shorter capitalised
+    # strings (ES, JAV, VU) collide with real words too often, and in capitals
+    # they are almost always abbreviations anyway. From 4 letters, genuine
+    # words become plausible, and those are protected.
     if len(s) >= 4 and _yra_tikras_zodis(s):
         return s
-    # 09-03 Roberto ausis: „ES ištarė neaiškiai… gal pauzės per trumpos".
-    # Ona tarp raidžių daro pauzeles. Brūkšnelis = trumpa pauzė sintezėje
-    # (sintezuok_zinias: KABLELIS; synth_reginute: 0,10 s) — raidės tampa
-    # atskirais gabalais, o ne suplaktu žodžiu.
-    # Brūkšneliai ir IŠ ABIEJŲ PUSIŲ: be jų pirmoji/paskutinė raidė prilimpa
-    # prie gretimo žodžio („vė - em - i primena") ir netenka pauzės.
-    # Pertekliniai brūkšneliai (sakinio gale, prieš skyrybą) valomi isplesk().
-    # ⭐ 09-03 vakare, 4 ratas — GRĮŽTA PRIE MOKYMO DUOMENŲ (Roberto priekaištas
-    # „į Piper vėl su kitokiom formulėm"). LIEPA tekstuose raidės rašomos
-    # PAPRASTAIS ŽODŽIAIS SAKINIO VIDURYJE, be jokių skyriklių:
-    #   „Rusijos ir Europos Sąjungos E ES."  -> mokyme: ˌea ˈes
-    #   „Kurio kodas įsiterpė į mūsų DĖ EN ER." -> dʲˈee ˈen ˈer
-    #   „U. A. Bė Stragutės mėsa"            -> ˋu. ˌa. bʲˈee
-    # Regina jas taip ir įrašė, ir modelis taip jų mokėsi. Buvau įdėjęs
-    # brūkšnelius („ - "), kad atsirastų pauzės — bet tai IŠSKIRIA santrumpą į
-    # atskirą trumpą gabalą, kokio mokymo duomenyse NIEKADA nebuvo.
-    # ⭐ 09-03 VĖLAI — GRĮŽTA PAUZELĖS, bet dabar pagrįstos KITU kriterijumi.
-    # Anksčiau jas nuėmiau, nes ASR matavimas rodė, kad su pauzėmis mašina
-    # trumpinį atpažįsta blogiau (6/11 prieš 8/11). Bet ASR matuoja MAŠINOS
-    # atkūrimą, o kolonėlė kalba ŽMOGUI. Roberto ausis ir radijo diktoriaus
-    # maniera: „VMI su mažom pauzelėm tarp raidžių gaunasi geriau".
-    # ⇒ žmogaus aiškumas viršesnis; pauzė 0,10 s (`synth_reginute.pauze["-"]`).
+    # How an abbreviation should sound took five rounds of listening, and the
+    # shape below is the result rather than a first guess.
     #
-    # ⭐⭐ 09-05, PENKTAS RATAS — pauzės NUIMAMOS IŠ VIDAUS, paliekamos IŠ ŠONŲ.
-    # Roberto palyginimas: A (pauzelės tarp raidžių) — „taip negerai";
-    # B (be pauzelių) — „santrumpa gerai, tik visas tekstas kaip žirniai į
-    # sieną". Antroji pastaba buvo apie VISĄ tekstą, ne apie trumpinį: išėmus
-    # brūkšnelius sakinys tapdavo VIENU gabalu, o greičio išlyginimas dirba per
-    # gabalus — tad skubėjo kalba, ne santrumpa.
-    # ⇒ Raidės jungiamos TARPAIS (skamba sulietai, kaip B), o brūkšneliai lieka
-    # tik iš šonų: taip santrumpa vis tiek atskiriamas gabalas, `synth_reginute`
-    # ją atpažįsta (pries/zenklas == "-") ir taria LĖČIAU
-    # (`SANTRUMPOS_LETUMAS` 1.15 — Roberto pasirinktas iš 1.0/1.15/1.30).
+    # The corpus writes spelled-out letters as ordinary words mid-sentence,
+    # with no separators at all ("Rusijos ir Europos Sąjungos E ES"), and the
+    # model learned them that way. Putting a separator between every letter
+    # therefore isolates the abbreviation into a kind of fragment the model
+    # never saw in training - and it was audibly worse, letters rattling out
+    # one at a time.
+    #
+    # Removing the separators entirely was worse in a different way: the
+    # sentence then became ONE fragment, and the rate levelling in
+    # synth_reginute works per fragment, so the whole text sped up. What
+    # sounded rushed was the speech around the abbreviation, not the
+    # abbreviation itself.
+    #
+    # So: the letters are joined by SPACES (they run together, as in the
+    # corpus), and the hyphens stay only on the OUTSIDE. That still makes the
+    # abbreviation its own fragment, which synth_reginute recognizes by the
+    # surrounding hyphens and speaks slower (SANTRUMPOS_LETUMAS). Redundant
+    # hyphens before punctuation are cleaned up in isplesk().
     return " - " + " ".join(RAIDZIU_VARDAI.get(c, c) for c in s) + " - "
 
 
-# Lietuviškas skaitvardžio ir daiktavardžio derinimas (vns. / dgs. / kilm.):
-# 21 euRAS · 2–9, 22–29 euRAI · 10, 11–19, 20, 30 euRŲ.
+# A Lithuanian noun agrees with the number in front of it, in three forms:
+# 21 euRAS (singular) · 2-9, 22-29 euRAI (plural) · 10, 11-19, 20, 30 euRŲ
+# (genitive plural).
 EURAI = ("euras", "eurai", "eurų")
 CENTAI = ("centas", "centai", "centų")
-# Mato vienetai, kuriems reikia to paties derinimo (žr. `isplesk` 0− punktą).
-# Ketvirtas laukas — giminė: "" vyriška, "_f" moteriška („dvi tonos", ne „du").
-# ⚠️ 09-04 antras praplėtimas (Roberto ausis: „2 g, 2 t, 2 cm skamba juokingai"
-# — iki tol lentelėje buvo TIK km/kg/proc, o visi kiti likdavo raide: „du gė").
+# Units of measurement need the same agreement. The fourth field is gender:
+# "" masculine, "_f" feminine ("dvi tonos", not "du tonos").
+# The table used to hold only km/kg/proc, so every other unit was read out as
+# a letter ("du gė" for "2 g") - which is exactly as odd as it looks.
 VIENETAI = {
     "km":  ("kilometras", "kilometrai", "kilometrų", ""),
     "cm":  ("centimetras", "centimetrai", "centimetrų", ""),
@@ -328,20 +310,20 @@ VIENETAI = {
     "kg":  ("kilogramas", "kilogramai", "kilogramų", ""),
     "ml":  ("mililitras", "mililitrai", "mililitrų", ""),
     "ha":  ("hektaras", "hektarai", "hektarų", ""),
-    # elektra (Roberto prašymas — „dažnai pasitaiko"):
+    # electricity units, common in household text:
     "kW":  ("kilovatas", "kilovatai", "kilovatų", ""),
     "Wh":  ("vatvalandė", "vatvalandės", "vatvalandžių", "_f"),
     "kWh": ("kilovatvalandė", "kilovatvalandės", "kilovatvalandžių", "_f"),
     "proc": ("procentas", "procentai", "procentų", ""),
 }
-# ⛔ 09-04 SĄMONINGAI NEĮTRAUKTI vienaraidžiai: W, A, V, m, g, t, l.
-# Roberto nuostata: „pavojingus aplenk, lai geriau keistai skamba negu
-# primeluotų kitose vietose." Kiekvienas jų lietuviškame tekste turi antrą
-# reikšmę: `V` — romėniškas penketas, `A.` `V.` `W.` — vardų inicialai,
-# `g.` — gatvė, `t.` — iš „t. y.", „t. t.". Skaičiaus reikalavimas PRIEŠ
-# vienetą daugumą tų atvejų atmeta, bet ne visus: „5 A klasė" virstų
-# „penki amperai klasė", „1 t. y." — „viena tona y". Kaina: „2 m" ir „500 g"
-# lieka raidėmis. Grąžinti galima bet kada — eilutė lentelėje ir šablone.
+# Single-letter units (W, A, V, m, g, t, l) are deliberately NOT included.
+# Every one of them has a second meaning in Lithuanian text: V is also the
+# Roman numeral five, A. V. W. are initials in names, g. is "street", t. is
+# part of common abbreviations. Requiring a number in front rejects most of
+# those cases but not all: "5 A klasė" (class 5A) would become "five amperes
+# class". The cost is that "2 m" and "500 g" stay as letters - better an odd
+# reading in a rare place than a confident lie in a common one. Adding them
+# back is one line in the table and one in the pattern.
 VIENETU_SABLONAS = "kWh|kW|Wh|km|kg|cm|mm|ml|ha|proc\\."
 
 
@@ -354,8 +336,9 @@ def _skaic_forma(n, formos):
     return formos[1]
 
 
-# „el. paštas" linksniai (žr. `isplesk` 0−− punktą). Visos formos, išskyrus
-# „elektroniniams", yra kirčių žodyne — kirtis ateina iš jo, ne iš espeak.
+# Case forms of "el. paštas" (e-mail). All of them except the rare dative
+# plural are in the stress dictionary, so the accent comes from there rather
+# than from espeak.
 EL_PASTAS = {"paštas": "elektroninis", "paštu": "elektroniniu",
              "pašto": "elektroninio", "paštą": "elektroninį",
              "pašte": "elektroniniame", "paštai": "elektroniniai",
@@ -369,25 +352,23 @@ GAL_VEIKSMAZODZIAI = r"(kainuoja|kainavo|moka|mokėjo|sumokėjo|gavo|gaus|" \
 
 
 def isplesk(t):
-    # 0−−. „el. paštu" -> „elektroniniu paštu" (Roberto ausis 09-05: „el kai ji
-    # tarė girdisi kaip al"). Pamatuota: espeak „el." išplečia į VARDININKĄ ir
-    # dar palieka tašką, tad bet koks linksnis skambėdavo „elektroninIS. paštu"
-    # — negramatiškai ir su pauze vidury frazės (`ˋeɭektronʲinʲis. paʃˋtu`).
-    # ⭐ Forma paimta ne iš galvos: Regina mokymo įraše pati sako „faksu ar
-    # elektroniniu paštu" (`_duomenys\regina\metadata.csv`) — modelis tą junginį
-    # girdėjo. Būdvardį deriname pagal paties daiktavardžio galūnę.
+    # "el. paštu" -> "elektroniniu paštu". espeak expands "el." into the
+    # NOMINATIVE and keeps the full stop, so any other case came out
+    # ungrammatical and with a pause in the middle of the phrase
+    # (`ˋeɭektronʲinʲis. paʃˋtu`). The adjective now agrees with the noun.
+    # The wording is not invented: the speaker says "faksu ar elektroniniu
+    # paštu" in the training data, so the model has heard this exact phrase.
     def _el_pastas(m):
         vnt = m.group(2)
         zodis = EL_PASTAS.get(vnt.lower(), "elektroninis")
         return (zodis.capitalize() if m.group(1)[0].isupper() else zodis) + " " + vnt
     t = re.sub(r"\b([Ee]l)\.\s*(pašt[a-ząčęėįšųūž]*)", _el_pastas, t)
-    # 0−. MATO VIENETAI SU SKAIČIUMI — derinam su skaičiumi.
-    # ⚠️ 09-04 (Roberto ausis: „Jarvis-Reginutė skaičius sako blogai"): lentelėje
-    # `km` visada virsdavo „kilometrų", tad „12 km" skambėdavo teisingai, o
-    # „5 km" → „penki kilometrŲ" ir „100,5 km" → „šimtas kablelis penki
-    # kilometrŲ“. Vienetas privalo derintis su PASKUTINIU ištartu skaičiumi
-    # (dešimtainėje — su trupmenine dalimi, kaip ir sakom: „devyni kablelis
-    # devyniasdešimt devyni eurAI"). Turi eiti PRIEŠ bendrą santrumpų lentelę.
+    # Units of measurement, made to agree with the number in front of them.
+    # `km` used to expand to a fixed genitive plural, so "12 km" happened to
+    # be right while "5 km" and "100,5 km" were not. The unit has to agree
+    # with the LAST number actually spoken - for a decimal, that is the
+    # fractional part, exactly as people say it. This must run BEFORE the
+    # general abbreviation table.
     def _vienetas(m):
         sk, tr, vnt = m.group(1), m.group(2), m.group(3)
         n = int(tr) if tr else int(sk)
@@ -395,46 +376,44 @@ def isplesk(t):
         skaic = (f"{kiekinis(int(sk), 'V', gim)} kablelis "
                  f"{kiekinis(int(tr), 'V', gim)}" if tr
                  else kiekinis(int(sk), "V", gim))
-        # „proc." taškas yra santrumpos, bet sakinio gale jis tarnauja ir kaip
-        # sakinio galas — o `synth_reginute` pagal jį skaido frazes. Grąžinam.
+        # The full stop in "proc." belongs to the abbreviation, but at the end
+        # of a sentence it also ends the sentence - and the synthesis splits
+        # phrases on it. So it is put back.
         liko = m.string[m.end():]
         galas = "." if (vnt.endswith(".") and
                         (not liko.strip() or re.match(r"\s+[A-ZĄČĘĖĮŠŲŪŽ]", liko))) else ""
         return f"{skaic} {_skaic_forma(n, formos)}{galas}"
     t = re.sub(r"\b(\d{1,9})(?:,(\d{1,2}))?\s*(" + VIENETU_SABLONAS +
                r")(?=\s|$|[.,;:!?])", _vienetas, t)
-    # 0−b. „5 mln." yra DAUGIKLIS, ne mato vienetas. Lentelėje jis buvo
-    # užrakintas vardininku („milijonai"), tad „skirs 5 mln. eurų" virsdavo
-    # „skirs penkIS milijonAI eurų" — skaičius galininku, o milijonai ne.
-    # ⚠️ 09-04 rasta per Reginos naujienas („Ministerija skirs 5 mln. eurų" —
-    # tipiška naujienų frazė). Pavertus tikru skaičiumi, linksnį parenka ta
-    # pati `kiekinis`, kuri jau moka visus atvejus.
+    # "5 mln." is a MULTIPLIER, not a unit. In the abbreviation table it was
+    # locked to the nominative, so a sentence like "skirs 5 mln. eurų" put the
+    # number in the accusative and the millions in the nominative. Turning it
+    # into a real number lets `kiekinis` choose the case, which it already
+    # knows how to do.
     t = re.sub(r"\b(\d{1,3})\s*mln\.", lambda m: str(int(m.group(1)) * 1_000_000), t)
-    # 0−c. „tūkst." tuo pačiu principu (09-05): lentelėje jos apskritai NEBUVO,
-    # tad „skirs 5 tūkst. eurų" nueidavo į fonemizatorių kaip „penkis tūkst.
-    # eurų" — su neišplėsta santrumpa vidury frazės. Naujienose ji dažna.
+    # "tūkst." the same way. It was not in the table at all, so it reached the
+    # phonemizer unexpanded, in the middle of a phrase. It is common in news.
     t = re.sub(r"\b(\d{1,3})\s*tūkst\.", lambda m: str(int(m.group(1)) * 1000), t)
-    # ⛔ `mlrd.` SĄMONINGAI nekeičiamas: 4 mlrd. = 4 000 000 000 peržengia
-    # `kiekinis` ribą (999 999 999), tad virstų plikais skaitmenimis — blogiau
-    # nei palikta santrumpa. Lieka senajai lentelei („milijardai").
-    # ⚠️ Ir dar viena riba, žinoma: „skirs 21 mln." duoda „dvidešimt vieną
-    # milijonUS" (turėtų būti vienaskaita). Retas atvejis, paliktas sąmoningai.
-    # 0. santrumpos
+    # `mlrd.` is deliberately left alone: 4 mlrd. = 4 000 000 000 exceeds what
+    # `kiekinis` covers (999 999 999) and would come out as bare digits, which
+    # is worse than the abbreviation. It stays with the old table.
+    # Plain abbreviations
     for r, z in SANTRUMPOS:
         t = re.sub(r, z, t)
-    # 0b. RAIDINES santrumpos: 2-5 didziosios is eiles -> raidziu vardai.
-    # Tik VIEN didziosios (kad neliestu „Vilnius"), ir ne is eiles su
-    # mazosiomis (kad „ESU" sakinio pradzioje neliktu perkirstas).
+    # Letter-by-letter abbreviations: 2-5 capitals in a row -> letter names.
+    # Only if the whole run is capitals (so "Vilnius" is untouched) and not
+    # followed by lowercase (so a capitalised ordinary word at the start of a
+    # sentence is not split apart).
     t = re.sub(r"\b[A-ZĄČĘĖĮŠŲŪŽ]{2,5}\b", raidem, t)
-    # raidžių brūkšnelių valymas: dvigubi -> vienas; prieš skyrybą ir
-    # eilutės galuose -> lauk (kad neliktų „… - ." ar „- em")
+    # Clean up the hyphens: collapse doubles, and drop them before punctuation
+    # and at line edges, so nothing is left dangling.
     t = re.sub(r"(?:\s*-\s*){2,}", " - ", t)
     t = re.sub(r"\s*-\s*(?=[.,:;!?])", "", t)
     t = re.sub(r"\s*-\s*$", "", t, flags=re.MULTILINE)
     t = re.sub(r"^\s*-\s*", "", t, flags=re.MULTILINE)
-    # 0c. KAINA: „9,99 Eur" -> „devyni eurai devyniasdešimt devyni centai".
-    # Turi eiti PRIEŠ bendrą kablelio taisyklę, kitaip liktų „kablelis".
-    # (0 punkte `Eur` jau paverstas į „ eurų", tad gaudom ir tą formą.)
+    # Prices: "9,99 Eur" -> "nine euros ninety nine cents", not "nine comma
+    # ninety nine". Must run BEFORE the general decimal rule below, and it
+    # also matches the already-expanded "eurų" form from the table above.
     def _kaina(m):
         e, c = int(m.group(1)), int(m.group(2))
         pries = (m.string[:m.start()].rstrip().split() or [""])[-1].lower()
@@ -445,19 +424,17 @@ def isplesk(t):
             dalys += [kiekinis(c, f), CENTAI[2] if kilm else _skaic_forma(c, CENTAI)]
         return " ".join(dalys)
     t = re.sub(r"\b(\d+),(\d{1,2})\s*(?:Eur\b|eurų|eurai|euro|euru|€)", _kaina, t)
-    # 0d. Dešimtainis kablelis: „9,99" -> „devyni kablelis devyniasdešimt devyni".
-    # ⚠️ 09-04 (Roberto ausis, Reginos paieška): be šito „9,99 Eur" virsdavo
-    # „devyni,devyniasdešimt devyni eurų" — kablelis likdavo tarp žodžių ir
-    # skambėdavo kaip vienas suklijuotas žodis. Turi eiti PRIEŠ visas skaičių
-    # taisykles, kitaip jos abi puses apdoroja atskirai.
+    # Decimal comma: "9,99" -> "nine comma ninety nine". Without this the
+    # comma stayed between the two words and the whole thing was spoken as one
+    # glued-together word. Must run BEFORE the remaining number rules, which
+    # would otherwise process the two halves separately.
     t = re.sub(r"\b(\d+),(\d{1,2})\b",
                lambda m: f"{kiekinis(int(m.group(1)))} kablelis "
                          f"{kiekinis(int(m.group(2)))}", t)
-    # 1. HH:MM -> „penkiolika trisdešimt" (0 min -> tik valanda kelintiniu)
-    # ⚠️ 09-04 PATAISA (Roberto ausis: „skaičius valandą supasakojo be linksnių"):
-    # po „nuo"/„iki"/„ligi" lietuviškai reikia KILMININKO — „nuo aštuntos
-    # valandos", ne „nuo aštuntą valandą". Anksčiau visada buvo galininkas,
-    # todėl parduotuvės darbo laikas skambėjo negramatiškai.
+    # Clock times. A whole hour is read as an ordinal ("the fifteenth hour"),
+    # otherwise as hour + minutes. After "nuo"/"iki"/"ligi" Lithuanian needs
+    # the GENITIVE - "nuo aštuntos valandos", not "nuo aštuntą valandą" -
+    # which is what made opening hours sound ungrammatical.
     NUO_IKI = ("nuo", "iki", "ligi")
 
     def _laikas(m):
@@ -470,40 +447,41 @@ def isplesk(t):
         val = kiekinis(h, "K") if kilm else kiekinis(h)
         return val + " " + (kiekinis(mi) if mi > 9 else "nulis " + kiekinis(mi))
     t = re.sub(r"\b(\d{1,2}):(\d{2})\b", _laikas, t)
-    # 2. metai kelintiniu įnag.: 2015 metais / 2015 m.
+    # Years take an ordinal in the instrumental: "2015 metais" / "2015 m."
     t = re.sub(r"\b(1\d{3}|2\d{3})\s*(m\.|metais)\b",
                lambda m: kelintinis(int(m.group(1)), "m", "Idgs") + " metais", t)
     t = re.sub(r"\b(1\d{3}|2\d{3})\s*metų\b",
                lambda m: kelintinis(int(m.group(1)), "m", "Kdgs") + " metų", t)
     t = re.sub(r"\b(1\d{3}|2\d{3})-(ai|ų|į)?[a-zų]*\b",
                lambda m: kelintinis(int(m.group(1)), "m", "Idgs", ivardz=True), t)
-    # 3. mot. giminės galininkas: „15 valandą/vietą/klasę" -> kelintinė
+    # Feminine accusative: "15 valandą/vietą/klasę" takes an ordinal
     t = re.sub(r"\b(\d{1,3})\s+(" + MOT_ZODZIAI + r"[ąę])",
                lambda m: kelintinis(int(m.group(1)), "f", "G") + " " + m.group(2), t)
-    # 3b. vyr. kelintinis G: „23 kartą" -> „dvidešimt trečią kartą"
+    # Masculine ordinal, accusative: "23 kartą" -> "the twenty-third time"
     t = re.sub(r"\b(\d{1,3})\s+(kartą|numerį|aukštą|etapą|turą|sezoną|puslapį)\b",
                lambda m: kelintinis(int(m.group(1)), "m", "G") + " " + m.group(2), t)
-    # 4. mot. kiekiniai: „2 valandas/dienas" -> „dvi valandas"
+    # Feminine cardinals: "2 valandas/dienas" -> "dvi valandas", not "du"
     t = re.sub(r"\b(\d{1,4})\s+(" + MOT_ZODZIAI + r"(as|os|es|ių|ę))",
                lambda m: kiekinis(int(m.group(1)),
                                   "G" if m.group(2).endswith(("as", "es", "ę")) else "V",
                                   "_f") + " " + m.group(2), t)
-    # 5. galininkas po veiksmažodžio: „kainuoja 25 eurus"
+    # Accusative after a verb that governs it: "kainuoja 25 eurus"
     t = re.sub(GAL_VEIKSMAZODZIAI + r"\s+(\d{1,9})\b",
                lambda m: m.group(1) + " " + kiekinis(int(m.group(2)), "G"), t)
-    # 6. vyriškas galininkas su daiktavardžiu: „3 mėnesius/eurus/kartus"
+    # Masculine accusative before a noun: "3 mėnesius/eurus/kartus"
     t = re.sub(r"\b(\d{1,9})\s+([a-ząčęėįšųūž]+(?:us|į|ą))\b",
                lambda m: kiekinis(int(m.group(1)), "G") + " " + m.group(2), t)
-    # 6b. KILMININKINIAI PRIELINKSNIAI (09-05, RADINIAI 29c): „nuo 2000 eurų"
-    # duodavo „nuo du tūkstančiai eurų". Laikui po „nuo/iki" kilmininkas jau
-    # buvo daromas (`_laikas`), o bendram skaičiui — ne.
-    # ⛔ Sąrašas SĄMONINGAI trumpas — tik tie, po kurių kilmininkas VISADA:
-    # „po" dviprasmis („po du" prieš „po dviejų valandų"), o „už, per, prieš,
-    # apie" reikalauja galininko. Roberto nuostata ta pati kaip su vienetais:
-    # pavojingus aplenk, lai geriau keistai skamba negu primeluotų.
+    # Prepositions that govern the genitive: "nuo 2000 eurų" used to leave the
+    # number in the nominative. Clock times after "nuo/iki" were already
+    # handled; ordinary numbers were not.
+    # The list is deliberately short - only prepositions that ALWAYS take the
+    # genitive. "po" is ambiguous ("po du" vs "po dviejų valandų"), and "už,
+    # per, prieš, apie" take the accusative. Same principle as with the units
+    # above: skip the risky ones rather than be confidently wrong.
     t = re.sub(r"\b(nuo|iki|ligi|be|dėl|iš|tarp|virš|šalia|arti)\s+(\d{1,9})\b",
                lambda m: m.group(1) + " " + kiekinis(int(m.group(2)), "K"), t)
-    # 7. „minus N" temperatūrai jau natūralu; likę skaičiai -> V
+    # "minus N" already reads naturally for temperatures; anything left over
+    # becomes a plain nominative cardinal.
     t = re.sub(r"\b\d{1,9}\b", lambda m: kiekinis(int(m.group(0))), t)
     return re.sub(r"\s{2,}", " ", t)
 
