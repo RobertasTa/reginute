@@ -17,8 +17,8 @@ pipeline_tag: text-to-speech
 # lt_LT-reginute1-medium — Piper voice (Lithuanian)
 
 The first Lithuanian voice for [Piper](https://github.com/OHF-Voice/piper1-gpl).
-Latvian and Estonian have been in the Piper catalogue for a long time;
-Lithuanian never has.
+Latvian has been in the Piper catalogue since October 2024 and Estonian since
+August 2026; Lithuanian never has.
 
 - Language: Lithuanian (`lt_LT`)
 - Voice: **female** — trained on the **LIEPA** corpus of Vilnius University,

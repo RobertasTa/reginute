@@ -14,9 +14,11 @@ own machine, no network, no telemetry.
 It is trained on the **LIEPA** corpus of Vilnius University — speaker Regina
 Jokubauskaitė, studio recordings, about three hours, CC-BY-4.0.
 
-**Why it exists:** the Piper catalogue has had Latvian and Estonian for years
-and has never had a Lithuanian voice. Not because the language is hard, but
-because nobody assembled one.
+**Why it exists:** the Piper catalogue has had Latvian since October 2024 and
+Estonian since August 2026 (measured from the catalogue's commit history on
+2026-09-05), and has never had a Lithuanian voice. Not because the language is
+hard, but because nobody assembled one. Do not say "for years" about Estonian
+— an earlier draft did, and it was wrong by about two years.
 
 ## The one technical fact that explains everything else
 
