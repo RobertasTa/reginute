@@ -23,6 +23,12 @@ Fine-tuned from the Piper catalogue checkpoint `ru_RU-irina-medium`
 stated so that the base-model question (see piper-voices discussion #94) is
 visible rather than hidden.
 
+Released checkpoint: **epoch 8310, val_mel 0.3618**. The training checkpoint
+is shipped alongside the model (`lt_LT-reginute1-medium-e8310.ckpt`, 269 MB,
+optimizer state stripped) so that another Lithuanian voice can start from this
+one rather than from a Russian checkpoint. Both the generator and the
+discriminator are included, since a GAN needs both to continue training.
+
 ## Phonemization — please read
 
 This voice uses `phoneme_type: text` with a custom `phoneme_id_map`
