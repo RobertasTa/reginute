@@ -7,7 +7,7 @@
 # Paleidimas:
 #   python3 wyoming_reginute.py --model lt_LT-reginute1-medium.onnx \
 #       --config lt_LT-reginute1-medium.onnx.json --uri tcp://0.0.0.0:10250 \
-#       [--dictionary lt_kirciai.tsv] [--length-scale 1.25]
+#       [--dictionary lt_kirciai.tsv] [--length-scale 1.30]
 # Priklausomybės: pip install piper-tts wyoming
 import argparse
 import asyncio
@@ -66,7 +66,10 @@ async def main() -> None:
     p.add_argument("--config", default=None, help="numatyta: MODEL + .json")
     p.add_argument("--dictionary", default=str(DEFAULT_DICTIONARY_PATH))
     p.add_argument("--uri", default="tcp://0.0.0.0:10250")
-    p.add_argument("--length-scale", type=float, default=1.25)
+    # 09-05: buvo 1.25, nors 09-04 sutarta 1.30 VISUR. Roberto serverio tarnyba
+    # tempą nurodo aiškiai, tad ten nieko nekeičia — bet svetimas žmogus,
+    # paleidęs be argumento, būtų gavęs kitą balsą nei tas, kurį vertinom.
+    p.add_argument("--length-scale", type=float, default=1.30)
     p.add_argument("--kablelis", type=float, default=0.25, help="pauzė po kablelio, s")
     p.add_argument("--taskas", type=float, default=0.15, help="pauzė po taško, s")
     p.add_argument("--kableli-skaidyti", action="store_true",

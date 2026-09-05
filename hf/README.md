@@ -44,6 +44,14 @@ will not produce Lithuanian. A `PhonemeType.LITHUANIAN` contribution to
 piper1-gpl (in the shape of `phonemize_japanese`) is being prepared; until it
 lands, ship the two files next to the model.
 
+The phonemizer also normalizes text before phonemizing — numbers with the
+right case endings, clock times, units and letter-by-letter abbreviations
+(`skaiciu_pletiklis.py`, loaded automatically when it sits beside the module;
+pass `expand_text=None` to switch it off). This matters more than it sounds:
+left to itself, espeak-ng reads `5000 eurų` as *"penki tūkstantčei"* and
+`15:00` as *"tūkstantis penkišimtai:"*. espeak's own phonemizer normalizes
+text the same way, so this is the usual Piper arrangement, not an extra layer.
+
 Recommended: **`normalize_audio=False`** — Piper's default (`True`) clips this
 voice.
 
@@ -98,7 +106,7 @@ being told everything is fine is worse than reading them here.
 | **Individual stress errors** — confirmed: `procentas`, `kilovatvalandės` | The dictionary is derived, not hand-checked word by word; in both cases the word family disagrees with itself (`procentas` vs `procentinis`). Expect more in loanwords and compounds. |
 | **Homographs unsolved** — `nãmo` (of the house) vs `namõ` (homewards) | Spelled identically, differ only in accent. A word-level dictionary cannot choose; that needs sentence context. Not a bug we can fix by adding entries. |
 | **Needs the phonemizer** — plain `piper -m …` will not speak Lithuanian | Architectural, not a rough edge. See the section above. |
-| **`length_scale 1.25` is a judgement, not a measurement** | Chosen by ear against recordings of the original speaker. Override freely if you prefer faster. |
+| **`length_scale 1.30` is a judgement, not a measurement** | Chosen by ear against recordings of the original speaker. Measured afterwards on the same text: 1.2 % slower than her. Override freely if you prefer faster. |
 
 None of these block ordinary use: the voice reads news, answers a smart
 speaker and speaks multi-minute articles without a break. They are listed so

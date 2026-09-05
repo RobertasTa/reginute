@@ -68,9 +68,11 @@ WantedBy=multi-user.target
 Konteineris: unprivileged, 2 branduoliai, 1 GB RAM (balsas ima ~330 MB),
 4 GB diskas. `OMP_NUM_THREADS=2` — kad nesigrumtų su kitais LXC.
 
-⚠️ **Atviras klausimas:** tarnyba tempą ima iš `--length-scale 1.30` (Roberto
-ausis serveriui 09-03), o paketo `.onnx.json` sako 1.25 (kadrų receptas).
-Vieną iš jų fiksuoti kopetėlių testu prieš HF (PIPER plano 9.1).
+✅ **Tempas UŽDARYTAS: 1.30 visur** (09-04 Roberto sprendimas — jis vertino
+vieną greitį, o svetimas būtų gavęs kitą). 09-05 pataisytos ir skriptų
+numatytosios reikšmės (`sudaryk_paketa.py`, `wyoming_reginute.py`,
+`demo_piper_wheel.py` sakė 1.25) — kitaip paketas be argumento būtų tyliai
+grįžęs prie senojo tempo. Serverio tarnyboje `--length-scale 1.30` liko.
 Balso vardas paliktas `reginute1` — HA asistentė „Reginutė" jį jau naudoja;
 pervadinimas atjungtų TTS.
 

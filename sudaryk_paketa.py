@@ -13,7 +13,11 @@
 # Leisti su MOKYMO venv (jame yra piper.train eksportui):
 #   .venv\Scripts\python.exe _irankiai\piper_lt\sudaryk_paketa.py
 #   .venv\Scripts\python.exe _irankiai\piper_lt\sudaryk_paketa.py --onnx _darbal\regina_e6885.onnx
-#   .venv\Scripts\python.exe _irankiai\piper_lt\sudaryk_paketa.py --length-scale 1.25
+#   .venv\Scripts\python.exe _irankiai\piper_lt\sudaryk_paketa.py --length-scale 1.30
+#
+# ⚠️ 09-05: numatytasis tempas buvo 1.25, nors 09-04 sutarta 1.30 VISUR
+# (Robertas vertino vieną greitį, o svetimas būtų gavęs kitą). Paleidus šį
+# skriptą be argumento paketas būtų TYLIAI grįžęs prie 1.25 — ištaisyta.
 import argparse
 import glob
 import hashlib
@@ -76,8 +80,8 @@ def sha256(kelias):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--onnx", help="konkretus .onnx; be jo — geriausias pjūvis pagal val_mel")
-    p.add_argument("--length-scale", type=float, default=1.25,
-                   help="numatytasis tempas .onnx.json (kadrų receptas 1.25; galutinį fiksuoti kopetėlių testu)")
+    p.add_argument("--length-scale", type=float, default=1.30,
+                   help="numatytasis tempas .onnx.json (09-04 sprendimas: 1.30 VISUR)")
     p.add_argument("--noise-scale", type=float, default=0.667)
     p.add_argument("--noise-w", type=float, default=0.8)
     args = p.parse_args()

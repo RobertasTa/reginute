@@ -102,7 +102,7 @@ Skiriasi tik turinys, ir sąmoningai:
 |---|---|---|---|
 | `espeak.voice` | `lv` | `lt` | kalba (mums informacinis — espeak sintezėje nenaudojamas) |
 | `phoneme_type` | `espeak` | **`text`** | mūsų fonemizatorius, 167 simboliai su priegaidėmis |
-| `inference.length_scale` | `1` | **`1.25`** | ⚠️ ATVIRA: serveryje 1.30, kadruose 1.25; fiksuoti kopetėlių testu prieš pateikimą |
+| `inference.length_scale` | `1` | **`1.30`** | ✅ UŽDARYTA 09-04: vienas tempas visur (buvo 1.25 pakete / 1.30 tarnyboje). Skriptų numatytosios reikšmės pataisytos 09-05 — be to paketas būtų tyliai grįžęs prie 1.25 |
 
 ## 5. `voicefest.py` — kur jis iš tikrųjų
 
