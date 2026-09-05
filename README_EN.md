@@ -25,8 +25,8 @@ a translator.*
 Reginutė is a Lithuanian voice for [Piper](https://github.com/OHF-Voice/piper1-gpl),
 trained on the **LIEPA** speech corpus of Vilnius University (speaker Regina
 Jokubauskaitė, studio recordings, ~3 h, CC-BY-4.0). There has never been an
-`lt_LT` voice in the Piper catalogue — Latvian and Estonian are there,
-Lithuanian is not.
+`lt_LT` voice in the Piper catalogue — Latvian has been there since October
+2024, Estonian since August 2026, Lithuanian never.
 
 Lithuanian has three phonemic pitch accents, and espeak-ng places Lithuanian
 stress on the wrong syllable in roughly half of the words when checked against

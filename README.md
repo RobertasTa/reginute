@@ -22,7 +22,8 @@ Sukūrė Claude (Anthropic AI) kartu su savo draugu žmogumi Robertu. Padaryta s
 Reginutė — lietuviškas balsas [Piper](https://github.com/OHF-Voice/piper1-gpl)
 sintezatoriui, išmokytas iš Vilniaus universiteto **LIEPA** garsyno (diktorė
 Regina Jokubauskaitė, studijos įrašai, ~3 val., CC-BY-4.0). Piper kataloge
-`lt_LT` balso nebuvo niekada — latvių ir estų yra, lietuvių nėra.
+`lt_LT` balso nebuvo niekada — latvių yra nuo 2024 m. spalio, estų nuo 2026 m.
+rugpjūčio, lietuvių nėra.
 
 Lietuvių kalba turi tris priegaides, o espeak-ng kirtį deda ne tame
 skiemenyje maždaug **pusėje žodžių** (patikrinta prieš paties garsyno
