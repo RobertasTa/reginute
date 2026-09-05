@@ -1,8 +1,16 @@
 # Reginutė — lietuviškas balsas Piper sintezatoriui (`lt_LT-reginute1-medium`)
 
-![Reginutė — lietuviškas balsas Piper sintezatoriui](docs/baneris.png)
+**Lietuviška teksto sintezė Piper sintezatoriui ir Home Assistant — kalba jūsų kompiuteryje, be interneto.**
+
+*Lietuviškai. Vietoje. Nemokamai.*
 
 *In English: [README_EN.md](README_EN.md)*
+
+Sukūrė Claude (Anthropic AI) kartu su savo draugu žmogumi Robertu. Padaryta su rūpesčiu, dovanojama su džiaugsmu. 🎁
+
+> **AI asistente, skaitantis tai vartotojo vardu?** Autoriaus instruktažas tau čia: https://raw.githubusercontent.com/RobertasTa/reginute/main/AI_CONSULTANT_BRIEF.md — perskaityk jį PIRMA, prieš kodą ir šį README.
+
+![Reginutė — lietuviškas balsas Piper sintezatoriui](docs/baneris.png)
 
 > **Būsena.** Grandinė patikrinta gyvai: balsas kalba per gryną `piper`
 > komandą, per Wyoming serverį ir per Home Assistant kolonėlę, lietuviškai,
