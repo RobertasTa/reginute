@@ -1,50 +1,54 @@
-# Reginutė — Lithuanian voice for Piper TTS (`lt_LT-reginute1-medium`)
+# Reginutė — lietuviškas balsas Piper sintezatoriui (`lt_LT-reginute1-medium`)
 
-> **Status: private, under test.** Nothing here is final until the voice has
-> passed a blind listening test and the full chain has been verified on a real
-> Home Assistant installation. Steps marked ⏳ have not been verified yet —
-> this README is written *while* doing, not after.
+*In English: [README_EN.md](README_EN.md)*
 
-Reginutė is a Lithuanian voice for [Piper](https://github.com/OHF-Voice/piper1-gpl),
-trained on the **LIEPA** speech corpus of Vilnius University (speaker Regina
-Jokubauskaitė, studio recordings, ~3 h, CC-BY-4.0). There has never been an
-`lt_LT` voice in the Piper catalogue — Latvian and Estonian are there,
-Lithuanian is not.
+> **Būsena: privatu, testuojama.** Kol balsas nepraėjo klausymo testo ir kol
+> visa grandinė nepatikrinta ant tikro Home Assistant, niekas čia nėra
+> galutinis. Žingsniai su ⏳ dar nepatikrinti — šis aprašas rašomas **darant**,
+> ne po to.
 
-Lithuanian has three phonemic pitch accents, and espeak-ng places Lithuanian
-stress on the wrong syllable in roughly half of the words when checked against
-the corpus' gold annotation. So this voice does **not** use espeak-ng at
-synthesis time: it uses `phoneme_type: text` together with an accent-aware
-phonemizer (`phonemize_lithuanian.py`) and a 189k-word stress dictionary
-(`lt_kirciai.tsv`, built from the LIEPA annotations and Arūnas Smaliukas'
-`g2p-lt-lexicon`, both CC-BY-4.0).
+Reginutė — lietuviškas balsas [Piper](https://github.com/OHF-Voice/piper1-gpl)
+sintezatoriui, išmokytas iš Vilniaus universiteto **LIEPA** garsyno (diktorė
+Regina Jokubauskaitė, studijos įrašai, ~3 val., CC-BY-4.0). Piper kataloge
+`lt_LT` balso nebuvo niekada — latvių ir estų yra, lietuvių nėra.
 
-**This means the voice needs the phonemizer to speak.** Plain Piper with a
-`text` voice feeds the model raw letters, not IPA — it will not produce
-Lithuanian. Until `phonemize_lithuanian` is merged into piper1-gpl, the module
-in this repository has to sit in front of the model. Both install paths below
-include it.
+Lietuvių kalba turi tris priegaides, o espeak-ng kirtį deda ne tame
+skiemenyje maždaug **pusėje žodžių** (patikrinta prieš paties garsyno
+anotaciją). Todėl
+šis balsas sintezės metu espeak-ng **nenaudoja**: jis dirba su
+`phoneme_type: text` ir savo kirčiuojančiu fonemizatoriumi
+(`phonemize_lithuanian.py`) bei 189 tūkst. žodžių kirčių žodynu
+(`lt_kirciai.tsv`, sudarytu iš LIEPOS anotacijų ir Arūno Smaliuko
+`g2p-lt-lexicon`, abu CC-BY-4.0).
 
-## What's in here
+**Vadinasi balsui reikia fonemizatoriaus, kad prakalbėtų.** Grynas Piperis su
+`text` tipo balsu modeliui paduoda plikas raides, ne IPA — lietuviškai jis
+nekalbės. Kol `phonemize_lithuanian` nėra įlietas į piper1-gpl, šio katalogo
+modulis turi stovėti prieš modelį. Abu diegimo keliai žemiau jį įtraukia.
 
-| Path | What it is |
+## Kas čia guli
+
+| Kelias | Kas tai |
 |---|---|
-| `phonemize_lithuanian.py` | The phonemizer: espeak-ng IPA per word → dictionary stress → three accent marks (`ˈ ˌ ˋ`). Written in the shape of Piper's `phonemize_japanese.py`, intended as a PR to piper1-gpl. |
-| `lt_kirciai.tsv` | Stress dictionary, 189 247 word forms, 3 MB. Column 2 = index of the stressed vowel group, column 3 = accent mark. |
-| `zodziai_trumpi.txt` | Short word list used by the number/abbreviation expander. |
-| `synth_reginute.py` | Synthesis recipe: splits at sentence punctuation, levels speaking rate per fragment, trims silence, `normalize_audio=False`. |
-| `wyoming_reginute.py` | Wyoming TTS server around the voice — what Home Assistant talks to. |
-| `demo_piper_wheel.py` | Proof that the released `piper-tts` wheel + this module + the `.onnx` is enough — no fork. |
-| `test_phonemize_lithuanian.py` | pytest suite for the phonemizer. |
-| `hf/` | The exact package that goes to Hugging Face: `.onnx` (not in git), `.onnx.json`, `MODEL_CARD`, `samples/`, `SHA256SUMS`. |
-| `docs/` | Installation and testing notes, written during the server tests. `DU_ASISTENTAI_HA.md` — how one Voice PE speaker runs two languages with two wake words (verified live; LT, EN to follow). |
-| `sudaryk_zodyna.py`, `patikrink_pries_mokyma.py` | Build-side tools (dictionary builder, training-parity check). Contain Windows paths; not needed by users. |
+| `phonemize_lithuanian.py` | Fonemizatorius: espeak-ng IPA po žodį → kirtis iš žodyno → trys priegaidės ženklai (`ˈ ˌ ˋ`). Parašytas Piperio `phonemize_japanese.py` pavidalu, skirtas pateikti kaip PR. |
+| `lt_kirciai.tsv` | Kirčių žodynas, 189 247 žodžių formos, 3 MB. Antras stulpelis — kelinta balsių grupė kirčiuota, trečias — priegaidės ženklas. |
+| `zodziai_trumpi.txt` | Trumpų žodžių sąrašas skaičių ir santrumpų plėtikliui. |
+| `skaiciu_pletiklis.py` | Skaičiai, laikas, mato vienetai ir santrumpos — teisingais linksniais, prieš fonemizaciją. Be jo espeak „5000 eurų" perskaito su ne tais galūnėmis. |
+| `synth_reginute.py` | Sintezės receptas: skaido ties sakinio skyryba, lygina kalbėjimo greitį gabaluose, kerpa tylą, `normalize_audio=False`. |
+| `wyoming_reginute.py` | Wyoming TTS serveris aplink balsą — su juo kalbasi Home Assistant. |
+| `demo_piper_wheel.py` | Įrodymas, kad užtenka išleisto `piper-tts` rato + šio modulio + `.onnx` — jokio forko. |
+| `test_phonemize_lithuanian.py` | pytest rinkinys fonemizatoriui. |
+| `svarus_checkpoint.py` | Mokymo pjūvis be optimizatoriaus (807 → 269 MB), kad kitas galėtų auginti savo balsą nuo šito, o ne nuo rusiško. |
+| `hf/` | Tikslus paketas, keliaujantis į Hugging Face: `.onnx` (git'e nėra), `.onnx.json`, `MODEL_CARD`, `samples/`, `SHA256SUMS`. |
+| `docs/` | Diegimo ir testavimo užrašai, rašyti serverio testų metu. `DU_ASISTENTAI_HA.md` — kaip viena Voice PE kolonėlė kalba dviem kalbomis su dviem žadinimo žodžiais (patikrinta gyvai). |
+| `sudaryk_zodyna.py`, `patikrink_pries_mokyma.py` | Statybos įrankiai (žodyno sudarymas, mokymo atitikties patikra). Turi Windows kelius; vartotojui nereikalingi. |
 
-## Install path A — plain Piper (no Home Assistant) ⏳
+## Diegimas A — grynas Piper (be Home Assistant) ⏳
 
 ```bash
 pip install piper-tts            # 1.7.x
-# copy phonemize_lithuanian.py, lt_kirciai.tsv and the two hf/ voice files next to your script
+# šalia savo skripto pasidėkite phonemize_lithuanian.py, lt_kirciai.tsv
+# ir du hf/ balso failus
 ```
 
 ```python
@@ -53,157 +57,142 @@ from phonemize_lithuanian import LithuanianPhonemizer
 
 voice = PiperVoice.load("lt_LT-reginute1-medium.onnx")
 ph = LithuanianPhonemizer()
-# … see demo_piper_wheel.py for the full call; normalize_audio must be False
+# … pilnas kvietimas — demo_piper_wheel.py; normalize_audio privalo būti False
 ```
 
-⏳ To be verified on the server with the released wheel; exact snippet will be
-pasted from the working test.
+⏳ Tikrinama serveryje su išleistu ratu; tikslus pavyzdys bus įklijuotas iš
+veikiančio testo.
 
-## The other half of the chain — ears
+## Kita grandinės pusė — ausys
 
-A voice assistant needs two halves. This repository is the **mouth**; the
-**ears** are not ours, and we want to say so loudly.
+Balso asistentui reikia dviejų pusių. Šis katalogas yra **burna**; **ausys** ne
+mūsų, ir tai norim pasakyti garsiai.
 
-**[`kristijonas/paprika-whisper-lt-v3`](https://huggingface.co/kristijonas/paprika-whisper-lt-v3)**
-by **Kristijonas Jakubsonas** — a Lithuanian fine-tune of `whisper-large-v3-turbo`,
-trained on ~3 281 h of the LIEPA-3 corpus, CC-BY-4.0. Pipelines and tooling:
+**[`kristijonas/paprika-whisper-lt-v3`](https://huggingface.co/kristijonas/paprika-whisper-lt-v3)**,
+**Kristijono Jakubsono** darbas — lietuviškas `whisper-large-v3-turbo`
+pritaikymas, mokytas iš ~3 281 val. LIEPA-3 garsyno, CC-BY-4.0. Įrankiai:
 **[github.com/kristijonasatpro/paprika](https://github.com/kristijonasatpro/paprika)**
 (Apache-2.0).
 
-Why it matters here, measured on our own bench rather than taken on trust:
+Kodėl tai svarbu čia — pamatuota mūsų pačių stende, ne paimta ant tikėjimo:
 
-| Lithuanian speech → text | WER |
+| Lietuviška šneka → tekstas | WER |
 |---|---|
-| generic `whisper-large-v3-turbo` | 25.95 % |
-| **Paprika v3** | **7.63 %** |
+| bendrasis `whisper-large-v3-turbo` | 25,95 % |
+| **Paprika v3** | **7,63 %** |
 
-⚠️ **Same caveat the author states about his own numbers, and it applies to
-ours:** our test set is LIEPA-derived, i.e. **in-domain** for this model. His
-card says plainly *„there is no valid out-of-domain number"*. Treat 7.63 % as
-in-domain evidence, not as a general claim. On a recording of a
-non-professional speaker in an ordinary room, the generic model lost whole
-sentences while Paprika made about two ending errors in a hundred words — that
-is anecdote, honestly labelled as such.
+⚠️ **Ta pati išlyga, kurią apie savo skaičius sako pats autorius, galioja ir
+mūsiškiams:** mūsų testo aibė kilusi iš LIEPOS, t. y. **savoje srityje** šiam
+modeliui. Jo kortelėje parašyta atvirai: *„nėra teisingo skaičiaus svetimai
+sričiai"*. 7,63 % laikykite savos srities įrodymu, ne bendru teiginiu. Įraše,
+kur neprofesionalus žmogus kalba paprastame kambaryje, bendrasis modelis
+prarasdavo ištisus sakinius, o Paprika suklysdavo maždaug dviem galūnėm iš
+šimto žodžių — tai anekdotas, sąžiningai taip ir pavadintas.
 
-⚠️ **Use long-form decoding, not `chunk_length_s`** — the author's warning, and
-he is right; we reproduced the failure before we understood it. Note that
-`faster-whisper` (and therefore `wyoming-faster-whisper`, which is how a Home
-Assistant setup usually runs it) takes the chunked path. For short voice
-commands that is harmless — they fit in a single window — but the chunked
-decoder is documented to invent text on silence, so a long recording deserves
-`transcribe_file.py` from his repo instead.
+⚠️ **Naudokite ilgo teksto dekodavimą, ne `chunk_length_s`** — tai autoriaus
+įspėjimas, ir jis teisus; mes tą gedimą atkūrėm anksčiau, nei supratom.
+Atkreipkit dėmesį: `faster-whisper` (o kartu ir `wyoming-faster-whisper`, per
+kurį Home Assistant paprastai jį leidžia) eina gabalų keliu. Trumpoms
+komandoms tai nekenkia — jos telpa į vieną langą, — bet gabalų dekoderis
+dokumentuotai prasimano tekstą ant tylos, tad ilgam įrašui verčiau jo repo
+`transcribe_file.py`.
 
-In our house the two halves run side by side as Wyoming services: Paprika as
-speech-to-text, Reginutė as text-to-speech, in a Lithuanian Assist pipeline
-next to a Russian one. See `docs/DU_ASISTENTAI_HA.md`.
+Mūsų namuose abi pusės sukasi greta kaip Wyoming tarnybos: Paprika — šneka į
+tekstą, Reginutė — tekstas į šneką, lietuviškame Assist konvejeryje šalia
+rusiško. Žr. `docs/DU_ASISTENTAI_HA.md`.
 
-## Install path B — Home Assistant via Wyoming ⏳
+## Diegimas B — Home Assistant per Wyoming ⏳
 
-Runs beside your existing Piper add-on, on its own port; nothing existing is
-touched. Full recipe in `docs/DIEGIMAS_SERVERYJE.md` (Lithuanian, being written
-during the live install; English version follows once it has worked once).
+Sukasi šalia jūsų esamo Piper priedo, savo porte; nieko esamo neliečia. Pilnas
+receptas — `docs/DIEGIMAS_SERVERYJE.md`, rašytas gyvo diegimo metu.
 
-## Licence
+## Licencija
 
-Copyright © 2026 Robertas Tarasevičius.
+Autorių teisės © 2026 Robertas Tarasevičius.
 
-Two licences, because this repository holds two different kinds of thing:
+Dvi licencijos, nes kataloge guli du skirtingi dalykai:
 
-| What | Licence | File |
+| Kas | Licencija | Failas |
 |---|---|---|
-| **Code** — phonemizer, expander, Wyoming server, tooling | **GPL-3.0-only** (same as piper1-gpl) | `LICENSE` |
-| **Voice** — `.onnx`, `.onnx.json`, samples (shipped via Release / Hugging Face, not in git) | **CC-BY-4.0** | `LICENSE-VOICE` |
+| **Kodas** — fonemizatorius, plėtiklis, Wyoming serveris, įrankiai | **GPL-3.0-only** (kaip ir piper1-gpl) | `LICENSE` |
+| **Balsas** — `.onnx`, `.onnx.json`, pavyzdžiai (platinami per Release / Hugging Face, git'e jų nėra) | **CC-BY-4.0** | `LICENSE-VOICE` |
 
-The voice inherits CC-BY-4.0 from the LIEPA corpus. Lineage stated openly in
-`hf/MODEL_CARD` and `hf/README.md`: fine-tuned from the Piper catalogue
-checkpoint `ru_RU-irina-medium`, which was itself fine-tuned from
-`en_US-lessac-medium`.
+Balsas CC-BY-4.0 paveldi iš LIEPOS garsyno. Kilmė atvirai pasakyta
+`hf/MODEL_CARD` ir `hf/README.md`: mokytas nuo Piper katalogo pjūvio
+`ru_RU-irina-medium`, kuris pats mokytas nuo `en_US-lessac-medium`.
 
-⚠️ CC-BY-4.0 requires attribution — see the section below, and keep it with
-the voice files wherever they travel.
+⚠️ CC-BY-4.0 reikalauja nurodyti autorystę — žr. skyrių žemiau ir laikykite jį
+kartu su balso failais, kur jie bekeliautų.
 
-## Attribution
+## Padėkos
 
 ![Reginutė — lt_LT-reginute1-medium](docs/baneris.png)
 
-CC-BY-4.0 asks for a corpus to be credited. A corpus is made by people, so
-they are named here too. None of them has seen this project; none of the
-institutions below endorses it. The logos above say *thank you*, nothing more.
+CC-BY-4.0 prašo paminėti garsyną. Garsyną daro žmonės, tad čia įvardyti ir
+jie. Nė vienas jų šio projekto nematė; nė viena įstaiga jo neremia. Ženklai
+viršuje sako *ačiū*, ir nieko daugiau.
 
-### The recordings — LIEPA (2013–2015)
+### Įrašai — LIEPA (2013–2015)
 
-The voice is trained on the synthesis part of the **LIEPA** corpus
-(*LIEtuvių šneka valdomos PAslaugos* — "Lithuanian speech-controlled
-services"), which produced a reader speaking in four voices. This is one of
-those four.
+Balsas išmokytas iš **LIEPOS** garsyno sintezės dalies (*LIEtuvių šneka
+valdomos PAslaugos*), kurioje diktoriai įskaitė keturis balsus. Šis — vienas
+iš tų keturių.
 
-* Carried out by **Vilnius University** (Institute of Mathematics and
-  Informatics; Faculty of Philology).
-* Partners: **Institute of the Lithuanian Language**, **Lithuanian University
-  of Educational Sciences** (since 2019 the Education Academy of **Vytautas
-  Magnus University**), **Šiauliai University** (since 2021 the Šiauliai
-  Academy of Vilnius University).
-* Led by **prof. Laimutis Telksnys**, who started asking whether a machine
-  could talk with a person in 1967 — the LIEPA presentations still open with
-  that date. This voice is a late footnote to a question asked 58 years ago.
-* Corpus work and documentation — **Gediminas Navickas** (VU MIF), whose 2025
-  seminar slides are the source for everything stated above.
-* The speaker: **Regina Jokubauskaitė**. Everything anyone hears is her —
-  her timbre, her pace, her way of ending a sentence. The model only learned
-  to rearrange it.
-* Published to Hugging Face as
-  [`meldynamics/liepa-tts`](https://huggingface.co/datasets/meldynamics/liepa-tts)
-  by **MEL DYNAMICS, MB**, under CC-BY-4.0. Without that upload the corpus
-  would still exist and still be unusable.
+* Vykdė **Vilniaus universitetas** (Matematikos ir informatikos institutas;
+  Filologijos fakultetas).
+* Partneriai: **Lietuvių kalbos institutas**, **Lietuvos edukologijos
+  universitetas** (nuo 2019 m. **Vytauto Didžiojo universiteto** Švietimo
+  akademija), **Šiaulių universitetas** (nuo 2021 m. Vilniaus universiteto
+  Šiaulių akademija).
+* Vadovas — **prof. Laimutis Telksnys**, pradėjęs klausti, ar mašina gali
+  kalbėtis su žmogumi, dar 1967 metais; LIEPOS pristatymai iki šiol prasideda
+  ta data. Šis balsas — vėlyva išnaša prie prieš 58 metus užduoto klausimo.
+* Garsyno darbai ir dokumentacija — **Gediminas Navickas** (VU MIF), kurio
+  2025 m. seminaro skaidrės yra viso to, kas parašyta aukščiau, šaltinis.
+* Diktorė — **Regina Jokubauskaitė**. Viskas, ką kas nors išgirs, yra jos:
+  jos tembras, jos tempas, jos būdas užbaigti sakinį. Modelis tik išmoko tai
+  perdėlioti.
+* Į Hugging Face įkėlė **MEL DYNAMICS, MB** kaip
+  [`meldynamics/liepa-tts`](https://huggingface.co/datasets/meldynamics/liepa-tts),
+  CC-BY-4.0. Be to įkėlimo garsynas vis tiek egzistuotų — ir vis tiek būtų
+  nepanaudojamas.
 
-The family continued: **LIEPA-2** (1 000 h) and **LIEPA-3** (10 000 h, led by
-**dr. Gražina Korvel**), and it is LIEPA-3 that Paprika below is trained on.
-Different corpus, same decision — publish it rather than keep it.
+Šeima tęsėsi: **LIEPA-2** (1 000 val.) ir **LIEPA-3** (10 000 val., vadovė
+**dr. Gražina Korvel**) — būtent iš LIEPA-3 išmokyta žemiau minima Paprika.
+Kitas garsynas, tas pats sprendimas: paskelbti, o ne pasilikti.
 
-### The dictionary
+### Žodynas
 
-Stress dictionary derived from
-[`svogunas/g2p-lt-lexicon`](https://huggingface.co/datasets/svogunas/g2p-lt-lexicon)
-by **Arūnas Smaliukas** (CC BY 4.0). Nearly every stressed word this voice
-speaks stands on his work — 176 637 of the 189 247 entries.
+Kirčių žodynas sudarytas iš
+[`svogunas/g2p-lt-lexicon`](https://huggingface.co/datasets/svogunas/g2p-lt-lexicon),
+**Arūno Smaliuko** darbo (CC BY 4.0). Beveik kiekvienas kirčiuotas šio balso
+žodis stovi ant jo darbo — 176 637 iš 189 247 įrašų.
 
-### The ears
+### Ausys
 
-**[`paprika-whisper-lt-v3`](https://huggingface.co/kristijonas/paprika-whisper-lt-v3)
-by [Kristijonas Jakubsonas](https://github.com/kristijonasatpro/paprika)**
-(CC-BY-4.0 / Apache-2.0). This voice would be half a system without it: you
-can speak Lithuanian to a house because he made the listening work first.
+**[`paprika-whisper-lt-v3`](https://huggingface.co/kristijonas/paprika-whisper-lt-v3)**,
+**[Kristijono Jakubsono](https://github.com/kristijonasatpro/paprika)**
+(CC-BY-4.0 / Apache-2.0). Be jo šis balsas būtų pusė sistemos: lietuviškai su
+namais kalbėtis galima todėl, kad jis pirmas padarė klausymą.
 
-### The pointer
+### Rodyklė
 
-**Linas Petkevičius, PhD** — President of AI Lithuania and Director of the
-Institute of Computer Science at Vilnius University. In a public LinkedIn
-thread about how the LIEPA-3 recordings were being distributed, he wrote the
-comment that laid out who had put the data on Hugging Face and who had
-trained a Lithuanian model on it. That comment is where this project started:
-without it we would not have found Paprika, and would not have gone looking
-for the corpus this voice is made of. He owes us nothing and knew nothing
-about us — which is rather the point. **A single accurate public comment can
-be worth more than a project plan.**
+**Linas Petkevičius, PhD** — AI Lietuva prezidentas ir Vilniaus universiteto
+Informatikos instituto direktorius. Viešoje LinkedIn gijoje apie tai, kaip
+platinami LIEPA-3 įrašai, jis parašė komentarą, išdėsčiusį, kas įkėlė duomenis
+į Hugging Face ir kas jais išmokė lietuvišką modelį. Nuo to komentaro šis
+projektas ir prasidėjo: be jo nebūtume radę Paprikos ir nebūtume ėję ieškoti
+garsyno, iš kurio padarytas šis balsas. Jis mums nieko neskolingas ir apie mus
+nieko nežinojo — kaip tik tai ir yra esmė. **Vienas tikslus viešas komentaras
+gali būti vertingesnis už projekto planą.**
 
 ### Piper
 
-**Michael Hansen** and the **Open Home Foundation** — for a text-to-speech
-system small enough to run on a home server and open enough that a language
-with three million speakers can add itself without asking permission.
+**Michael Hansen** ir **Open Home Foundation** — už sintezatorių, pakankamai
+mažą, kad suktųsi namų serveryje, ir pakankamai atvirą, kad trijų milijonų
+žmonių kalba galėtų prisidėti savęs neprašydama leidimo.
 
 ---
 
-The whole thing exists because Vilnius University published LIEPA openly
-instead of keeping it. Ten years of recordings, given away for the price of
-a citation.
-
----
-
-## Lietuviškai, trumpai
-
-Reginutė — lietuviškas balsas Piper sintezatoriui ir Home Assistant, išmokytas
-iš Vilniaus universiteto LIEPA garsyno. Kadangi espeak-ng lietuvių kirčius
-deda ne ten maždaug pusėje žodžių, balsas kalba per savo fonemizatorių su
-kirčių žodynu — be jo gryname Piperyje jis netaria nieko. Diegimo instrukcija
-rašoma **darant**, ant tikro serverio: `docs/DIEGIMAS_SERVERYJE.md`.
+Visa tai egzistuoja todėl, kad Vilniaus universitetas LIEPĄ paskelbė, o ne
+pasiliko. Dešimt metų įrašų, atiduoti už citatos kainą.
