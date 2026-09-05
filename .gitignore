@@ -9,6 +9,12 @@ __pycache__/
 # Modelio svoriai NE git'e: 60 MB, kiekvienas pakeitimas išpūstų istoriją.
 # Platinami per GitHub Release ir HF repo. SHA256 — hf/SHA256SUMS.
 hf/*.onnx
+# 09-05: ir mokymo pjūvis (269 MB, `svarus_checkpoint.py`) — tas pats
+# argumentas, tik keturis kartus svaresnis. Jis irgi eina į HF, ne į git.
+hf/*.ckpt
+
+# Atsarginės kopijos prieš keitimus — darbinės, ne dovanos dalis
+*.pries_*
 
 # Vietiniai bandymai
 _bandymai/
