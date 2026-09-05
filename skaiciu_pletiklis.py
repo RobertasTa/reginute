@@ -55,11 +55,25 @@ DESIMT_K = {10: "dešimties", 20: "dvidešimties", 30: "trisdešimties",
             80: "aštuoniasdešimties", 90: "devyniasdešimties"}
 
 
+# ⚠️ 09-05: „tūkstantis" yra i-kamienas su t→č kaita, ir bendrinė galūnių
+# logika jam netinka — ji davė „tūkstantiį", „tūkstantio", „tūkstantu"
+# („kainuoja 1000 eurų" -> „tūkstantiį eurų"). Aiškios formos:
+TUKSTANTIS_VNS = {"V": "tūkstantis", "G": "tūkstantį",
+                  "K": "tūkstančio", "I": "tūkstančiu"}
+
+
 def _grupe(zodis_vns, zodis_dgs, zodis_kilm, n, forma):
     """šimtas/tūkstantis/milijonas grupės žodis pagal kiekį ir linksnį."""
+    # ⚠️ 09-05: vienaskaitos reikalauja ne tik 1, bet ir 21, 31 … 91
+    # („dvidešimt vienas tūkstantis", ne „tūkstančiai"). Ta pati riba buvo
+    # žinoma ir milijonuose („skirs 21 mln." davė „dvidešimt vieną milijonUS")
+    # — uždarom abu vienoje vietoje. 11 — išimtis (vienuolika tūkstančių).
+    vienas = (n % 10 == 1 and n % 100 != 11)
+    if vienas and zodis_vns == "tūkstantis":
+        return TUKSTANTIS_VNS.get(forma, zodis_vns)
     if forma == "K":
-        return zodis_kilm if n != 1 else zodis_vns[:-2] + ("o" if zodis_vns.endswith("as") else "io")
-    if n == 1:
+        return zodis_kilm if not vienas else zodis_vns[:-2] + ("o" if zodis_vns.endswith("as") else "io")
+    if vienas:
         return {"V": zodis_vns, "G": zodis_vns[:-1] + "į" if zodis_vns.endswith("is")
                 else zodis_vns[:-2] + "ą", "I": zodis_vns[:-2] + "u"}.get(forma, zodis_vns)
     # 2-9 -> dgs; 10-19/dešimtys -> kilmininkas
@@ -107,16 +121,39 @@ def kiekinis(n, forma="V", gimine=""):
 
     if n >= 1_000_000:
         mln = n // 1_000_000
+        # ⚠️ 09-04 (rasta Reginos naujienose): daugiklis prieš „milijonus" buvo
+        # užrakintas vardininku, tad „skirs 5 mln." duodavo „penkI milijonUS".
+        # Ta pati klaida, kaip šįryt su šimtais — daugiklis turi derintis su
+        # linksniu. Kilmininke ir toliau lieka „V" (penki milijonai eurų).
+        # 09-05: „K" pridėtas kartu su tūkstančiais — „nuo 5 mln. eurų" davė
+        # „nuo penki milijonų". 09-04 komentaras apie kilmininką galiojo, kol
+        # tikro kilmininko kelio nebuvo.
+        mln_f = forma if forma in ("G", "I", "K") else "V"
         if mln > 1:
-            dalys += trejetas(mln, "V")
-        dalys.append(_grupe("milijonas", "milijonai", "milijonų", mln, forma if n % 1_000_000 == 0 else "V"))
+            dalys += trejetas(mln, mln_f)
+        dalys.append(_grupe("milijonas", "milijonai", "milijonų", mln, forma))
         n %= 1_000_000
     if n >= 1000:
         t = n // 1000
+        # ⚠️ 09-05 (plano punktas „tūkstančių daugiklis"): ta pati klaida, kaip
+        # šįryt su šimtais ir vakar su milijonais — daugiklis prieš
+        # „tūkstančius" buvo užrakintas vardininku, tad „skirs 5000 eurų"
+        # duodavo „penkI tūkstančius", o „gavo 3000" — „trys tūkstančius".
+        # Sąlyga ta pati, kaip milijonuose (žr. žemiau).
+        # ⚠️ 09-05 antras ratas: „K" į sąlygą įrašytas TIK dabar, kai atsirado
+        # 6b punktas (kilmininkiniai prielinksniai). Iki tol kilmininkas per
+        # `isplesk` buvo nepasiekiamas, ir riba buvo palikta sąmoningai — o
+        # atsiradus keliui ji iškart pasirodė kaip „nuo du tūkstančių eurų".
+        # ⚠️ 09-05 trečias ratas: sąlyga buvo `n % 1000 == 0`, t. y. tūkstančiai
+        # derinosi TIK kai jie paskutinis dėmuo. Todėl „nuo 3500 eurų" duodavo
+        # „nuo trys tūkstančiai penkių šimtų" — lietuviškai skirtingos grupės
+        # (tūkstančiai + šimtai) linksniuojamos VISOS. Tai ne tas pats, kas
+        # 28a taisyklė: ten dešimtys ir vienetai VIENOJE grupėje („devyniasdešimt
+        # devynių"), o čia dvi atskiros grupės.
+        tukst_f = forma if forma in ("G", "I", "K") else "V"
         if t > 1:
-            dalys += trejetas(t, "V")
-        dalys.append(_grupe("tūkstantis", "tūkstančiai", "tūkstančių", t,
-                            forma if n % 1000 == 0 else "V"))
+            dalys += trejetas(t, tukst_f)
+        dalys.append(_grupe("tūkstantis", "tūkstančiai", "tūkstančių", t, forma))
         n %= 1000
     if n:
         dalys += trejetas(n, forma)
@@ -191,6 +228,12 @@ RAIDZIU_VARDAI = {
 SANTRUMPOS_ZODZIU = {
     "NATO", "UNESCO", "UNICEF", "SODRA", "LIEPA", "COVID", "AIDS", "LED",
     "PIN", "WIFI", "USB", "PDF", "GPS", "JAV", "FIBA", "NASA", "DELFI",
+    # ⭐ 09-05 Roberto ausis: „girdžiu vė em i, o turėčiau girdėti vmi" ir
+    # „VMI taip dėk į išimčių žurnalą". Antra išimtis po JAV, ir abi rastos
+    # tuo pačiu būdu — ne taisykle, o klausantis. Skaidymas raidėmis lieka
+    # numatytas visiems kitiems (LIEPA tekstuose „E ES", „EN EM A"), o čia
+    # trumpinys jau suaugęs į vieną žodį.
+    "VMI",
 }
 
 
@@ -256,7 +299,18 @@ def raidem(m):
     # atkūrimą, o kolonėlė kalba ŽMOGUI. Roberto ausis ir radijo diktoriaus
     # maniera: „VMI su mažom pauzelėm tarp raidžių gaunasi geriau".
     # ⇒ žmogaus aiškumas viršesnis; pauzė 0,10 s (`synth_reginute.pauze["-"]`).
-    return " - " + " - ".join(RAIDZIU_VARDAI.get(c, c) for c in s) + " - "
+    #
+    # ⭐⭐ 09-05, PENKTAS RATAS — pauzės NUIMAMOS IŠ VIDAUS, paliekamos IŠ ŠONŲ.
+    # Roberto palyginimas: A (pauzelės tarp raidžių) — „taip negerai";
+    # B (be pauzelių) — „santrumpa gerai, tik visas tekstas kaip žirniai į
+    # sieną". Antroji pastaba buvo apie VISĄ tekstą, ne apie trumpinį: išėmus
+    # brūkšnelius sakinys tapdavo VIENU gabalu, o greičio išlyginimas dirba per
+    # gabalus — tad skubėjo kalba, ne santrumpa.
+    # ⇒ Raidės jungiamos TARPAIS (skamba sulietai, kaip B), o brūkšneliai lieka
+    # tik iš šonų: taip santrumpa vis tiek atskiriamas gabalas, `synth_reginute`
+    # ją atpažįsta (pries/zenklas == "-") ir taria LĖČIAU
+    # (`SANTRUMPOS_LETUMAS` 1.15 — Roberto pasirinktas iš 1.0/1.15/1.30).
+    return " - " + " ".join(RAIDZIU_VARDAI.get(c, c) for c in s) + " - "
 
 
 # Lietuviškas skaitvardžio ir daiktavardžio derinimas (vns. / dgs. / kilm.):
@@ -300,6 +354,14 @@ def _skaic_forma(n, formos):
     return formos[1]
 
 
+# „el. paštas" linksniai (žr. `isplesk` 0−− punktą). Visos formos, išskyrus
+# „elektroniniams", yra kirčių žodyne — kirtis ateina iš jo, ne iš espeak.
+EL_PASTAS = {"paštas": "elektroninis", "paštu": "elektroniniu",
+             "pašto": "elektroninio", "paštą": "elektroninį",
+             "pašte": "elektroniniame", "paštai": "elektroniniai",
+             "paštus": "elektroninius", "paštų": "elektroninių",
+             "paštais": "elektroniniais", "paštams": "elektroniniams"}
+
 MOT_ZODZIAI = r"(valand|dien|minut|savait|sekund|viet|klas|kart(?!ą))"
 GAL_VEIKSMAZODZIAI = r"(kainuoja|kainavo|moka|mokėjo|sumokėjo|gavo|gaus|" \
                      r"turi|turėjo|siekia|siekė|sudaro|sudarė|uždirba|uždirbo|" \
@@ -307,6 +369,18 @@ GAL_VEIKSMAZODZIAI = r"(kainuoja|kainavo|moka|mokėjo|sumokėjo|gavo|gaus|" \
 
 
 def isplesk(t):
+    # 0−−. „el. paštu" -> „elektroniniu paštu" (Roberto ausis 09-05: „el kai ji
+    # tarė girdisi kaip al"). Pamatuota: espeak „el." išplečia į VARDININKĄ ir
+    # dar palieka tašką, tad bet koks linksnis skambėdavo „elektroninIS. paštu"
+    # — negramatiškai ir su pauze vidury frazės (`ˋeɭektronʲinʲis. paʃˋtu`).
+    # ⭐ Forma paimta ne iš galvos: Regina mokymo įraše pati sako „faksu ar
+    # elektroniniu paštu" (`_duomenys\regina\metadata.csv`) — modelis tą junginį
+    # girdėjo. Būdvardį deriname pagal paties daiktavardžio galūnę.
+    def _el_pastas(m):
+        vnt = m.group(2)
+        zodis = EL_PASTAS.get(vnt.lower(), "elektroninis")
+        return (zodis.capitalize() if m.group(1)[0].isupper() else zodis) + " " + vnt
+    t = re.sub(r"\b([Ee]l)\.\s*(pašt[a-ząčęėįšųūž]*)", _el_pastas, t)
     # 0−. MATO VIENETAI SU SKAIČIUMI — derinam su skaičiumi.
     # ⚠️ 09-04 (Roberto ausis: „Jarvis-Reginutė skaičius sako blogai"): lentelėje
     # `km` visada virsdavo „kilometrų", tad „12 km" skambėdavo teisingai, o
@@ -329,6 +403,22 @@ def isplesk(t):
         return f"{skaic} {_skaic_forma(n, formos)}{galas}"
     t = re.sub(r"\b(\d{1,9})(?:,(\d{1,2}))?\s*(" + VIENETU_SABLONAS +
                r")(?=\s|$|[.,;:!?])", _vienetas, t)
+    # 0−b. „5 mln." yra DAUGIKLIS, ne mato vienetas. Lentelėje jis buvo
+    # užrakintas vardininku („milijonai"), tad „skirs 5 mln. eurų" virsdavo
+    # „skirs penkIS milijonAI eurų" — skaičius galininku, o milijonai ne.
+    # ⚠️ 09-04 rasta per Reginos naujienas („Ministerija skirs 5 mln. eurų" —
+    # tipiška naujienų frazė). Pavertus tikru skaičiumi, linksnį parenka ta
+    # pati `kiekinis`, kuri jau moka visus atvejus.
+    t = re.sub(r"\b(\d{1,3})\s*mln\.", lambda m: str(int(m.group(1)) * 1_000_000), t)
+    # 0−c. „tūkst." tuo pačiu principu (09-05): lentelėje jos apskritai NEBUVO,
+    # tad „skirs 5 tūkst. eurų" nueidavo į fonemizatorių kaip „penkis tūkst.
+    # eurų" — su neišplėsta santrumpa vidury frazės. Naujienose ji dažna.
+    t = re.sub(r"\b(\d{1,3})\s*tūkst\.", lambda m: str(int(m.group(1)) * 1000), t)
+    # ⛔ `mlrd.` SĄMONINGAI nekeičiamas: 4 mlrd. = 4 000 000 000 peržengia
+    # `kiekinis` ribą (999 999 999), tad virstų plikais skaitmenimis — blogiau
+    # nei palikta santrumpa. Lieka senajai lentelei („milijardai").
+    # ⚠️ Ir dar viena riba, žinoma: „skirs 21 mln." duoda „dvidešimt vieną
+    # milijonUS" (turėtų būti vienaskaita). Retas atvejis, paliktas sąmoningai.
     # 0. santrumpos
     for r, z in SANTRUMPOS:
         t = re.sub(r, z, t)
@@ -404,6 +494,15 @@ def isplesk(t):
     # 6. vyriškas galininkas su daiktavardžiu: „3 mėnesius/eurus/kartus"
     t = re.sub(r"\b(\d{1,9})\s+([a-ząčęėįšųūž]+(?:us|į|ą))\b",
                lambda m: kiekinis(int(m.group(1)), "G") + " " + m.group(2), t)
+    # 6b. KILMININKINIAI PRIELINKSNIAI (09-05, RADINIAI 29c): „nuo 2000 eurų"
+    # duodavo „nuo du tūkstančiai eurų". Laikui po „nuo/iki" kilmininkas jau
+    # buvo daromas (`_laikas`), o bendram skaičiui — ne.
+    # ⛔ Sąrašas SĄMONINGAI trumpas — tik tie, po kurių kilmininkas VISADA:
+    # „po" dviprasmis („po du" prieš „po dviejų valandų"), o „už, per, prieš,
+    # apie" reikalauja galininko. Roberto nuostata ta pati kaip su vienetais:
+    # pavojingus aplenk, lai geriau keistai skamba negu primeluotų.
+    t = re.sub(r"\b(nuo|iki|ligi|be|dėl|iš|tarp|virš|šalia|arti)\s+(\d{1,9})\b",
+               lambda m: m.group(1) + " " + kiekinis(int(m.group(2)), "K"), t)
     # 7. „minus N" temperatūrai jau natūralu; likę skaičiai -> V
     t = re.sub(r"\b\d{1,9}\b", lambda m: kiekinis(int(m.group(0))), t)
     return re.sub(r"\s{2,}", " ", t)
