@@ -1,5 +1,7 @@
 # Reginutė — Lithuanian voice for Piper TTS (`lt_LT-reginute1-medium`)
 
+![Reginutė — Lithuanian voice for Piper](docs/baneris.png)
+
 *Lietuviškai: [README.md](README.md) — the main page, because the voice is for
 Lithuanians. This English version exists so that nobody has to read it through
 a translator.*
@@ -176,11 +178,10 @@ the voice files wherever they travel.
 
 ## Attribution
 
-![Reginutė — lt_LT-reginute1-medium](docs/baneris.png)
-
 CC-BY-4.0 asks for a corpus to be credited. A corpus is made by people, so
 they are named here too. None of them has seen this project; none of the
-institutions below endorses it. The logos above say *thank you*, nothing more.
+institutions below endorses it. The institution logos on the banner at the
+top of this page say *thank you*, nothing more.
 
 ### The recordings — LIEPA (2013–2015)
 
