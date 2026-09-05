@@ -1,5 +1,7 @@
 # Reginutė — lietuviškas balsas Piper sintezatoriui (`lt_LT-reginute1-medium`)
 
+![Reginutė — lietuviškas balsas Piper sintezatoriui](docs/baneris.png)
+
 *In English: [README_EN.md](README_EN.md)*
 
 > **Būsena.** Grandinė patikrinta gyvai: balsas kalba per gryną `piper`
@@ -172,11 +174,9 @@ kartu su balso failais, kur jie bekeliautų.
 
 ## Padėkos
 
-![Reginutė — lt_LT-reginute1-medium](docs/baneris.png)
-
 CC-BY-4.0 prašo paminėti garsyną. Garsyną daro žmonės, tad čia įvardyti ir
-jie. Nė vienas jų šio projekto nematė; nė viena įstaiga jo neremia. Ženklai
-viršuje sako *ačiū*, ir nieko daugiau.
+jie. Nė vienas jų šio projekto nematė; nė viena įstaiga jo neremia. Įstaigų
+ženklai baneryje puslapio viršuje sako *ačiū*, ir nieko daugiau.
 
 ### Įrašai — LIEPA (2013–2015)
 
