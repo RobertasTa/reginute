@@ -35,6 +35,12 @@ the voice; proposed as a `PhonemeType.LITHUANIAN` contribution to piper1-gpl)
 together with the stress dictionary `lt_kirciai.tsv`. Plain Piper without the
 phonemizer feeds the model raw letters and will not produce Lithuanian.
 
+The module also normalizes text first (`skaiciu_pletiklis.py`, picked up
+automatically when present, `expand_text=None` to disable): Lithuanian number
+case endings, clock times, units and letter-by-letter abbreviations. Without
+it espeak-ng reads `5000 eurų` as "penki tūkstantčei" and `15:00` as
+"tūkstantis penkišimtai:".
+
 Recommended: `normalize_audio=False` (the default `True` clips this voice).
 
 ## Known limitations
@@ -61,9 +67,12 @@ being told everything is fine is worse than reading them here.
 * **The voice needs the phonemizer.** Plain `piper -m lt_LT-reginute1-medium.onnx`
   will not speak Lithuanian — see the phonemization section above. This is
   the one limitation that is architectural rather than a rough edge.
-* **`length_scale` is a judgement, not a measurement.** The default 1.25 was
+* **`length_scale` is a judgement, not a measurement.** The default 1.30 was
   chosen by ear against recordings of the original speaker. Other listeners
-  may prefer faster; override it freely.
+  may prefer faster; override it freely. (For what it is worth, the same
+  listener later compared the two side by side against the original speaker
+  reading the same text: this voice came out 1.2 % slower than her, so the
+  setting is at least not far off.)
 
 None of these block ordinary use — the voice reads news, answers a smart
 speaker and speaks long articles without a break. They are listed so that

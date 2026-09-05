@@ -23,7 +23,7 @@ except Exception:
     isplesk = None
 
 onnx, cfg, tekstas, isvestis = sys.argv[1:5]
-tempas = float(sys.argv[5]) if len(sys.argv) > 5 else 1.25
+tempas = float(sys.argv[5]) if len(sys.argv) > 5 else 1.30   # 09-05: buvo 1.25
 min_zodziu = int(sys.argv[6]) if len(sys.argv) > 6 else 0   # 0 = kablelį skaidyti visada
 
 voice = PiperVoice.load(onnx, config_path=cfg)
