@@ -46,9 +46,9 @@ Two configs exist for the same model, on purpose:
 * **piper-voices catalogue:** `"phoneme_type": "lithuanian"` — Piper runs the
   phonemizer itself (needs a Piper that includes the piper1-gpl contribution;
   an older Piper refuses to load the voice with a clear error rather than
-  producing noise). Put `lt_kirciai.tsv` next to the model or pass
-  `--data-dir`; `piper.download_voices` fetches only `.onnx` and `.onnx.json`,
-  so take the TSV from the same catalogue folder or from this repo.
+  producing noise). Put `lt_kirciai.tsv` from this repo next to the model or
+  pass `--data-dir`; the catalogue folder holds only the model and config,
+  like every other voice.
 * **this repo / older Piper:** `"phoneme_type": "text"` — you phonemize with
   the module and pass IPA to Piper (`synth_reginute.py` does exactly that).
 
