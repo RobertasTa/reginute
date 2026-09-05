@@ -52,12 +52,15 @@ Written down here so nothing depends on an email thread.
    source as `lv.txt` / `et.txt`; sent to piper-samples as a separate small
    PR), through the module. Regenerating it with a Piper that lacks the
    phonemizer will fail (or, with a `text` config, produce noise).
-3. **`lt_kirciai.tsv` sits in the voice folder on purpose.** The phonemizer
-   looks for it next to the model first, then in `--data-dir`.
-   `voicefest.py` ignores it (it is not in `voices.json` `files`, by design —
-   the same convention as g2pW data for Chinese, which Piper also does not
-   download). The MODEL_CARD tells users to take it from this folder or from
-   the voice repo.
+3. **The stress dictionary (`lt_kirciai.tsv`, 3 MB) is not in this folder** —
+   no catalogue voice ships extra files, and I did not want to start. It
+   lives in the voice repo; the phonemizer resolves it through `--data-dir`
+   (or next to the model) and fails with a clear message if it is missing.
+   For making that automatic there are two precedents in Piper — bundling
+   in the package the way the Hebrew models are (they are 25 MB, this is 3),
+   or a `_resources` archive in `piper-checkpoints` that Piper downloads on
+   first use the way g2pW is. I've asked Ihor which he prefers; if you have a
+   preference for the catalogue side, say so and I'll do it that way.
 4. `_script/voicefest.py` has the `lt_LT` language line and `voices.json`
    has the entry with md5/sizes from the shipped files, so nothing needs
    regenerating.

@@ -114,9 +114,11 @@ def main():
         json.dump(cfg, f, ensure_ascii=False, indent=2)
         f.write("\n")
     failai[f"{KELIAS}/{VARDAS}.onnx.json"] = p
-    # The dictionary travels next to the model; the phonemizer looks there first.
-    failai[f"{KELIAS}/lt_kirciai.tsv"] = os.path.join(HF, "lt_kirciai.tsv")
-    assert os.path.exists(failai[f"{KELIAS}/lt_kirciai.tsv"])
+    # NO dictionary in the catalogue folder. Measured 09-05 night: 176 voices,
+    # not one ships an extra file; non-espeak voices get their data from the
+    # piper package (Hebrew), a pip dependency (Japanese) or an auto-download
+    # from piper-checkpoints/_resources (g2pW). Where lt_kirciai.tsv lives is
+    # Ihor's/Michael's call (LAISKAS_4); until then it sits in the voice repo.
     with io.open(TEKSTAS, encoding="utf-8") as f:
         eilutes = f.read().split("\n", 1)
     pavadinimas, aprasas = eilutes[0].strip(), eilutes[1].strip()
