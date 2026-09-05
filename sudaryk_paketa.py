@@ -89,8 +89,11 @@ def main():
     os.makedirs(os.path.join(HF, "samples"), exist_ok=True)
 
     # 1. Modelis
+    e = None
     if args.onnx:
         onnx, kilme = os.path.abspath(args.onnx), "nurodytas ranka"
+        m = re.search(r"e(\d+)", os.path.basename(onnx))
+        e = int(m.group(1)) if m else None
     else:
         val, e, ck = geriausias_ckpt()
         onnx = os.path.join(BAZE, "_darbal", f"regina_e{e}.onnx")
@@ -136,6 +139,24 @@ def main():
           f"length_scale {args.length_scale})")
 
     # 3. SHA256SUMS — viskam, kas hf/ kataloge, išskyrus patį sąrašą
+    # ⚠️ 09-05 (rasta darant pateikimo repeticiją): į sąrašą buvo patekusi
+    # atsarginė kopija `.onnx.json.pries_09-04`, o kartu su ja būtų nuėjusi ir
+    # į HF. Katalogas turi turėti TIK tai, kas keliauja žmonėms — todėl darbinė
+    # liekana ne praleidžiama tyliai, o SUSTABDO paketą: tyliai praleistas
+    # failas kitą kartą vėl gulėtų nepastebėtas.
+    liekanos = [fn for _, _, ff in os.walk(HF) for fn in ff
+                if ".pries_" in fn or fn.endswith((".bak", ".tmp", ".orig"))]
+    if liekanos:
+        raise SystemExit("⛔ hf/ guli darbinės liekanos — išnešk jas prieš "
+                         "sudarant paketą:\n   " + "\n   ".join(liekanos))
+    # Checkpoint (jei jau padarytas) privalo būti iš TO PATIES pjūvio, kaip
+    # modelis — kitaip žmogus augintų balsą ne nuo to, ką girdi.
+    if e is not None:
+        for _, _, ff in os.walk(HF):
+            for fn in ff:
+                if fn.endswith(".ckpt") and f"-e{e}." not in fn:
+                    raise SystemExit(f"⛔ hf/{fn} yra iš kito pjūvio nei modelis "
+                                     f"(e{e}). Perdaryk: svarus_checkpoint.py")
     eilutes = []
     for saknis, _, failai in os.walk(HF):
         for fn in sorted(failai):
