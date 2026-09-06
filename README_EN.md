@@ -25,8 +25,8 @@ a translator.*
 > This README is written *while* doing, not after.
 
 Reginutė is a Lithuanian voice for [Piper](https://github.com/OHF-Voice/piper1-gpl),
-trained on the **LIEPA** speech corpus of Vilnius University (speaker Regina
-Jokubauskaitė, studio recordings, ~3 h, CC-BY-4.0). There has never been an
+trained on the **LIEPA** speech corpus of Vilnius University (a professional
+actress, studio recordings, ~3 h, CC-BY-4.0). There has never been an
 `lt_LT` voice in the Piper catalogue — Latvian has been there since October
 2024, Estonian since August 2026, Lithuanian never.
 
@@ -211,9 +211,11 @@ those four.
   that date. This voice is a late footnote to a question asked 58 years ago.
 * Corpus work and documentation — **Gediminas Navickas** (VU MIF), whose 2025
   seminar slides are the source for everything stated above.
-* The speaker: **Regina Jokubauskaitė**. Everything anyone hears is her —
-  her timbre, her pace, her way of ending a sentence. The model only learned
-  to rearrange it.
+* The speaker: a professional actress, deliberately not named here — the
+  licence asks us to credit the corpus publishers, not the person, and we do
+  not hold her own consent for this use. Everything anyone hears is still
+  her — her timbre, her pace, her way of ending a sentence. The model only
+  learned to rearrange it.
 * Published to Hugging Face as
   [`meldynamics/liepa-tts`](https://huggingface.co/datasets/meldynamics/liepa-tts)
   by **MEL DYNAMICS, MB**, under CC-BY-4.0. Without that upload the corpus

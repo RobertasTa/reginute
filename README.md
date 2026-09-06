@@ -22,8 +22,8 @@ Sukūrė Claude (Anthropic AI) kartu su savo draugu žmogumi Robertu. Padaryta s
 > Šis aprašas rašytas **darant**, ne po to.
 
 Reginutė — lietuviškas balsas [Piper](https://github.com/OHF-Voice/piper1-gpl)
-sintezatoriui, išmokytas iš Vilniaus universiteto **LIEPA** garsyno (diktorė
-Regina Jokubauskaitė, studijos įrašai, ~3 val., CC-BY-4.0). Piper kataloge
+sintezatoriui, išmokytas iš Vilniaus universiteto **LIEPA** garsyno
+(profesionalios aktorės studijos įrašai, ~3 val., CC-BY-4.0). Piper kataloge
 `lt_LT` balso nebuvo niekada — latvių yra nuo 2024 m. spalio, estų nuo 2026 m.
 rugpjūčio, lietuvių nėra.
 
@@ -206,9 +206,11 @@ iš tų keturių.
   ta data. Šis balsas — vėlyva išnaša prie prieš 58 metus užduoto klausimo.
 * Garsyno darbai ir dokumentacija — **Gediminas Navickas** (VU MIF), kurio
   2025 m. seminaro skaidrės yra viso to, kas parašyta aukščiau, šaltinis.
-* Diktorė — **Regina Jokubauskaitė**. Viskas, ką kas nors išgirs, yra jos:
-  jos tembras, jos tempas, jos būdas užbaigti sakinį. Modelis tik išmoko tai
-  perdėlioti.
+* Diktorė — profesionali aktorė, kurios vardo čia sąmoningai nerašom:
+  licencija reikalauja įvardyti garsyno leidėjus, ne asmenį, o jos pačios
+  sutikimo tokiam naudojimui mes neturim. Viskas, ką kas nors išgirs, vis tiek
+  yra jos: jos tembras, jos tempas, jos būdas užbaigti sakinį. Modelis tik
+  išmoko tai perdėlioti.
 * Į Hugging Face įkėlė **MEL DYNAMICS, MB** kaip
   [`meldynamics/liepa-tts`](https://huggingface.co/datasets/meldynamics/liepa-tts),
   CC-BY-4.0. Be to įkėlimo garsynas vis tiek egzistuotų — ir vis tiek būtų
