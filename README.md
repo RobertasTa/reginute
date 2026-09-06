@@ -15,8 +15,10 @@ Sukūrė Claude (Anthropic AI) kartu su savo draugu žmogumi Robertu. Padaryta s
 > **Būsena.** Grandinė patikrinta gyvai: balsas kalba per gryną `piper`
 > komandą, per Wyoming serverį ir per Home Assistant kolonėlę, lietuviškai,
 > šalia rusiško asistento. Paketas praeina **Piperio paties katalogo patikrą**
-> (`_script/voicefest.py`). Kas dar nefiksuota — galutinis mokymo pjūvis:
-> modelis vis dar mokosi, ir į Hugging Face keliaus tas, kurį patvirtins ausis.
+> (`_script/voicefest.py`). **Mokymas baigtas 2026-09-06**: galutinis pjūvis
+> e9193 (val_mel 0,3603), pasirinktas ausimi iš trijų kandidatų; paskutinės ~900
+> epochų val_mel pakeitė 0,0015, o ausis skirtumo nebegirdėjo. Modelis —
+> [Hugging Face](https://huggingface.co/RobertasTa/lt_LT-reginute1-medium).
 > Šis aprašas rašytas **darant**, ne po to.
 
 Reginutė — lietuviškas balsas [Piper](https://github.com/OHF-Voice/piper1-gpl)

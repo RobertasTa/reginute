@@ -18,9 +18,11 @@ a translator.*
 > the plain `piper` command, through a Wyoming server and through a Home
 > Assistant smart speaker, in Lithuanian, beside a Russian assistant. The
 > package passes **Piper's own catalogue check** (`_script/voicefest.py`).
-> What is not fixed yet is the final training checkpoint: the model is still
-> training, and the one that goes to Hugging Face will be the one a listener
-> picks. This README is written *while* doing, not after.
+> **Training finished on 2026-09-06**: the released checkpoint is e9193
+> (val_mel 0.3603), picked by ear from three candidates; the last ~900 epochs
+> moved val_mel by 0.0015 and the listener no longer heard a difference. The
+> model: [Hugging Face](https://huggingface.co/RobertasTa/lt_LT-reginute1-medium).
+> This README is written *while* doing, not after.
 
 Reginutė is a Lithuanian voice for [Piper](https://github.com/OHF-Voice/piper1-gpl),
 trained on the **LIEPA** speech corpus of Vilnius University (speaker Regina
