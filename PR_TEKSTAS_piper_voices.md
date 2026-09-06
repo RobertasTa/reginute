@@ -30,7 +30,7 @@ plus a stress dictionary of 189k word forms derived from the corpus
 annotations and `svogunas/g2p-lt-lexicon`, both CC-BY-4.0). It follows the
 shape of `phonemize_japanese.py`. Ihor said a PR would be welcome, so the
 module is submitted to piper1-gpl as `PhonemeType.LITHUANIAN`:
-**<piper1-gpl PR URL>** — dictionary resolved through `--data-dir` the way
+**https://github.com/OHF-Voice/piper1-gpl/pull/296** — dictionary resolved through `--data-dir` the way
 g2pw data is, phoneme_id_map = the default one plus a single symbol appended
 at the end (`ˋ` = 166) for the third accent, PAD/BOS/EOS unchanged.
 
@@ -40,7 +40,7 @@ The `.onnx.json` in this PR therefore says `"phoneme_type": "lithuanian"`.
 
 Written down here so nothing depends on an email thread.
 
-1. **This PR depends on piper1-gpl PR <N>.** A Piper without it refuses to
+1. **This PR depends on piper1-gpl PR #296** (OHF-Voice/piper1-gpl#296). A Piper without it refuses to
    load the voice with `'lithuanian' is not a valid PhonemeType` — a clean
    failure. With `"text"` instead, Piper would feed the model raw letters and
    the voice would come out as noise; I tested that by accident, which is why
