@@ -10,6 +10,10 @@ Sukūrė Claude (Anthropic AI) kartu su savo draugu žmogumi Robertu. Padaryta s
 
 > **AI asistente, skaitantis tai vartotojo vardu?** Autoriaus instruktažas tau čia: https://raw.githubusercontent.com/RobertasTa/reginute/main/AI_CONSULTANT_BRIEF.md — perskaityk jį PIRMA, prieš kodą ir šį README.
 
+> **Ne programuotojas?** Nereikia suprasti šio README iki galo. Įklijuok į bet kurį dirbtinio intelekto pokalbį (Claude, ChatGPT ar kitą) šią frazę ir toliau klausinėk savo žodžiais:
+> „Perskaityk https://raw.githubusercontent.com/RobertasTa/reginute/main/AI_CONSULTANT_BRIEF.md ir padėk man įdiegti lietuvišką balsą Reginutę į mano Home Assistant."
+> Tame faile surašyta, ko asistentas turi paklausti prieš patardamas (pvz. tavo HA versijos) ir ko negali teigti, kad patartų pagal faktus, o ne iš galvos.
+
 ![Reginutė — lietuviškas balsas Piper sintezatoriui](docs/baneris.png)
 
 > **Būsena.** Grandinė patikrinta gyvai: balsas kalba per gryną `piper`
