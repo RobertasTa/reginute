@@ -10,8 +10,9 @@
 * URL: https://huggingface.co/datasets/meldynamics/liepa-tts
 * License: CC-BY-4.0
 
-LIEPA corpus, Vilnius University. Speaker Regina Jokubauskaitė (professional
-actress), studio recordings, 5 121 utterances, ~3 hours. Stress and pitch
+LIEPA corpus, Vilnius University. One speaker — a professional actress, not
+named here on purpose (the licence credits the publishers, not the person) —
+studio recordings, 5 121 utterances, ~3 hours. Stress and pitch
 accents in the training transcriptions come from the corpus' own annotation,
 sentence by sentence.
 
@@ -111,7 +112,7 @@ you know what you are getting.
   Informatics; Faculty of Philology), with the Institute of the Lithuanian
   Language, the Lithuanian University of Educational Sciences and Šiauliai
   University. Project lead: prof. Laimutis Telksnys. Corpus work and
-  documentation: Gediminas Navickas. Speaker: Regina Jokubauskaitė.
+  documentation: Gediminas Navickas.
 * Published to Hugging Face as `meldynamics/liepa-tts` by MEL DYNAMICS, MB.
 * Thanks to Vilnius University for publishing the corpus under an open licence
   instead of keeping it.

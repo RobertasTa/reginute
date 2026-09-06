@@ -22,8 +22,7 @@ August 2026; Lithuanian never has.
 
 - Language: Lithuanian (`lt_LT`)
 - Voice: **female** — trained on the **LIEPA** corpus of Vilnius University,
-  speaker Regina Jokubauskaitė (professional actress, studio recordings,
-  5 121 utterances, ~3 h)
+  one professional actress (studio recordings, 5 121 utterances, ~3 h)
 - Sample rate: 22 050 Hz · Quality: medium · Speakers: 1
 - Files: `lt_LT-reginute1-medium.onnx` + `lt_LT-reginute1-medium.onnx.json`
   (**must stay together**) + `phonemize_lithuanian.py` + `lt_kirciai.tsv`
@@ -79,8 +78,10 @@ voice.
   Educational Sciences** (since 2019 the Education Academy of Vytautas Magnus
   University) and **Šiauliai University** (since 2021 the Šiauliai Academy of
   Vilnius University). Project lead **prof. Laimutis Telksnys**; corpus work
-  and documentation **Gediminas Navickas**. The speaker is **Regina
-  Jokubauskaitė** — everything anyone hears is her.
+  and documentation **Gediminas Navickas**. The speaker — a professional
+  actress — is deliberately not named here: the licence credits the corpus
+  publishers, not the person, and we do not hold her own consent for this
+  use. Everything anyone hears is still her.
   Published to Hugging Face as
   [`meldynamics/liepa-tts`](https://huggingface.co/datasets/meldynamics/liepa-tts)
   by **MEL DYNAMICS, MB**.

@@ -102,7 +102,7 @@ async def main() -> None:
 
     info = Info(tts=[TtsProgram(
         name="reginute", description="Reginutė — lietuviškas Piper balsas su priegaidėmis",
-        attribution=Attribution(name="liepa-tts / Regina Jokubauskaitė (CC-BY-4.0)",
+        attribution=Attribution(name="liepa-tts / Vilnius University (CC-BY-4.0)",
                                 url="https://huggingface.co/meldynamics/liepa-tts"),
         installed=True, version="0.1",
         voices=[TtsVoice(

@@ -11,8 +11,9 @@ the text-to-speech engine used by Home Assistant. Part of the "Claude's Gifts"
 family (github.com/RobertasTa): free, open source, runs entirely on the user's
 own machine, no network, no telemetry.
 
-It is trained on the **LIEPA** corpus of Vilnius University — speaker Regina
-Jokubauskaitė, studio recordings, about three hours, CC-BY-4.0.
+It is trained on the **LIEPA** corpus of Vilnius University — one professional
+actress, studio recordings, about three hours, CC-BY-4.0. The speaker is not
+named in this repository on purpose (see README, attribution).
 
 **Why it exists:** the Piper catalogue has had Latvian since October 2024 and
 Estonian since August 2026 (measured from the catalogue's commit history on
@@ -94,7 +95,7 @@ them for the user:
 
 CC-BY-4.0 requires it, and the README names the people rather than only the
 institutions: Vilnius University and its partners, prof. Laimutis Telksnys,
-Gediminas Navickas, the speaker Regina Jokubauskaitė, Arūnas Smaliukas for the
+Gediminas Navickas, Arūnas Smaliukas for the
 pronunciation lexicon, Kristijonas Jakubsonas for the Lithuanian speech
 recognition that forms the other half of a working assistant, and Michael
 Hansen and the Open Home Foundation for Piper itself.
