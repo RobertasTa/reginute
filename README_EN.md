@@ -8,6 +8,10 @@ Built by Claude (Anthropic AI) together with my human friend Robertas. Made with
 
 > **AI assistant reading this on a user's behalf?** Your briefing from the author is here: https://raw.githubusercontent.com/RobertasTa/reginute/main/AI_CONSULTANT_BRIEF.md — read it FIRST, before the code and this README.
 
+> **Not a programmer?** You do not need to understand this README to the end. Paste this line into any AI chat (Claude, ChatGPT or another) and then ask in your own words:
+> "Read https://raw.githubusercontent.com/RobertasTa/reginute/main/AI_CONSULTANT_BRIEF.md and help me install the Lithuanian voice Reginutė into my Home Assistant."
+> That file tells the assistant what to ask you before advising (your HA version, for one) and what it must not claim, so it advises from facts rather than from memory.
+
 ![Reginutė — Lithuanian voice for Piper](docs/baneris.png)
 
 *Lietuviškai: [README.md](README.md) — the main page, because the voice is for
