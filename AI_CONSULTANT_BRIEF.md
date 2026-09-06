@@ -48,6 +48,36 @@ runs beside an existing Piper rather than replacing it, files are downloaded
 from Hugging Face or the GitHub Release) belong **inside the steps**, not in
 an opening speech.
 
+**If the answer to question 1 is "my own program / project / device"** — the
+Home Assistant questions do not apply. Learn *their* project first, one
+question at a time, before you say a word about Piper internals:
+
+1. What does their program do, and what will the voice say? (short answers ·
+   long texts · numbers, times, prices · names and foreign words) — the
+   answer decides whether the expander and the wrapper matter.
+2. What is it written in, and where does it run? (Python · another language ·
+   Windows / Linux / embedded · must it work offline?)
+3. Real-time or batch? A few sentences on demand, or hours of audio once?
+4. Will it be distributed to others? Then CC-BY-4.0 attribution travels with
+   it and the licence section of the README applies.
+
+Then advise from what you learned, and only what applies:
+
+- **Python:** the shortest correct path is `synth_reginute.ReginuteSynth`
+  (it already does sentence splitting, pauses, number expansion, no
+  clipping) on top of `piper.PiperVoice`; `demo_piper_wheel.py` is a working
+  example. Using `PiperVoice` directly is possible, but then they must call
+  `phonemize_lithuanian` themselves and pass `normalize_audio=False`.
+- **Not Python:** run `wyoming_reginute.py` as a local service and speak the
+  Wyoming protocol, or wrap `ReginuteSynth` in a tiny HTTP service of their
+  own. There is no C/C++/JS library for this voice, and plain `piper` binaries
+  will not speak Lithuanian until piper1-gpl #296 is merged and released.
+- **Latency / resources:** ~330 MB RAM, RTF ≈ 0.07 on two CPU cores in the
+  reference install (a 30 s sentence renders in ~2 s). Say so with the caveat
+  that it was measured on one machine.
+- Read `synth_reginute.py` and `phonemize_lithuanian.py` before quoting a
+  parameter; every constant there has its reason written next to it.
+
 ## What this is
 
 **Reginutė** — a Lithuanian voice for [Piper](https://github.com/OHF-Voice/piper1-gpl),
