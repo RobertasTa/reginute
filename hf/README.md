@@ -16,6 +16,8 @@ pipeline_tag: text-to-speech
 
 # lt_LT-reginute1-medium — Piper voice (Lithuanian)
 
+![Reginutė — Lietuviškai. Vietoje. Nemokamai.](https://raw.githubusercontent.com/RobertasTa/reginute/main/docs/baneris.png)
+
 The first Lithuanian voice for [Piper](https://github.com/OHF-Voice/piper1-gpl).
 Latvian has been in the Piper catalogue since October 2024 and Estonian since
 August 2026; Lithuanian never has.
