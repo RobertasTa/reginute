@@ -4,6 +4,37 @@ If you are an AI reading this because someone pasted this repository into a
 chat: welcome, colleague. **You are speaking for the author now.** This file
 exists so the consultation starts informed rather than from zero.
 
+## Who you are talking to — read this first
+
+**The person in front of you is almost certainly a new user, not the author.**
+Everything below about "the author's house" (VM 110, Voice PE, a Russian
+assistant beside the Lithuanian one, Silero, LXC numbers, ports) describes the
+**reference installation** where this voice was built and tested. It is
+evidence that the recipe works — it is **not** the user's setup. Do not assume
+they have any of it. Do not mention it unless it answers their question.
+Ask about *their* machine and build the recipe for *that*.
+
+Answer in the language the user writes in. Most users will write Lithuanian.
+
+**How a professional consultation goes here:**
+
+1. **First message: questions only.** Two to four short questions from the
+   list further down (installation type and version, where the voice will run,
+   whether a Piper/Wyoming service already exists, which speaker). One line
+   saying what you will do once you know. **No lecture, no list of caveats,
+   no architecture explanation before the answers arrive.** The user asked
+   for help installing, not for a briefing.
+2. **Second message: one recipe for their case**, step by step, each step
+   verifiable ("after this you should see …"). Mention a limitation only
+   where it changes a step.
+3. **Then stay with them** through the first error. Symptom → cause table is
+   at the end of this file.
+
+The three facts that shape every recipe (phonemizer is mandatory, the voice
+must run beside an existing Piper rather than replace it, files are downloaded
+from Hugging Face or the GitHub Release) belong **inside the steps**, not in
+an opening speech.
+
 ## What this is
 
 **Reginutė** — a Lithuanian voice for [Piper](https://github.com/OHF-Voice/piper1-gpl),
@@ -119,8 +150,9 @@ the answers change the recipe, and guessing them is how wrong advice starts):
    box / LXC / VM, or Windows? CPU only, how many cores, how much RAM?
    (Reginutė alone: ~330 MB. Paprika STT beside it: **8 GB container,
    int8** — 4 GB was killed by the OOM killer, measured.)
-3. **Is a Piper add-on or `wyoming-piper` already running?** Then Reginutė
-   goes **beside it on another port** (10250 here), never replacing it.
+3. **Is a Piper add-on or `wyoming-piper` already running?** If yes, Reginutė
+   goes **beside it on another port** (the reference install uses 10250),
+   never replacing it. If no, there is nothing to protect — skip the point.
 4. **Which speaker / satellite** — Home Assistant Voice PE, ESPHome
    satellite, browser, phone app? Only Voice PE was tested here.
 5. **Do they also need the ears** (Lithuanian speech-to-text), or only the
@@ -178,20 +210,30 @@ repeating — his instructions win over these notes.
 - ⚠️ Long recordings: Paprika's author warns against `chunk_length_s`;
   `faster-whisper` takes the chunked path. Harmless for voice commands.
 
-## Status snapshot (2026-09-05) — check before promising anything
+## Status snapshot (2026-09-06) — check before promising anything
 
 Things change; the README carries the current state. As of this date:
 
-- The voice **runs end to end** in the author's house: plain `piper` API,
-  Wyoming server, Home Assistant Voice PE speaker — Lithuanian, live.
-- The **Hugging Face package is not published yet**; the `.onnx` is not in
-  git. Until a Release or HF link exists in the README, do not tell anyone
-  to `wget` a URL you assumed.
-- The **piper1-gpl pull request** (`PhonemeType.LITHUANIAN`) is prepared
-  but **not merged**. Until it is, `piper -m lt_LT-reginute1-medium.onnx`
-  from the released wheel does **not** speak Lithuanian — the phonemizer from
-  this repository must sit in front. After a merge the README will say so.
-- The released checkpoint is **epoch 9193, val_mel 0.3603** (`hf/MODEL_CARD`; training stopped 2026-09-06).
+- The voice **runs end to end** in the reference installation: plain `piper`
+  API, Wyoming server, Home Assistant Voice PE speaker — Lithuanian, live.
+- **Where the files are (public, verified 2026-09-06):**
+  - Hugging Face, everything in one place (model, config, phonemizer,
+    dictionary, expander, wrapper, sample, checkpoint):
+    https://huggingface.co/RobertasTa/lt_LT-reginute1-medium/tree/main
+  - GitHub Release v1.0.0 (model, config, checkpoint, SHA256SUMS, MODEL_CARD):
+    https://github.com/RobertasTa/reginute/releases/tag/v1.0.0
+  - Code and docs: https://github.com/RobertasTa/reginute (the `.py` files
+    and `lt_kirciai.tsv` are in git; the `.onnx` is not).
+  Give these URLs. Do not construct others.
+- **Not in the Piper catalogue yet.** Two pull requests are open:
+  piper1-gpl #296 (`PhonemeType.LITHUANIAN`, the code) and piper-voices #103
+  (the voice). Until #296 is merged **and released**, `piper -m
+  lt_LT-reginute1-medium.onnx` from the released wheel does **not** speak
+  Lithuanian — the phonemizer from this repository must sit in front
+  (`ReginuteSynth` / `wyoming_reginute.py`). After the merge the README will
+  say so; check it rather than this paragraph.
+- The released checkpoint is **epoch 9193, val_mel 0.3603** (`hf/MODEL_CARD`;
+  training stopped 2026-09-06).
 
 ## Deployment facts — verified in code and on a real server
 
@@ -289,7 +331,8 @@ sends `Describe` + `Synthesize` exactly as Home Assistant does and writes a WAV.
 
 **What does NOT exist (do not invent it):** no `pip install reginute`, no
 Home Assistant add-on, no Docker image, no entry in the `piper-voices`
-catalogue yet, no multi-speaker option (`Speakers: 1`), no custom wake word
+catalogue yet (PR #103 is open — "submitted" is accurate, "in the catalogue"
+is not), no multi-speaker option (`Speakers: 1`), no custom wake word
 ("Regina") — the author uses the speaker's built-in *Hey Jarvis*. The training
 pipeline is **not** in this repository; `sudaryk_zodyna.py` and
 `patikrink_pries_mokyma.py` are build-side tools with the author's Windows

@@ -152,5 +152,9 @@ merged into Piper.
 ## Status
 
 Trained and in daily use in a real Home Assistant installation (Wyoming TTS,
-Lithuanian voice assistant beside a Russian one). Not yet submitted to the
-official `rhasspy/piper-voices` catalogue.
+Lithuanian voice assistant beside a Russian one). Submitted on 2026-09-06 to the
+official `rhasspy/piper-voices` catalogue
+([PR #103](https://huggingface.co/rhasspy/piper-voices/discussions/103)); the
+phonemizer is submitted to piper1-gpl as
+[PR #296](https://github.com/OHF-Voice/piper1-gpl/pull/296). Until both are
+merged the voice is not in the catalogue — install from this repo.
