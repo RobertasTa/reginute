@@ -50,7 +50,9 @@ for f in "${FAILAI[@]}"; do
 done
 
 echo "== 4. SHA256 konteineryje (hf/ failai prieš SHA256SUMS):"
-ssh "$HOST" "pct exec $CT -- bash -c 'cd $TIKSLAS && grep -E \"$VARDAS\" SHA256SUMS | sha256sum -c -'"
+# Only the two files that travel here: the .ckpt is in SHA256SUMS too (HF gets
+# it), but the server does not - found 09-06 when the check tripped over it.
+ssh "$HOST" "pct exec $CT -- bash -c 'cd $TIKSLAS && grep -E \"$VARDAS\.onnx(\.json)?\$\" SHA256SUMS | sha256sum -c -'"
 
 echo "== 5. Tarnyba: keičiu TIK --model ir --config"
 ssh "$HOST" "pct exec $CT -- bash -c '

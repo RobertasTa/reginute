@@ -190,7 +190,7 @@ Things change; the README carries the current state. As of this date:
   but **not merged**. Until it is, `piper -m lt_LT-reginute1-medium.onnx`
   from the released wheel does **not** speak Lithuanian — the phonemizer from
   this repository must sit in front. After a merge the README will say so.
-- The released checkpoint is **epoch 8310, val_mel 0.3618** (`hf/MODEL_CARD`).
+- The released checkpoint is **epoch 9193, val_mel 0.3603** (`hf/MODEL_CARD`; training stopped 2026-09-06).
 
 ## Deployment facts — verified in code and on a real server
 
