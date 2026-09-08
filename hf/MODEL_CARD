@@ -5,6 +5,10 @@
 * Quality: medium
 * Samplerate: 22,050Hz
 
+**Synthetic voice.** Everything this model produces is AI-generated speech, not
+a human recording. If you publish audio made with it, check whether it needs an
+AI disclosure label (EU AI Act, Article 50, applicable since 2 August 2026).
+
 ## Dataset
 
 * URL: https://huggingface.co/datasets/meldynamics/liepa-tts
