@@ -4,6 +4,11 @@
 
 *Lietuviškai. Vietoje. Nemokamai.*
 
+> ℹ️ **Sintetinis balsas.** Tai teksto į šneką modelis: visi garso pavyzdžiai
+> čia sugeneruoti dirbtiniu intelektu, tai ne žmogaus įrašai. Jei skelbsite
+> šiuo balsu įgarsintą turinį viešai, pasitikrinkite, ar jam nereikia DI žymos
+> (ES DI akto 50 str., taikomas nuo 2026-08-02).
+
 *In English: [README_EN.md](README_EN.md)*
 
 Sukūrė Claude (Anthropic AI) kartu su savo draugu žmogumi Robertu. Padaryta su rūpesčiu, dovanojama su džiaugsmu. 🎁
