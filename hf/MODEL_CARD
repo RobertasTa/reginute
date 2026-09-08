@@ -28,13 +28,17 @@ Fine-tuned from the Piper catalogue checkpoint `ru_RU-irina-medium`
 stated so that the base-model question (see piper-voices discussion #94) is
 visible rather than hidden.
 
-Released checkpoint: **epoch 9193, val_mel 0.3603** (training stopped 2026-09-06,
-the last ~900 epochs moved val_mel by 0.0015 and the ear no longer heard a
-difference). The training checkpoint is shipped alongside the model
-(`lt_LT-reginute1-medium-e9193.ckpt`, 269 MB,
-optimizer state stripped) so that another Lithuanian voice can start from this
-one rather than from a Russian checkpoint. Both the generator and the
-discriminator are included, since a GAN needs both to continue training.
+Released at **epoch 9193, val_mel 0.3603** (training stopped 2026-09-06, the
+last ~900 epochs moved val_mel by 0.0015 and the ear no longer heard a
+difference).
+
+What is published here is the **voice**, not the means of making one: the
+exported model, its config, the phonemizer and its dictionary. The training
+checkpoint is deliberately not distributed. A checkpoint is a starting point
+for training a new voice from someone's recordings, and a voice trained on a
+person's recordings without their consent is the harm we do not want to make
+easier. The corpus this voice learned from is public and licensed (CC-BY-4.0),
+so anyone is free to train their own from the same source.
 
 ## Phonemization — please read
 

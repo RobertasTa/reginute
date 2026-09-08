@@ -62,7 +62,7 @@ modulis turi stovėti prieš modelį. Abu diegimo keliai žemiau jį įtraukia.
 | `wyoming_reginute.py` | Wyoming TTS serveris aplink balsą — su juo kalbasi Home Assistant. |
 | `demo_piper_wheel.py` | Įrodymas, kad užtenka išleisto `piper-tts` rato + šio modulio + `.onnx` — jokio forko. |
 | `test_phonemize_lithuanian.py` | pytest rinkinys fonemizatoriui. |
-| `svarus_checkpoint.py` | Mokymo pjūvis be optimizatoriaus (807 → 269 MB), kad kitas galėtų auginti savo balsą nuo šito, o ne nuo rusiško. |
+| `svarus_checkpoint.py` | Mokymo pjūvio valymas (807 → 269 MB). **Mūsų vidinis įrankis — pats pjūvis neplatinamas** (2026-09-08: dovanojam balsą, ne priemones balsui daryti). |
 | `hf/` | Tikslus paketas, keliaujantis į Hugging Face: `.onnx` (git'e nėra), `.onnx.json`, `MODEL_CARD`, `samples/`, `SHA256SUMS`. |
 | `docs/` | Diegimo ir testavimo užrašai, rašyti serverio testų metu. `DU_ASISTENTAI_HA.md` — kaip viena Voice PE kolonėlė kalba dviem kalbomis su dviem žadinimo žodžiais (patikrinta gyvai). |
 | `AI_CONSULTANT_BRIEF.md` | Jei ką nors klausit dirbtinio intelekto apie šitą balsą — duokit jam pirma šitą failą. Ten surašyta, ko negalima teigti (pvz. „pirmas lietuviškas TTS" — netiesa) ir kokios yra žinomos ribos. |

@@ -270,10 +270,15 @@ Things change; the README carries the current state. As of this date:
   API, Wyoming server, Home Assistant Voice PE speaker — Lithuanian, live.
 - **Where the files are (public, verified 2026-09-06):**
   - Hugging Face, everything in one place (model, config, phonemizer,
-    dictionary, expander, wrapper, sample, checkpoint):
+    dictionary, expander, wrapper, sample):
     https://huggingface.co/RobertasTa/lt_LT-reginute1-medium/tree/main
-  - GitHub Release v1.0.0 (model, config, checkpoint, SHA256SUMS, MODEL_CARD):
+  - GitHub Release v1.0.0 (model, config, SHA256SUMS, MODEL_CARD):
     https://github.com/RobertasTa/reginute/releases/tag/v1.0.0
+  ⛔ **The training checkpoint is not distributed** (removed 2026-09-08). What
+  is given away is the voice, not the means of making one: a checkpoint is a
+  starting point for training a voice from someone's recordings. If asked for
+  it, say it is deliberately not published, and point at the corpus
+  (`meldynamics/liepa-tts`, CC-BY-4.0) which anyone may train from.
   - Code and docs: https://github.com/RobertasTa/reginute (the `.py` files
     and `lt_kirciai.tsv` are in git; the `.onnx` is not).
   Give these URLs. Do not construct others.
