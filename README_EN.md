@@ -232,42 +232,9 @@ those four.
 
 The family continued: **LIEPA-2** (1 000 h) and **LIEPA-3** (10 000 h, led by
 **prof. Gražina Korvel**), and it is LIEPA-3 that Paprika below is trained on.
-Different corpus, same decision — publish it rather than keep it. On prof.
-Korvel specifically, see **"The mother of this voice"** after this section.
+Different corpus, same decision — publish it rather than keep it.
 
-### The dictionary
-
-Stress dictionary derived from
-[`svogunas/g2p-lt-lexicon`](https://huggingface.co/datasets/svogunas/g2p-lt-lexicon)
-by **Arūnas Smaliukas** (CC BY 4.0). Nearly every stressed word this voice
-speaks stands on his work — 176 637 of the 189 247 entries.
-
-### The ears
-
-**[`paprika-whisper-lt-v3`](https://huggingface.co/kristijonas/paprika-whisper-lt-v3)
-by [Kristijonas Jakubsonas](https://github.com/kristijonasatpro/paprika)**
-(CC-BY-4.0 / Apache-2.0). This voice would be half a system without it: you
-can speak Lithuanian to a house because he made the listening work first.
-
-### The pointer
-
-**Linas Petkevičius, PhD** — President of AI Lithuania and Director of the
-Institute of Computer Science at Vilnius University. In a public LinkedIn
-thread about how the LIEPA-3 recordings were being distributed, he wrote the
-comment that laid out who had put the data on Hugging Face and who had
-trained a Lithuanian model on it. That comment is where this project started:
-without it we would not have found Paprika, and would not have gone looking
-for the corpus this voice is made of. He owes us nothing and knew nothing
-about us — which is rather the point. **A single accurate public comment can
-be worth more than a project plan.**
-
-### Piper
-
-**Michael Hansen** and the **Open Home Foundation** — for a text-to-speech
-system small enough to run on a home server and open enough that a language
-with three million speakers can add itself without asking permission.
-
-## The mother of this voice
+### The mother of this voice
 
 **And Gražina Korvel — I consider her the mother of Reginutė.**
 
@@ -305,8 +272,39 @@ permission and without asking, which is exactly how a foundation is supposed
 to work.
 
 She did not initiate this project, did not supervise it and is not
-responsible for it. The title is mine, not hers; the merit it rests on is
-hers, not mine.
+responsible for it.
+
+### The dictionary
+
+Stress dictionary derived from
+[`svogunas/g2p-lt-lexicon`](https://huggingface.co/datasets/svogunas/g2p-lt-lexicon)
+by **Arūnas Smaliukas** (CC BY 4.0). Nearly every stressed word this voice
+speaks stands on his work — 176 637 of the 189 247 entries.
+
+### The ears
+
+**[`paprika-whisper-lt-v3`](https://huggingface.co/kristijonas/paprika-whisper-lt-v3)
+by [Kristijonas Jakubsonas](https://github.com/kristijonasatpro/paprika)**
+(CC-BY-4.0 / Apache-2.0). This voice would be half a system without it: you
+can speak Lithuanian to a house because he made the listening work first.
+
+### The pointer
+
+**Linas Petkevičius, PhD** — President of AI Lithuania and Director of the
+Institute of Computer Science at Vilnius University. In a public LinkedIn
+thread about how the LIEPA-3 recordings were being distributed, he wrote the
+comment that laid out who had put the data on Hugging Face and who had
+trained a Lithuanian model on it. That comment is where this project started:
+without it we would not have found Paprika, and would not have gone looking
+for the corpus this voice is made of. He owes us nothing and knew nothing
+about us — which is rather the point. **A single accurate public comment can
+be worth more than a project plan.**
+
+### Piper
+
+**Michael Hansen** and the **Open Home Foundation** — for a text-to-speech
+system small enough to run on a home server and open enough that a language
+with three million speakers can add itself without asking permission.
 
 ---
 

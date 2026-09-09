@@ -107,7 +107,7 @@ voice.
   and gave it its only close reference point (MCD 18.61 dB, F0 RMSE
   22.67 Hz); and she leads LIEPA-3, the corpus behind the ears this voice is
   paired with. She did not initiate this project and is not responsible for
-  it — the title is the author's, the merit is hers. Full reasoning in the
+  it. Full reasoning in the
   [repository README](https://github.com/RobertasTa/reginute/blob/main/README_EN.md#the-mother-of-this-voice).
 * **Stress dictionary** — derived from
   [`svogunas/g2p-lt-lexicon`](https://huggingface.co/datasets/svogunas/g2p-lt-lexicon)
