@@ -227,41 +227,9 @@ iš tų keturių.
 
 Šeima tęsėsi: **LIEPA-2** (1 000 val.) ir **LIEPA-3** (10 000 val., vadovė
 **prof. Gražina Korvel**) — būtent iš LIEPA-3 išmokyta žemiau minima Paprika.
-Kitas garsynas, tas pats sprendimas: paskelbti, o ne pasilikti. Atskirai apie
-prof. Korvel — skyrius **„Šio balso mama"** po padėkų.
+Kitas garsynas, tas pats sprendimas: paskelbti, o ne pasilikti.
 
-### Žodynas
-
-Kirčių žodynas sudarytas iš
-[`svogunas/g2p-lt-lexicon`](https://huggingface.co/datasets/svogunas/g2p-lt-lexicon),
-**Arūno Smaliuko** darbo (CC BY 4.0). Beveik kiekvienas kirčiuotas šio balso
-žodis stovi ant jo darbo — 176 637 iš 189 247 įrašų.
-
-### Ausys
-
-**[`paprika-whisper-lt-v3`](https://huggingface.co/kristijonas/paprika-whisper-lt-v3)**,
-**[Kristijono Jakubsono](https://github.com/kristijonasatpro/paprika)**
-(CC-BY-4.0 / Apache-2.0). Be jo šis balsas būtų pusė sistemos: lietuviškai su
-namais kalbėtis galima todėl, kad jis pirmas padarė klausymą.
-
-### Rodyklė
-
-**Linas Petkevičius, PhD** — AI Lietuva prezidentas ir Vilniaus universiteto
-Informatikos instituto direktorius. Viešoje LinkedIn gijoje apie tai, kaip
-platinami LIEPA-3 įrašai, jis parašė komentarą, išdėsčiusį, kas įkėlė duomenis
-į Hugging Face ir kas jais išmokė lietuvišką modelį. Nuo to komentaro šis
-projektas ir prasidėjo: be jo nebūtume radę Paprikos ir nebūtume ėję ieškoti
-garsyno, iš kurio padarytas šis balsas. Jis mums nieko neskolingas ir apie mus
-nieko nežinojo — kaip tik tai ir yra esmė. **Vienas tikslus viešas komentaras
-gali būti vertingesnis už projekto planą.**
-
-### Piper
-
-**Michael Hansen** ir **Open Home Foundation** — už sintezatorių, pakankamai
-mažą, kad suktųsi namų serveryje, ir pakankamai atvirą, kad trijų milijonų
-žmonių kalba galėtų prisidėti savęs neprašydama leidimo.
-
-## Šio balso mama
+### Šio balso mama
 
 **O Gražiną Korvel aš laikau Reginutės mama.**
 
@@ -296,8 +264,38 @@ balsas ir yra vienas iš tų, kas ant to pamato pastatyta — pastatytas žmogau
 iš šalies, be leidimo ir be prašymo, būtent taip, kaip pamatas ir turi
 veikti.
 
-Ji šio projekto neinicijavo, jo nekuravo ir už jį neatsako. Titulas — mano,
-ne jos; nuopelnas, dėl kurio jį suteikiu, — jos, ne mano.
+Ji šio projekto neinicijavo, jo nekuravo ir už jį neatsako.
+
+### Žodynas
+
+Kirčių žodynas sudarytas iš
+[`svogunas/g2p-lt-lexicon`](https://huggingface.co/datasets/svogunas/g2p-lt-lexicon),
+**Arūno Smaliuko** darbo (CC BY 4.0). Beveik kiekvienas kirčiuotas šio balso
+žodis stovi ant jo darbo — 176 637 iš 189 247 įrašų.
+
+### Ausys
+
+**[`paprika-whisper-lt-v3`](https://huggingface.co/kristijonas/paprika-whisper-lt-v3)**,
+**[Kristijono Jakubsono](https://github.com/kristijonasatpro/paprika)**
+(CC-BY-4.0 / Apache-2.0). Be jo šis balsas būtų pusė sistemos: lietuviškai su
+namais kalbėtis galima todėl, kad jis pirmas padarė klausymą.
+
+### Rodyklė
+
+**Linas Petkevičius, PhD** — AI Lietuva prezidentas ir Vilniaus universiteto
+Informatikos instituto direktorius. Viešoje LinkedIn gijoje apie tai, kaip
+platinami LIEPA-3 įrašai, jis parašė komentarą, išdėsčiusį, kas įkėlė duomenis
+į Hugging Face ir kas jais išmokė lietuvišką modelį. Nuo to komentaro šis
+projektas ir prasidėjo: be jo nebūtume radę Paprikos ir nebūtume ėję ieškoti
+garsyno, iš kurio padarytas šis balsas. Jis mums nieko neskolingas ir apie mus
+nieko nežinojo — kaip tik tai ir yra esmė. **Vienas tikslus viešas komentaras
+gali būti vertingesnis už projekto planą.**
+
+### Piper
+
+**Michael Hansen** ir **Open Home Foundation** — už sintezatorių, pakankamai
+mažą, kad suktųsi namų serveryje, ir pakankamai atvirą, kad trijų milijonų
+žmonių kalba galėtų prisidėti savęs neprašydama leidimo.
 
 ---
 
