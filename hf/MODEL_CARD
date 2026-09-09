@@ -122,5 +122,12 @@ you know what you are getting.
   University. Project lead: prof. Laimutis Telksnys. Corpus work and
   documentation: Gediminas Navickas.
 * Published to Hugging Face as `meldynamics/liepa-tts` by MEL DYNAMICS, MB.
+* LIEPA-3 (10 000 h) — led by prof. Gražina Korvel. A different, much larger
+  corpus: it is what the Lithuanian ASR model paired with this voice is
+  trained on, not this voice. Separately, her group's paper on VITS for
+  Lithuanian (Lėveris & Korvel, VU Open Series 2026,
+  doi:10.15388/LMITT.2026.15) removed a multi-speaker branch from this
+  voice's plans and supplied its only close reference point. The author of
+  this voice calls her its mother; the reasoning is in the repository README.
 * Thanks to Vilnius University for publishing the corpus under an open licence
   instead of keeping it.
