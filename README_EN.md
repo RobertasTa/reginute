@@ -232,7 +232,8 @@ those four.
 
 The family continued: **LIEPA-2** (1 000 h) and **LIEPA-3** (10 000 h, led by
 **prof. Gražina Korvel**), and it is LIEPA-3 that Paprika below is trained on.
-Different corpus, same decision — publish it rather than keep it.
+Different corpus, same decision — publish it rather than keep it. On prof.
+Korvel specifically, see **"The mother of this voice"** after this section.
 
 ### The dictionary
 
@@ -265,6 +266,47 @@ be worth more than a project plan.**
 **Michael Hansen** and the **Open Home Foundation** — for a text-to-speech
 system small enough to run on a home server and open enough that a language
 with three million speakers can add itself without asking permission.
+
+## The mother of this voice
+
+**And Gražina Korvel — I consider her the mother of Reginutė.**
+
+Not for the recordings — those are LIEPA-1 and prof. Laimutis Telksnys's
+work, as stated above. For the fact that her work made mine on this model
+easier. Three things that are hers.
+
+**She has worked on this subject since 2013.** Her doctoral work was on
+dynamic models of Lithuanian phonemes and their **synthesis** — not
+recognition. Then a phoneme harmonic generator, voiceless stop consonant
+modelling, an acoustic comparison of Lithuanian and Polish consonants, an
+overview of Lithuanian intonation. This voice is that same thirteen-year
+line, only carried as far as a speaker on a shelf.
+
+**Her group's work changed this voice's course.** V. Lėveris, G. Korvel,
+"Investigation of VITS Text-to-Speech for the Lithuanian Language" (VU Open
+Series, 2026, [DOI 10.15388/LMITT.2026.15](https://doi.org/10.15388/LMITT.2026.15))
+measured that for Lithuanian, with ~3 h of data, a multi-speaker model makes
+quality **worse** (MCD +36 %, DTW-L2 +49 %). That removed an already-written
+multi-speaker branch from this voice's plans — without spending a single
+training night on it. The same paper provided the only close reference point
+(female speaker, LIEPA corpus, ~3.5 h: MCD 18.61 dB, F0 RMSE 22.67 Hz)
+against which this voice can be measured in numbers rather than by ear. The
+paper appeared after the first release, so it did not shape v1 — but it set
+where v2 goes.
+
+**She leads LIEPA-3** — the corpus the ears are trained on, the ears by which
+this voice is heard in a house. Both halves of the chain, mouth and ears,
+passed through corpora she worked on.
+
+Her own words about LIEPA-3: *"not a finished product, but a foundation on
+which Lithuanian-language AI solutions will be built."* This voice is one of
+the things built on that foundation — built by an outsider, without
+permission and without asking, which is exactly how a foundation is supposed
+to work.
+
+She did not initiate this project, did not supervise it and is not
+responsible for it. The title is mine, not hers; the merit it rests on is
+hers, not mine.
 
 ---
 

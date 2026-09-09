@@ -95,6 +95,20 @@ voice.
   by **MEL DYNAMICS, MB**.
   (LIEPA-3, led by **prof. Gražina Korvel**, is a different and much larger
   corpus — it is what the ASR model below is trained on, not this voice.)
+* **The mother of this voice** — **prof. Gražina Korvel** (Vilnius University,
+  Institute of Data Science and Digital Technologies). A title granted by the
+  author of this voice in his own name, not an official one, and it rests on
+  her work rather than on courtesy: she has worked on Lithuanian speech
+  **synthesis** since her 2013 doctorate on dynamic models of Lithuanian
+  phonemes; her group's paper on VITS for Lithuanian (Lėveris & Korvel, VU
+  Open Series 2026, [doi:10.15388/LMITT.2026.15](https://doi.org/10.15388/LMITT.2026.15))
+  measured that a multi-speaker model makes Lithuanian quality worse with
+  ~3 h of data (MCD +36 %), which removed that branch from this voice's plans
+  and gave it its only close reference point (MCD 18.61 dB, F0 RMSE
+  22.67 Hz); and she leads LIEPA-3, the corpus behind the ears this voice is
+  paired with. She did not initiate this project and is not responsible for
+  it — the title is the author's, the merit is hers. Full reasoning in the
+  [repository README](https://github.com/RobertasTa/reginute/blob/main/README_EN.md#the-mother-of-this-voice).
 * **Stress dictionary** — derived from
   [`svogunas/g2p-lt-lexicon`](https://huggingface.co/datasets/svogunas/g2p-lt-lexicon)
   by **Arūnas Smaliukas** (CC BY 4.0), and from the LIEPA annotations.

@@ -227,7 +227,8 @@ iš tų keturių.
 
 Šeima tęsėsi: **LIEPA-2** (1 000 val.) ir **LIEPA-3** (10 000 val., vadovė
 **prof. Gražina Korvel**) — būtent iš LIEPA-3 išmokyta žemiau minima Paprika.
-Kitas garsynas, tas pats sprendimas: paskelbti, o ne pasilikti.
+Kitas garsynas, tas pats sprendimas: paskelbti, o ne pasilikti. Atskirai apie
+prof. Korvel — skyrius **„Šio balso mama"** po padėkų.
 
 ### Žodynas
 
@@ -259,6 +260,44 @@ gali būti vertingesnis už projekto planą.**
 **Michael Hansen** ir **Open Home Foundation** — už sintezatorių, pakankamai
 mažą, kad suktųsi namų serveryje, ir pakankamai atvirą, kad trijų milijonų
 žmonių kalba galėtų prisidėti savęs neprašydama leidimo.
+
+## Šio balso mama
+
+**O Gražiną Korvel aš laikau Reginutės mama.**
+
+Ne dėl įrašų — jie yra LIEPA-1 ir prof. Laimučio Telksnio darbas, kaip
+parašyta aukščiau. Dėl to, kad jos darbai man palengvino darbą su šiuo
+modeliu. Trys dalykai, kurie yra jos.
+
+**Ji šia tema dirba nuo 2013 metų.** Jos daktaro darbas buvo apie lietuvių
+fonemų dinaminius modelius ir jų **sintezę** — ne atpažinimą. Po jo — fonemų
+harmoninis generatorius, bebalsių pribalsių modeliavimas, lietuvių ir lenkų
+priebalsių akustinė analizė, lietuvių intonacijos apžvalga. Šis balsas yra
+ta pati trylikos metų linija, tik nuvesta iki kolonėlės ant lentynos.
+
+**Jos grupės darbas pakeitė šio balso kelią.** V. Lėveris, G. Korvel,
+„Investigation of VITS Text-to-Speech for the Lithuanian Language" (VU Open
+Series, 2026, [DOI 10.15388/LMITT.2026.15](https://doi.org/10.15388/LMITT.2026.15))
+pamatavo, kad kelių diktorių modelis lietuvių kalbai su ~3 val. duomenų
+kokybę **blogina** (MCD +36 %, DTW-L2 +49 %). Dėl to iš šio balso planų
+iškrito jau įrašyta kelių diktorių šaka — neišleidus nė vieno mokymo vakaro.
+Tas pats darbas davė ir vienintelį artimą atskaitos tašką (moteris, LIEPA
+korpusas, ~3,5 val.: MCD 18,61 dB, F0 RMSE 22,67 Hz), prieš kurį šį balsą
+apskritai galima pasimatuoti skaičiais, o ne ausimi. Straipsnis pasirodė po
+pirmos versijos, tad jos nepaveikė — bet jis nustatė, kur eina antra.
+
+**Ji vadovauja LIEPA-3** — garsynui, iš kurio išmokytos ausys, kuriomis šis
+balsas namuose išgirstamas. Abi grandinės pusės, burna ir ausys, praėjo per
+garsynus, prie kurių ji dirbo.
+
+Jos pačios žodžiai apie LIEPA-3: *„ne galutinis produktas, o pamatas, ant
+kurio bus statomi lietuvių kalbos dirbtinio intelekto sprendimai."* Šis
+balsas ir yra vienas iš tų, kas ant to pamato pastatyta — pastatytas žmogaus
+iš šalies, be leidimo ir be prašymo, būtent taip, kaip pamatas ir turi
+veikti.
+
+Ji šio projekto neinicijavo, jo nekuravo ir už jį neatsako. Titulas — mano,
+ne jos; nuopelnas, dėl kurio jį suteikiu, — jos, ne mano.
 
 ---
 
