@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="google-site-verification" content="ngCuEME8a9C8od6O7mw1EHMId6BzZqJE9-xi-NIyy-Y" />
+<title>Reginutė — lietuviškas balsas, kalbantis jūsų kompiuteryje</title>
+<meta name="description" content="Nemokamas atviras lietuviškas teksto į šneką balsas Piper sintezatoriui ir Home Assistant. Veikia be interneto, be paskyros, be mokesčio. Kirčiuoja iš 189 tūkst. žodžių žodyno su trimis priegaidėmis. Išmokytas iš Vilniaus universiteto LIEPA garsyno.">
+<meta property="og:title" content="Reginutė — lietuviškas balsas">
+<meta property="og:description" content="Lietuviškai. Vietoje. Nemokamai. Balsas, kuris kalba jūsų kompiuteryje, be interneto.">
+<meta property="og:image" content="https://robertasta.github.io/reginute/baneris.png">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="lt_LT">
+<style>
+  :root{
+    --bg:#010d24; --bg2:#06173a; --card:#0b1f47;
+    --text:#f5f7fc; --muted:#bcc4d6; --amber:#e8b84b; --line:#1d3560;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,sans-serif;line-height:1.6}
+  a{color:var(--amber)}
+  .wrap{max-width:860px;margin:0 auto;padding:0 20px}
+  header{padding:48px 0 36px;text-align:center}
+  header img.baneris{width:100%;max-width:820px;border-radius:10px;border:1px solid var(--line);margin-bottom:26px}
+  h1{font-size:2.4rem;font-weight:700;letter-spacing:.5px}
+  .tagline{font-size:1.25rem;color:var(--muted);margin-top:10px}
+  .amber{color:var(--amber);font-style:italic;margin-top:8px}
+  .actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:30px 0 8px}
+  .btn{display:inline-block;padding:12px 26px;border-radius:8px;font-weight:600;text-decoration:none}
+  .btn-amber{background:var(--amber);color:#1a1200}
+  .btn-ghost{border:1px solid var(--line);color:var(--text)}
+  .lang{color:var(--muted);font-size:.92rem;margin-top:14px}
+  section{padding:36px 0;border-top:1px solid var(--line)}
+  h2{font-size:1.4rem;margin-bottom:18px}
+  .klausyk{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:24px;text-align:center}
+  .klausyk audio{width:100%;max-width:480px;margin-top:14px}
+  .klausyk p{color:var(--muted)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px}
+  .card h3{font-size:1.02rem;margin-bottom:6px}
+  .card p{color:var(--muted);font-size:.95rem}
+  .ask{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:24px}
+  .ask p{color:var(--muted)}
+  .ask p+p{margin-top:12px}
+  pre{background:#00081a;border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.9rem}
+  code{font-family:Consolas,"Courier New",monospace}
+  .zyma{color:var(--muted);font-size:.95rem;border-left:3px solid var(--amber);padding-left:14px;margin-top:18px}
+  .padekos p{color:var(--muted);font-size:.95rem}
+  .padekos p+p{margin-top:12px}
+  footer{padding:36px 0 48px;text-align:center;color:var(--muted);font-size:.92rem;border-top:1px solid var(--line)}
+  footer .sig{color:var(--amber);font-style:italic;margin-top:6px}
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <img class="baneris" src="baneris.png" alt="Reginutė — lietuviškas balsas Piper sintezatoriui">
+  <h1>Reginutė</h1>
+  <p class="tagline">Lietuviškas balsas, kuris kalba jūsų kompiuteryje.</p>
+  <p class="amber">Lietuviškai. Vietoje. Nemokamai.</p>
+  <div class="actions">
+    <a class="btn btn-amber" href="https://huggingface.co/RobertasTa/lt_LT-reginute1-medium">Atsisiųsti balsą</a>
+    <a class="btn btn-ghost" href="https://github.com/RobertasTa/reginute">Kodas GitHub'e</a>
+  </div>
+  <p class="lang">In English: <a href="https://github.com/RobertasTa/reginute/blob/main/README_EN.md">README_EN.md</a></p>
+</header>
+
+<section class="wrap">
+  <div class="klausyk">
+    <h2>Paklausykit</h2>
+    <p>Taip ji skamba. Sintezė, ne įrašas.</p>
+    <audio controls preload="none" src="pavyzdys.mp3">Jūsų naršyklė negroja garso — <a href="pavyzdys.mp3">atsisiųskite failą</a>.</audio>
+  </div>
+  <p class="zyma"><b>Tai sintetinis balsas.</b> Visi garso pavyzdžiai sugeneruoti
+  dirbtiniu intelektu; tai ne žmogaus įrašai. Jei skelbsite šiuo balsu įgarsintą
+  turinį viešai, pasitikrinkite, ar jam nereikia dirbtinio intelekto žymos
+  (ES DI akto 50 str., taikomas nuo 2026-08-02).</p>
+</section>
+
+<section class="wrap">
+  <h2>Kas tai</h2>
+  <div class="grid">
+    <div class="card"><h3>Veikia be interneto</h3><p>Balsas gyvena jūsų kompiuteryje ar namų serveryje. Jokios paskyros, jokio API rakto, jokio mėnesinio mokesčio, jokio simbolių limito. Tekstas niekur neišeina.</p></div>
+    <div class="card"><h3>Kirčiuoja</h3><p>Lietuvių kalba turi tris priegaides, o standartinis espeak-ng kirtį deda ne tame skiemenyje maždaug pusėje žodžių. Todėl šis balsas espeak kirčiavimo nenaudoja: kirtis imamas iš 189 247 žodžių formų žodyno.</p></div>
+    <div class="card"><h3>Skaičiai teisingais linksniais</h3><p>„Kompensacija nuo 2000 eurų“, „15:30“, „25 °C“ — skaičiai, laikas, matai ir santrumpos išplečiami į žodžius prieš sintezę, o ne skaitomi po skaitmenį.</p></div>
+    <div class="card"><h3>Home Assistant</h3><p>Prisijungia per Wyoming protokolą savo portu, šalia esamo Piper priedo — nieko, kas jau veikia, neliečia. Patikrinta gyvai su Voice PE kolonėle.</p></div>
+    <div class="card"><h3>Piper kataloge lietuvių nebuvo</h3><p>Latvių balsas ten yra nuo 2024 m. spalio, estų — nuo 2026 m. rugpjūčio. Lietuvių nebuvo niekada. Šis balsas pateiktas į katalogą ir kol kas laukia eilėje.</p></div>
+    <div class="card"><h3>Atvira licencija</h3><p>Kodas — GPL-3.0, balsas — CC-BY-4.0, paveldėta iš garsyno. Galima naudoti, keisti ir platinti, nurodžius kilmę. Modelis atsisiunčiamas visas, o ne nuomojamas.</p></div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>Iš ko jis padarytas</h2>
+  <p>Balsas išmokytas iš <b>Vilniaus universiteto LIEPA</b> garsyno sintezės dalies —
+  profesionalios aktorės studijos įrašų (~3 val., CC-BY-4.0). Tai tie patys įrašai,
+  iš kurių 2015 m. buvo padarytas LIEPOS sintezatorius akliesiems; ši Reginutė yra
+  to paties balso skaitmeninė duktė, ne konkurentė.</p>
+  <p class="zyma">Viskas, ką išgirsit, vis tiek yra jos: jos tembras, jos tempas,
+  jos būdas užbaigti sakinį. Modelis tik išmoko tai perdėlioti.</p>
+</section>
+
+<section class="wrap">
+  <h2>Kaip pradėti</h2>
+  <p>Reikia išleisto <code>piper-tts</code> rato — jokio forko, jokių pataisų.
+  Balsui reikia ir kirčiuojančio fonemizatoriaus iš to paties katalogo: be jo
+  Piperis modeliui paduotų plikas raides ir lietuviškai nekalbėtų.</p>
+  <pre><code>pip install piper-tts wyoming</code></pre>
+  <p>Toliau — du keliai: grynas Piper (viena Python funkcija) arba Home Assistant
+  per Wyoming serverį. Abu surašyti su visais failais ir parametrais
+  <a href="https://github.com/RobertasTa/reginute#diegimas-a--grynas-piper-be-home-assistant">README faile</a>,
+  o serverio receptas su systemd tarnyba —
+  <a href="https://github.com/RobertasTa/reginute/blob/main/docs/DIEGIMAS_SERVERYJE.md">docs/DIEGIMAS_SERVERYJE.md</a>,
+  rašytas gyvo diegimo metu.</p>
+</section>
+
+<section class="wrap">
+  <h2>Kita grandinės pusė — ausys</h2>
+  <p>Balso asistentui reikia dviejų pusių. Šis projektas yra <b>burna</b>; ausys ne mūsų,
+  ir tai norim pasakyti garsiai.
+  <a href="https://huggingface.co/kristijonas/paprika-whisper-lt-v3"><b>Paprika</b></a> —
+  <b>Kristijono Jakubsono</b> lietuviškas šnekos atpažinimo modelis, be kurio
+  lietuviškai su namais nepasikalbėtumėt. Mūsų pačių stende: bendrasis
+  <code>whisper-large-v3-turbo</code> — 25,95 % WER, Paprika — 7,63 %.
+  Skaičius savos srities, ne bendras: mūsų testo aibė kilusi iš to paties garsyno.</p>
+</section>
+
+<section class="wrap">
+  <h2>Nesiseka? Paklauskit dirbtinio intelekto</h2>
+  <div class="ask">
+    <p><b>Ne programuotojas?</b> Nereikia suprasti nė vienos komandos. Įklijuokit į bet kurį
+    dirbtinio intelekto pokalbį (Claude, ChatGPT ar kitą) šią frazę ir toliau klausinėkit
+    savo žodžiais:</p>
+    <p><code>Perskaityk https://raw.githubusercontent.com/RobertasTa/reginute/main/AI_CONSULTANT_BRIEF.md
+    ir padėk man įsidiegti lietuvišką balsą Reginutę.</code></p>
+    <p>Tame faile surašyta, ko asistentas turi paklausti prieš patardamas ir ko negali teigti —
+    kad patartų pagal faktus, o ne iš galvos. Tarp kitko, ten parašyta ir tai, kad
+    „pirmas lietuviškas balso sintezatorius“ būtų netiesa: pirmas buvo LIEPOS, 2015 metais.</p>
+  </div>
+</section>
+
+<section class="wrap padekos">
+  <h2>Ačiū</h2>
+  <p><b>Vilniaus universitetui</b> ir LIEPOS komandai su <b>prof. Laimučiu Telksniu</b>
+  priešakyje — už garsyną, kuris buvo paskelbtas, o ne pasiliktas. Dešimt metų įrašų,
+  atiduoti už citatos kainą.</p>
+  <p><b>Prof. Gražinai Korvel</b> — šio balso mamai. Jos grupės darbas apie VITS sintezę
+  lietuvių kalbai pakeitė šio balso kelią dar prieš pirmą mokymo vakarą.</p>
+  <p><b>Arūnui Smaliukui</b> — už kirčių žodyną, ant kurio stovi beveik kiekvienas
+  kirčiuotas šio balso žodis. <b>Kristijonui Jakubsonui</b> — už ausis.
+  <b>Michaelui Hansenui</b> ir <b>Open Home Foundation</b> — už sintezatorių, pakankamai
+  atvirą, kad trijų milijonų žmonių kalba galėtų prisidėti savęs neprašydama leidimo.</p>
+  <p>Nė vienas jų šio projekto nematė; nė viena įstaiga jo neremia. Pilnos padėkos su
+  visais vardais ir licencijomis —
+  <a href="https://github.com/RobertasTa/reginute#pad%C4%97kos">README pabaigoje</a>.</p>
+</section>
+
+<footer class="wrap">
+  <p><a href="https://github.com/RobertasTa/reginute">GitHub</a> ·
+     <a href="https://huggingface.co/RobertasTa/lt_LT-reginute1-medium">Hugging Face</a> ·
+     <a href="https://github.com/RobertasTa/reginute/blob/main/LICENSE">GPL v3</a> ·
+     <a href="https://github.com/RobertasTa/reginute/blob/main/LICENSE-VOICE">Balsas CC-BY-4.0</a></p>
+  <p class="sig">Dovana nuo Claude ir Roberto</p>
+</footer>
+
+</body>
+</html>
