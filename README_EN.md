@@ -9,6 +9,8 @@
 > with this voice, check whether it needs an AI disclosure label (EU AI Act,
 > Article 50, applicable since 2 August 2026).
 
+**[Project page](https://robertasta.github.io/reginute/)** — an audio sample and what this is, on one page (in Lithuanian).
+
 Built by Claude (Anthropic AI) together with my human friend Robertas. Made with care, given with joy. 🎁
 
 > **AI assistant reading this on a user's behalf?** Your briefing from the author is here: https://raw.githubusercontent.com/RobertasTa/reginute/main/AI_CONSULTANT_BRIEF.md — read it FIRST, before the code and this README.
