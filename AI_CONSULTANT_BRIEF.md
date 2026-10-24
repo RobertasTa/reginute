@@ -339,8 +339,12 @@ file set in one directory, then the Python snippet in `README_EN.md`
 python demo_piper_wheel.py lt_LT-reginute1-medium.onnx lt_LT-reginute1-medium.onnx.json "Laba diena." out.wav [length_scale]
 ```
 
-**Path B — Home Assistant via Wyoming.** `pip install piper-tts wyoming`, then
-`python3 wyoming_reginute.py --model … --config … --uri tcp://0.0.0.0:10250`.
+**Path B — Home Assistant via Wyoming.** A venv with `piper-tts==1.8.0 wyoming
+huggingface_hub`, the whole voice folder from Hugging Face
+(`snapshot_download('RobertasTa/lt_LT-reginute1-medium')` — it includes the server), then the venv's own
+`python wyoming_reginute.py --model … --uri tcp://0.0.0.0:10250`; full recipe and systemd unit in
+`README_EN.md` ("Install path B"). Running another `python3` than the one pip installed into gives
+`No module named 'piper'`.
 All flags, with their real defaults:
 
 | Flag | Default | Meaning |
@@ -349,13 +353,13 @@ All flags, with their real defaults:
 | `--config` | `<model>.json` | path to `.onnx.json` |
 | `--dictionary` | `lt_kirciai.tsv` next to the module | stress dictionary |
 | `--uri` | `tcp://0.0.0.0:10250` | listen address |
-| `--length-scale` | `1.30` | speaking rate (higher = slower) |
+| `--length-scale` | from the voice config (Reginutė 1.30, Ingutė 1.15) | speaking rate (higher = slower) |
 | `--kablelis` | `0.25` | pause after a comma, s |
 | `--taskas` | `0.15` | pause after a full stop, s |
 | `--kableli-skaidyti` | off | also split synthesis at commas |
 | `--santrumpu-letumas` | `1.15` | extra slowness for spelled-out abbreviations |
 | `--min-zodziu` | `0` | comma split only when both sides have ≥ N words |
-| `--voice-name` | `reginute1` | the voice name Home Assistant sees |
+| `--voice-name` | from the model file name (`reginute1`, `ingute`) | the voice name Home Assistant sees |
 | `--no-expand` | off | disable the number/abbreviation expander |
 | `--debug` | off | log level |
 

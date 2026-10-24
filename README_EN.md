@@ -76,13 +76,16 @@ include it.
 The released `piper-tts` wheel is enough — no fork, no patches.
 
 ```bash
-pip install piper-tts             # 1.7.x
+pip install piper-tts==1.8.0      # tested with 1.8.0
 ```
 
-One directory needs five files: `lt_LT-reginute1-medium.onnx` and its
-`.onnx.json` (from the Release or Hugging Face), and beside them
-`phonemize_lithuanian.py`, `lt_kirciai.tsv` and `skaiciu_pletiklis.py`
-(together with `zodziai_trumpi.txt`).
+All files must sit in one directory and come from the same set: the model
+`lt_LT-reginute1-medium.onnx` with its `.onnx.json`, `phonemize_lithuanian.py`
+with its tables `lt_kirciai.tsv`, `lt_raides.tsv`, `lt_kreipiniai.tsv`,
+`skaiciu_pletiklis.py` with `zodziai_trumpi.txt`, and `synth_reginute.py`.
+Simplest: the whole Hugging Face folder at once
+(`pip install huggingface_hub`, then `snapshot_download('RobertasTa/lt_LT-reginute1-medium', local_dir='reginute')`)
+and run Python inside that folder; tested this way on 2026-10-24.
 
 ```python
 from piper import PiperVoice
@@ -117,6 +120,9 @@ reads Lithuanian digits with the wrong case endings and clock times as plain
 numbers. `ReginuteSynth` calls it for you when given `expand_text=isplesk`.
 
 ## The other half of the chain — ears
+
+**For Home Assistant on a CPU we now recommend [LT_ausys](https://github.com/RobertasTa/lt-ausys)** (see below);
+Paprika stays our choice for long dictation ([Diktuoklė](https://github.com/RobertasTa/diktuokle)).
 
 A voice assistant needs two halves. This repository is the **mouth**; the
 **ears** are not ours, and we want to say so loudly.
@@ -157,24 +163,52 @@ transcribes a voice command in 0.21 s (Paprika: 3.55 s) and gets 10.6 % of the
 words wrong on read speech (FLEURS; Paprika 12.0 %). Our house now runs
 LT_ausys as the ears and Ingutė as the mouth.
 
-In our house the two halves run side by side as Wyoming services: Paprika as
-speech-to-text, Reginutė as text-to-speech, in a Lithuanian Assist pipeline
-next to a Russian one. See `docs/DU_ASISTENTAI_HA.md`.
+How a Lithuanian Assist pipeline ran next to a Russian one in our house (with
+Paprika and Reginutė at the time): `docs/DU_ASISTENTAI_HA.md`.
 
 ## Install path B — Home Assistant via Wyoming
 
 Runs beside your existing Piper add-on, on its own port; nothing existing is
 touched.
 
+Any Linux, as root (otherwise with `sudo`); tested on 2026-10-24 on a clean Ubuntu 24.04 container:
+
 ```bash
-pip install piper-tts wyoming
-python3 wyoming_reginute.py \
-    --model lt_LT-reginute1-medium.onnx \
-    --config lt_LT-reginute1-medium.onnx.json \
-    --dictionary lt_kirciai.tsv \
-    --uri tcp://0.0.0.0:10250 \
-    --length-scale 1.30
+apt install -y python3-venv
+python3 -m venv /opt/reginute/venv
+/opt/reginute/venv/bin/pip install piper-tts==1.8.0 wyoming huggingface_hub
+# every voice file and the server — from Hugging Face (~65 MB)
+/opt/reginute/venv/bin/python -c "from huggingface_hub import snapshot_download as s; s('RobertasTa/lt_LT-reginute1-medium', local_dir='/opt/reginute/voice')"
+# to try it
+/opt/reginute/venv/bin/python /opt/reginute/voice/wyoming_reginute.py --model /opt/reginute/voice/lt_LT-reginute1-medium.onnx --uri tcp://0.0.0.0:10250
 ```
+
+Always run the **venv's** Python (by full path, as above): if `pip` installed into one
+Python and `python3` is another, you get `No module named 'piper'` although `piper-tts`
+is installed. To have it start by itself — `/etc/systemd/system/reginute.service`:
+
+```ini
+[Unit]
+Description=Reginute - Lithuanian Piper voice over Wyoming
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/opt/reginute/venv/bin/python /opt/reginute/voice/wyoming_reginute.py --model /opt/reginute/voice/lt_LT-reginute1-medium.onnx --uri tcp://0.0.0.0:10250
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+systemctl daemon-reload && systemctl enable --now reginute
+```
+
+The log should say
+`reginute1 klauso tcp://0.0.0.0:10250 (tempas 1.3 iš konfigo, plėtiklis: taip)`
+("listening… speed 1.3 from the config").
 
 In Home Assistant: **Settings → Devices & Services → Add integration →
 Wyoming Protocol**, then the host and port 10250. The voice appears as
@@ -187,8 +221,13 @@ same server runs [Ingutė](https://github.com/RobertasTa/ingute) too.
 `reginute1`: Ingutė run through it without `--length-scale 1.15` spoke about
 13 % slower, stretched.
 
-Full recipe with a systemd unit and container settings in
-`docs/DIEGIMAS_SERVERYJE.md` (Lithuanian, written during the live install).
+Once Piper 1.9.0 is released (the Lithuanian phonemizer is already merged into
+`piper1-gpl`), Reginutė should work straight from the Home Assistant Piper
+add-on, and this server will no longer be needed. That is our expectation — we
+will check it when it is out.
+
+Container settings and the log of our live install: `docs/DIEGIMAS_SERVERYJE.md`
+(Lithuanian).
 How one speaker runs two languages with two wake words:
 `docs/DU_ASISTENTAI_HA.md`.
 

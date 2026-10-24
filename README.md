@@ -75,13 +75,16 @@ modulis turi stovėti prieš modelį. Abu diegimo keliai žemiau jį įtraukia.
 Reikia išleisto `piper-tts` rato — jokio forko, jokių pataisų.
 
 ```bash
-pip install piper-tts             # 1.7.x
+pip install piper-tts==1.8.0      # išbandyta su 1.8.0
 ```
 
-Vienam katalogui reikia penkių failų: `lt_LT-reginute1-medium.onnx` ir
-`.onnx.json` (iš Release arba Hugging Face), o šalia jų —
-`phonemize_lithuanian.py`, `lt_kirciai.tsv` ir `skaiciu_pletiklis.py`
-(kartu su `zodziai_trumpi.txt`).
+Visi failai turi gulėti viename kataloge ir būti iš to paties rinkinio: modelis
+`lt_LT-reginute1-medium.onnx` su `.onnx.json`, `phonemize_lithuanian.py` su
+lentelėmis `lt_kirciai.tsv`, `lt_raides.tsv`, `lt_kreipiniai.tsv`,
+`skaiciu_pletiklis.py` su `zodziai_trumpi.txt` ir `synth_reginute.py`.
+Paprasčiausia — visą Hugging Face katalogą vienu kartu
+(`pip install huggingface_hub`, tada `snapshot_download('RobertasTa/lt_LT-reginute1-medium', local_dir='reginute')`)
+ir Python leisti tame kataloge; taip išbandyta 2026-10-24.
 
 ```python
 from piper import PiperVoice
@@ -116,6 +119,9 @@ skaitmenis skaito ne tais linksniais, o laiką kaip paprastą skaičių.
 `ReginuteSynth` jį iškviečia pats, jei paduodate `expand_text=isplesk`.
 
 ## Kita grandinės pusė — ausys
+
+**Home Assistant'ui procesoriuje dabar siūlom [LT_ausys](https://github.com/RobertasTa/lt-ausys)** (žr. žemiau);
+Paprika lieka mūsų pasirinkimas ilgam diktavimui ([Diktuoklė](https://github.com/RobertasTa/diktuokle)).
 
 Balso asistentui reikia dviejų pusių. Šis katalogas yra **burna**; **ausys** ne
 mūsų, ir tai norim pasakyti garsiai.
@@ -156,23 +162,50 @@ komandą jis atpažįsta per 0,21 s (Paprika — 3,55 s), skaitomoje kalboje
 (FLEURS) klysta 10,6 % žodžių (Paprika — 12,0 %). Dabar mūsų namuose ausys —
 LT_ausys, burna — Ingutė.
 
-Mūsų namuose abi pusės sukasi greta kaip Wyoming tarnybos: Paprika — šneka į
-tekstą, Reginutė — tekstas į šneką, lietuviškame Assist konvejeryje šalia
-rusiško. Žr. `docs/DU_ASISTENTAI_HA.md`.
+Kaip mūsų namuose lietuviškas Assist konvejeris sukosi šalia rusiško (tada — Paprika
+ir Reginutė), žr. `docs/DU_ASISTENTAI_HA.md`.
 
 ## Diegimas B — Home Assistant per Wyoming
 
 Sukasi šalia jūsų esamo Piper priedo, savo porte; nieko esamo neliečia.
 
+Bet koks Linux, root'u (kitaip — su `sudo`); išbandyta 2026-10-24 švariame Ubuntu 24.04 konteineryje:
+
 ```bash
-pip install piper-tts wyoming
-python3 wyoming_reginute.py \
-    --model lt_LT-reginute1-medium.onnx \
-    --config lt_LT-reginute1-medium.onnx.json \
-    --dictionary lt_kirciai.tsv \
-    --uri tcp://0.0.0.0:10250 \
-    --length-scale 1.30
+apt install -y python3-venv
+python3 -m venv /opt/reginute/venv
+/opt/reginute/venv/bin/pip install piper-tts==1.8.0 wyoming huggingface_hub
+# visi balso failai ir serveris — iš Hugging Face (~65 MB)
+/opt/reginute/venv/bin/python -c "from huggingface_hub import snapshot_download as s; s('RobertasTa/lt_LT-reginute1-medium', local_dir='/opt/reginute/voice')"
+# bandymui
+/opt/reginute/venv/bin/python /opt/reginute/voice/wyoming_reginute.py --model /opt/reginute/voice/lt_LT-reginute1-medium.onnx --uri tcp://0.0.0.0:10250
 ```
+
+Visada leiskite **venv'o** Pythonu (pilnu keliu, kaip aukščiau): jei `pip` įdiegė į vieną
+Python, o `python3` yra kitas, gausite `No module named 'piper'`, nors `piper-tts` įdiegtas.
+Kad pasileistų pati — `/etc/systemd/system/reginute.service`:
+
+```ini
+[Unit]
+Description=Reginute - Lithuanian Piper voice over Wyoming
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/opt/reginute/venv/bin/python /opt/reginute/voice/wyoming_reginute.py --model /opt/reginute/voice/lt_LT-reginute1-medium.onnx --uri tcp://0.0.0.0:10250
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+systemctl daemon-reload && systemctl enable --now reginute
+```
+
+Paleidus žurnale turi būti:
+`reginute1 klauso tcp://0.0.0.0:10250 (tempas 1.3 iš konfigo, plėtiklis: taip)`.
 
 Home Assistant: **Settings → Devices & Services → Add integration → Wyoming
 Protocol**, įrašykite serverio adresą ir portą 10250. Balsas atsiras kaip
@@ -184,8 +217,11 @@ nebūtina, o tas pats serveris tinka ir [Ingutei](https://github.com/RobertasTa/
 ⚠️ Iki 2026-10-24 serveris **visiems** balsams duodavo 1.30 ir vardą `reginute1`:
 Ingutė, paleista juo be `--length-scale 1.15`, kalbėjo ~13 % lėčiau, ištęstai.
 
-Pilnas receptas su systemd tarnyba ir LXC konteinerio parametrais —
-`docs/DIEGIMAS_SERVERYJE.md`, rašytas gyvo diegimo metu.
+Kai išeis Piper 1.9.0 (lietuviškas fonemizatorius jau įlietas į `piper1-gpl`),
+Reginutė turėtų veikti tiesiai iš Home Assistant Piper priedo, ir šio serverio
+nebereikės. Tai mūsų lūkestis — patikrinsim, kai išeis.
+
+LXC konteinerio parametrai ir mūsų gyvo diegimo eiga — `docs/DIEGIMAS_SERVERYJE.md`.
 Kaip viena kolonėlė kalba dviem kalbomis (du žadinimo žodžiai, du asistentai)
 — `docs/DU_ASISTENTAI_HA.md`.
 
