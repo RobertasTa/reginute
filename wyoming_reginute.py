@@ -1,21 +1,26 @@
-# Wyoming TTS server for Reginutė - the self-hosted path, for running the
-# voice without waiting for anything to be merged upstream. It does what
-# wyoming-piper does, with the Lithuanian phonemizer in front of the model;
-# the voice config uses phoneme_type = "text".
+# Wyoming TTS server for Reginutė and Ingutė - the self-hosted path, for
+# running the voices without waiting for anything to be merged upstream. It
+# does what wyoming-piper does, with the Lithuanian phonemizer in front of the
+# model; the voice config uses phoneme_type = "text" (the config from the
+# voice's GitHub repo, not the one from the Piper catalogue).
 #
 # Home Assistant sees it as any other Wyoming TTS service (Settings →
 # Integrations → Wyoming → host:port). It runs beside an existing
 # wyoming-piper on a DIFFERENT port, so nothing already working is touched.
+# Synthesis runs on the CPU (onnxruntime); a 2-core container on a Ryzen mini
+# PC makes 16 s of speech in 1.8 s.
 #
-# Usage:
-#   python3 wyoming_reginute.py --model lt_LT-reginute1-medium.onnx \
-#       --config lt_LT-reginute1-medium.onnx.json --uri tcp://0.0.0.0:10250 \
-#       [--dictionary lt_kirciai.tsv] [--length-scale 1.30]
+# Usage (speed and voice name come from the model and its config):
+#   python3 wyoming_reginute.py --model lt_LT-ingute-medium.onnx --uri tcp://0.0.0.0:10250
+#   python3 wyoming_reginute.py --model lt_LT-reginute1-medium.onnx --uri tcp://0.0.0.0:10251
+#   [--config X.onnx.json] [--dictionary lt_kirciai.tsv] [--length-scale N] [--voice-name N]
 # Requires: pip install piper-tts wyoming
 import argparse
 import asyncio
+import json
 import logging
 import os
+import re
 import sys
 from functools import partial
 
@@ -69,11 +74,12 @@ async def main() -> None:
     p.add_argument("--config", default=None, help="numatyta: MODEL + .json")
     p.add_argument("--dictionary", default=str(DEFAULT_DICTIONARY_PATH))
     p.add_argument("--uri", default="tcp://0.0.0.0:10250")
-    # The default used to be 1.25 while the agreed speed was 1.30. A service
-    # file that states the speed explicitly is unaffected - but anyone running
-    # this without arguments would have got a different voice than the one
-    # that was listened to and approved.
-    p.add_argument("--length-scale", type=float, default=1.30)
+    # The speed each voice was listened to and approved at lives in its own
+    # config (inference.length_scale): Reginutė 1.30, Ingutė 1.15. This used to
+    # default to 1.30 for every voice, so Ingutė run without the flag spoke at
+    # her sister's slower pace - stretched, and more robotic than she is.
+    p.add_argument("--length-scale", type=float, default=None,
+                   help="tempas; numatyta: iš balso konfigo (Reginutė 1.30, Ingutė 1.15)")
     p.add_argument("--kablelis", type=float, default=0.25, help="pauzė po kablelio, s")
     p.add_argument("--taskas", type=float, default=0.15, help="pauzė po taško, s")
     p.add_argument("--kableli-skaidyti", action="store_true",
@@ -82,36 +88,50 @@ async def main() -> None:
                    help="kiek lėčiau tarti raidines santrumpas (1.0 = kaip kalbą)")
     p.add_argument("--min-zodziu", type=int, default=0,
                    help="ties kableliu skaidyti tik kai abi pusės >= N žodžių (0 = visada)")
-    p.add_argument("--voice-name", default="reginute1")
+    p.add_argument("--voice-name", default=None,
+                   help="balso vardas Home Assistant'e; numatyta: iš modelio failo (reginute1, ingute)")
     p.add_argument("--no-expand", action="store_true",
                    help="neplėsti skaičių/santrumpų (palikti espeak'ui)")
     p.add_argument("--debug", action="store_true")
     args = p.parse_args()
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
 
-    voice = PiperVoice.load(args.model, config_path=args.config)
-    if voice.config.phoneme_type.value != "text":
-        raise SystemExit("Balso config turi būti phoneme_type=text (fonemas duodam mes)")
+    config_path = args.config or args.model + ".json"
+    with open(config_path, encoding="utf-8") as f:
+        phoneme_type = json.load(f).get("phoneme_type")
+    if phoneme_type != "text":
+        # The official Piper catalogue ships these voices with
+        # phoneme_type "lithuanian" (for Piper >= 1.9.0, which phonemizes
+        # itself); piper-tts 1.8.0 cannot even parse that, and fails cryptically.
+        raise SystemExit(
+            f"{config_path}: phoneme_type={phoneme_type!r}, šiam serveriui reikia \"text\" "
+            "(fonemas duodam mes). Imkite .onnx.json iš balso GitHub repo "
+            "(github.com/RobertasTa/ingute arba /reginute), ne iš Piper katalogo.")
+    voice = PiperVoice.load(args.model, config_path=config_path)
+    length_scale = args.length_scale if args.length_scale is not None else voice.config.length_scale
+    voice_name = args.voice_name or re.sub(
+        r"-(x_low|low|medium|high)$", "", re.sub(r"^[a-z]{2,3}_[A-Z]{2}-", "", os.path.basename(args.model)[:-5]))
     expand = None if (args.no_expand or _isplesk is None) else _isplesk
     phonemizer = LithuanianPhonemizer(dictionary_path=args.dictionary)
-    synth = ReginuteSynth(voice, phonemizer, length_scale=args.length_scale,
+    synth = ReginuteSynth(voice, phonemizer, length_scale=length_scale,
                           kablelis=args.kablelis, taskas=args.taskas, expand_text=expand,
                           min_zodziu=args.min_zodziu,
                           santrumpu_letumas=args.santrumpu_letumas,
                           kableli_skaidyti=args.kableli_skaidyti)
 
     info = Info(tts=[TtsProgram(
-        name="reginute", description="Reginutė — lietuviškas Piper balsas su priegaidėmis",
+        name="reginute", description="Lietuviškas Piper balsas su priegaidėmis (Reginutė / Ingutė)",
         attribution=Attribution(name="liepa-tts / Vilnius University (CC-BY-4.0)",
                                 url="https://huggingface.co/meldynamics/liepa-tts"),
         installed=True, version="0.1",
         voices=[TtsVoice(
-            name=args.voice_name, description="Reginutė (medium, 22050 Hz)",
+            name=voice_name, description=f"{voice_name} ({synth.sr} Hz, length_scale {length_scale})",
             attribution=Attribution(name="liepa-tts", url="https://huggingface.co/meldynamics/liepa-tts"),
             installed=True, version="0.1", languages=["lt", "lt_LT", "lt-LT"])])])
 
     server = AsyncServer.from_uri(args.uri)
-    _LOGGER.info("Reginutė klauso %s (plėtiklis: %s)", args.uri, "taip" if expand else "ne")
+    _LOGGER.info("%s klauso %s (tempas %s%s, plėtiklis: %s)", voice_name, args.uri, length_scale,
+                 "" if args.length_scale is not None else " iš konfigo", "taip" if expand else "ne")
     await server.run(partial(ReginuteHandler, info, synth))
 
 

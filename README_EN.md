@@ -150,6 +150,13 @@ commands that is harmless — they fit in a single window — but the chunked
 decoder is documented to invent text on silence, so a long recording deserves
 `transcribe_file.py` from his repo instead.
 
+**Since 2026-10-24 — faster ears for a CPU: [LT_ausys](https://github.com/RobertasTa/lt-ausys).**
+It is Kristijonas's [kmynas](https://huggingface.co/kristijonas/kmynas-parakeet-lt-v4)
+(Parakeet-TDT, LIEPA-3), exported by us to ONNX. On the same mini PC it
+transcribes a voice command in 0.21 s (Paprika: 3.55 s) and gets 10.6 % of the
+words wrong on read speech (FLEURS; Paprika 12.0 %). Our house now runs
+LT_ausys as the ears and Ingutė as the mouth.
+
 In our house the two halves run side by side as Wyoming services: Paprika as
 speech-to-text, Reginutė as text-to-speech, in a Lithuanian Assist pipeline
 next to a Russian one. See `docs/DU_ASISTENTAI_HA.md`.
@@ -172,6 +179,13 @@ python3 wyoming_reginute.py \
 In Home Assistant: **Settings → Devices & Services → Add integration →
 Wyoming Protocol**, then the host and port 10250. The voice appears as
 `reginute1`.
+
+Speed and voice name come from the model and its config (Reginutė 1.30 and
+`reginute1`, Ingutė 1.15 and `ingute`), so `--length-scale` is optional and the
+same server runs [Ingutė](https://github.com/RobertasTa/ingute) too.
+⚠️ Before 2026-10-24 the server gave **every** voice 1.30 and the name
+`reginute1`: Ingutė run through it without `--length-scale 1.15` spoke about
+13 % slower, stretched.
 
 Full recipe with a systemd unit and container settings in
 `docs/DIEGIMAS_SERVERYJE.md` (Lithuanian, written during the live install).

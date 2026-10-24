@@ -149,6 +149,13 @@ komandoms tai nekenkia — jos telpa į vieną langą, — bet gabalų dekoderis
 dokumentuotai prasimano tekstą ant tylos, tad ilgam įrašui verčiau jo repo
 `transcribe_file.py`.
 
+**Nuo 2026-10-24 — greitesnės ausys procesoriui: [LT_ausys](https://github.com/RobertasTa/lt-ausys).**
+Tai Kristijono [kmynas](https://huggingface.co/kristijonas/kmynas-parakeet-lt-v4)
+(Parakeet-TDT, LIEPA-3), mūsų perkeltas į ONNX. Tame pačiame mini PC balso
+komandą jis atpažįsta per 0,21 s (Paprika — 3,55 s), skaitomoje kalboje
+(FLEURS) klysta 10,6 % žodžių (Paprika — 12,0 %). Dabar mūsų namuose ausys —
+LT_ausys, burna — Ingutė.
+
 Mūsų namuose abi pusės sukasi greta kaip Wyoming tarnybos: Paprika — šneka į
 tekstą, Reginutė — tekstas į šneką, lietuviškame Assist konvejeryje šalia
 rusiško. Žr. `docs/DU_ASISTENTAI_HA.md`.
@@ -170,6 +177,12 @@ python3 wyoming_reginute.py \
 Home Assistant: **Settings → Devices & Services → Add integration → Wyoming
 Protocol**, įrašykite serverio adresą ir portą 10250. Balsas atsiras kaip
 `reginute1`.
+
+Tempas ir balso vardas imami iš modelio ir jo konfigo (Reginutė — 1.30 ir
+`reginute1`, Ingutė — 1.15 ir `ingute`), tad `--length-scale` nurodyti
+nebūtina, o tas pats serveris tinka ir [Ingutei](https://github.com/RobertasTa/ingute).
+⚠️ Iki 2026-10-24 serveris **visiems** balsams duodavo 1.30 ir vardą `reginute1`:
+Ingutė, paleista juo be `--length-scale 1.15`, kalbėjo ~13 % lėčiau, ištęstai.
 
 Pilnas receptas su systemd tarnyba ir LXC konteinerio parametrais —
 `docs/DIEGIMAS_SERVERYJE.md`, rašytas gyvo diegimo metu.
