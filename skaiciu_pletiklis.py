@@ -166,7 +166,7 @@ KELINT_GAL = {("m", "V"): "as", ("m", "G"): "ą", ("m", "K"): "o",
               ("m", "Idgs"): "ais", ("m", "Vdgs"): "i",
               ("f", "V"): "a", ("f", "G"): "ą", ("f", "K"): "os", ("m", "Kdgs"): "ų"}
 IVARDZ = {("m", "V"): "asis", ("m", "G"): "ąjį", ("f", "V"): "oji",
-          ("f", "G"): "ąją", ("m", "Idgs"): "aisiais"}
+          ("f", "G"): "ąją", ("f", "K"): "osios", ("m", "Idgs"): "aisiais"}
 
 
 def kelintinis(n, gimine="m", forma="V", ivardz=False):
@@ -315,8 +315,23 @@ VIENETAI = {
     "Wh":  ("vatvalandė", "vatvalandės", "vatvalandžių", "_f"),
     "kWh": ("kilovatvalandė", "kilovatvalandės", "kilovatvalandžių", "_f"),
     "proc": ("procentas", "procentai", "procentų", ""),
+    # Home Assistant speaks sensor states as the value plus its unit symbol
+    # ("21.5 °C", "45 %", "1013 hPa", "3.2 km/h", "120 W"). None of these
+    # symbols was in the table, so the number was read and the unit was not.
+    # °C is just "laipsniai": that is how people say a temperature aloud.
+    "°C":  ("laipsnis", "laipsniai", "laipsnių", ""),
+    "°F":  ("laipsnis pagal Farenheitą", "laipsniai pagal Farenheitą", "laipsnių pagal Farenheitą", ""),
+    "°":   ("laipsnis", "laipsniai", "laipsnių", ""),
+    "%":   ("procentas", "procentai", "procentų", ""),
+    "hPa": ("hektopaskalis", "hektopaskaliai", "hektopaskalių", ""),
+    "km/h": ("kilometras per valandą", "kilometrai per valandą", "kilometrų per valandą", ""),
+    "m/s": ("metras per sekundę", "metrai per sekundę", "metrų per sekundę", ""),
+    "W":   ("vatas", "vatai", "vatų", ""),
+    "lx":  ("liuksas", "liuksai", "liuksų", ""),
+    "dB":  ("decibelas", "decibelai", "decibelų", ""),
+    "ppm": ("milijoninė dalis", "milijoninės dalys", "milijoninių dalių", "_f"),
 }
-# Single-letter units (W, A, V, m, g, t, l) are deliberately NOT included.
+# Single-letter units (A, V, m, g, t, l) are deliberately NOT included.
 # Every one of them has a second meaning in Lithuanian text: V is also the
 # Roman numeral five, A. V. W. are initials in names, g. is "street", t. is
 # part of common abbreviations. Requiring a number in front rejects most of
@@ -324,7 +339,30 @@ VIENETAI = {
 # class". The cost is that "2 m" and "500 g" stay as letters - better an odd
 # reading in a rare place than a confident lie in a common one. Adding them
 # back is one line in the table and one in the pattern.
-VIENETU_SABLONAS = "kWh|kW|Wh|km|kg|cm|mm|ml|ha|proc\\."
+# W is the one exception: every Home Assistant power sensor ends in it, while
+# "W." as an initial is followed by a full stop and a name, not by a number.
+VIENETU_SABLONAS = "kWh|kW|Wh|W|km/h|km|kg|cm|mm|ml|m/s|hPa|ha|lx|dB|ppm|°C|°F|°|%|proc\\."
+# Words that mean the number before them is a measurement, so "21.50" is a
+# decimal and not the clock time 21:50 ("21.50 laipsnių").
+MATU_ZODZIAI = r"laipsn|procent|kilometr|centimetr|milimetr|metr|kilogram|gram|litr|vat|kilovat|hektopaskal|liuks|decibel"
+
+
+def _trupmena(tr, gimine=""):
+    """The digits after the decimal comma, as people read them: a number, with
+    leading zeros spoken. "0,05" used to come out as "nulis kablelis penki",
+    which is 0,5. Tails longer than three digits are read digit by digit."""
+    if len(tr) > 3:
+        return " ".join(kiekinis(int(c), "V", gimine) for c in tr)
+    likutis = tr.lstrip("0")
+    zodziai = ["nulis"] * (len(tr) - len(likutis))
+    if likutis:
+        zodziai.append(kiekinis(int(likutis), "V", gimine))
+    return " ".join(zodziai)
+
+
+def _trupmenos_paskutinis(tr):
+    """The last number actually spoken after the comma - what the unit agrees with."""
+    return int(tr[-1]) if len(tr) > 3 else int(tr)
 
 
 def _skaic_forma(n, formos):
@@ -346,6 +384,7 @@ EL_PASTAS = {"paštas": "elektroninis", "paštu": "elektroniniu",
              "paštais": "elektroniniais", "paštams": "elektroniniams"}
 
 MOT_ZODZIAI = r"(valand|dien|minut|savait|sekund|viet|klas|kart(?!ą))"
+MENESIAI = r"sausio|vasario|kovo|balandžio|gegužės|birželio|liepos|rugpjūčio|rugsėjo|spalio|lapkričio|gruodžio"
 GAL_VEIKSMAZODZIAI = r"(kainuoja|kainavo|moka|mokėjo|sumokėjo|gavo|gaus|" \
                      r"turi|turėjo|siekia|siekė|sudaro|sudarė|uždirba|uždirbo|" \
                      r"skyrė|skirs|prarado|laimėjo|surinko)"
@@ -363,6 +402,34 @@ def isplesk(t):
         zodis = EL_PASTAS.get(vnt.lower(), "elektroninis")
         return (zodis.capitalize() if m.group(1)[0].isupper() else zodis) + " " + vnt
     t = re.sub(r"\b([Ee]l)\.\s*(pašt[a-ząčęėįšųūž]*)", _el_pastas, t)
+    # A minus glued to a number. "-3.5 °C" lost its sign altogether and was
+    # read as plus three and a half - Home Assistant's weather answer has
+    # exactly this shape. Only a sign that starts a token counts, so ranges
+    # ("5-7") and dates ("2026-10-24") are left alone.
+    t = re.sub(r"(?<![\w.,])[-−–](?=\d)", "minus ", t)
+    # Numbers written with a POINT. Lithuanian news uses it for thousands
+    # ("250.000 žmonių", "90.000 Eur" - always three digits after it) and for
+    # clock times ("22.30 val."); Home Assistant uses it for decimals ("21.5
+    # °C", "3.25 kWh"). None of it was handled: the halves were read as two
+    # numbers glued together ("dvidešimt vienas.penki"). A unit symbol or a
+    # measuring word after the number makes it a decimal; otherwise groups of
+    # three digits are thousands and a possible hh.mm is a time. A second
+    # point that is not a thousands group (versions, dates) leaves it alone.
+    def _matas(po):
+        return re.match(r"\s*(?:(?:" + VIENETU_SABLONAS + r")(?=\s|$|[.,;:!?])|" + MATU_ZODZIAI + r")", po)
+
+    def _tukstanciai(m):
+        return m.group(0) if _matas(m.string[m.end():]) else m.group(0).replace(".", "")
+    t = re.sub(r"(?<![\w.,])\d{1,3}(?:\.\d{3})+(?![.,]?\d)", _tukstanciai, t)
+
+    def _taskas(m):
+        a, b = m.group(1), m.group(2)
+        po = m.string[m.end():]
+        if (not _matas(po) and len(b) == 2 and int(a) <= 23 and int(b) <= 59
+                and not re.match(r"\s*(?:Eur\b|eur|€)", po)):
+            return f"{a}:{b}"
+        return f"{a},{b}"
+    t = re.sub(r"(?<![\w.,])(\d+)\.(\d+)(?![.,]?\d)", _taskas, t)
     # Units of measurement, made to agree with the number in front of them.
     # `km` used to expand to a fixed genitive plural, so "12 km" happened to
     # be right while "5 km" and "100,5 km" were not. The unit has to agree
@@ -371,10 +438,9 @@ def isplesk(t):
     # general abbreviation table.
     def _vienetas(m):
         sk, tr, vnt = m.group(1), m.group(2), m.group(3)
-        n = int(tr) if tr else int(sk)
+        n = _trupmenos_paskutinis(tr) if tr else int(sk)
         *formos, gim = VIENETAI[vnt.rstrip(".")]
-        skaic = (f"{kiekinis(int(sk), 'V', gim)} kablelis "
-                 f"{kiekinis(int(tr), 'V', gim)}" if tr
+        skaic = (f"{kiekinis(int(sk), 'V', gim)} kablelis {_trupmena(tr, gim)}" if tr
                  else kiekinis(int(sk), "V", gim))
         # The full stop in "proc." belongs to the abbreviation, but at the end
         # of a sentence it also ends the sentence - and the synthesis splits
@@ -383,8 +449,19 @@ def isplesk(t):
         galas = "." if (vnt.endswith(".") and
                         (not liko.strip() or re.match(r"\s+[A-ZĄČĘĖĮŠŲŪŽ]", liko))) else ""
         return f"{skaic} {_skaic_forma(n, formos)}{galas}"
-    t = re.sub(r"\b(\d{1,9})(?:,(\d{1,2}))?\s*(" + VIENETU_SABLONAS +
+    t = re.sub(r"\b(\d{1,9})(?:,(\d+))?\s*(" + VIENETU_SABLONAS +
                r")(?=\s|$|[.,;:!?])", _vienetas, t)
+    # "1,3 mln." and "405,4 tūkst." - a decimal multiplier. The integer rules
+    # below caught only the digits after the comma and multiplied THEM, so the
+    # sentence said "vienas,trys milijonai", or, once decimals were read
+    # properly, a string of zeros. The multiplier word agrees with the last
+    # number spoken, like the units above.
+    def _dalinis_daugiklis(m):
+        formos = (("milijonas", "milijonai", "milijonų") if m.group(3) == "mln"
+                  else ("tūkstantis", "tūkstančiai", "tūkstančių"))
+        return (f"{kiekinis(int(m.group(1)))} kablelis {_trupmena(m.group(2))} "
+                + _skaic_forma(_trupmenos_paskutinis(m.group(2)), formos))
+    t = re.sub(r"\b(\d{1,3}),(\d+)\s*(mln|tūkst)\.", _dalinis_daugiklis, t)
     # "5 mln." is a MULTIPLIER, not a unit. In the abbreviation table it was
     # locked to the nominative, so a sentence like "skirs 5 mln. eurų" put the
     # number in the accusative and the millions in the nominative. Turning it
@@ -428,9 +505,8 @@ def isplesk(t):
     # comma stayed between the two words and the whole thing was spoken as one
     # glued-together word. Must run BEFORE the remaining number rules, which
     # would otherwise process the two halves separately.
-    t = re.sub(r"\b(\d+),(\d{1,2})\b",
-               lambda m: f"{kiekinis(int(m.group(1)))} kablelis "
-                         f"{kiekinis(int(m.group(2)))}", t)
+    t = re.sub(r"\b(\d+),(\d+)\b",
+               lambda m: f"{kiekinis(int(m.group(1)))} kablelis {_trupmena(m.group(2))}", t)
     # Clock times. A whole hour is read as an ordinal ("the fifteenth hour"),
     # otherwise as hour + minutes. After "nuo"/"iki"/"ligi" Lithuanian needs
     # the GENITIVE - "nuo aštuntos valandos", not "nuo aštuntą valandą" -
@@ -447,6 +523,35 @@ def isplesk(t):
         val = kiekinis(h, "K") if kilm else kiekinis(h)
         return val + " " + (kiekinis(mi) if mi > 9 else "nulis " + kiekinis(mi))
     t = re.sub(r"\b(\d{1,2}):(\d{2})\b", _laikas, t)
+    # Dates. With a month after it, "2026 m." is the genitive "metų" - and the
+    # year rule below never matched "m." anyway: `\b` after the full stop needs
+    # a word character next. The day is a definite ordinal: nominative only
+    # when the date is the whole text, as in Home Assistant's answer "2026 m.
+    # spalio 24 d." ("dvidešimt ketvirtoji diena"); accusative in a sentence,
+    # even at its end ("pristatysiu lapkričio 29 d." - on the 29th);
+    # genitive after nuo/iki.
+    def _data(m):
+        if not (m.group(1) or m.group(3)):
+            return m.group(0)
+        dalys = []
+        if m.group(1):
+            dalys.append(kelintinis(int(m.group(1)), "m", "Kdgs") + " metų")
+        dalys.append(m.group(2))
+        if m.group(3):
+            d = int(m.group(3))
+            liko = m.string[m.end():]
+            pries = (m.string[:m.start()].rstrip().split() or [""])[-1].lower()
+            if pries in NUO_IKI:
+                dalys.append(kelintinis(d, "f", "K", ivardz=True) + " dienos")
+            elif not liko.strip(" .,!?") and not m.string[:m.start()].strip():
+                dalys.append(kelintinis(d, "f", "V", ivardz=True) + " diena")
+            else:
+                dalys.append(kelintinis(d, "f", "G", ivardz=True) + " dieną")
+            # the full stop of "d." may end the sentence as well
+            if not liko.strip() or re.match(r"\s+[A-ZĄČĘĖĮŠŲŪŽ]", liko):
+                dalys[-1] += "."
+        return " ".join(dalys)
+    t = re.sub(r"\b(?:(1\d{3}|2\d{3})\s*m\.\s+)?(" + MENESIAI + r")(?:\s+(\d{1,2})\s*d\.)?", _data, t)
     # Years take an ordinal in the instrumental: "2015 metais" / "2015 m."
     t = re.sub(r"\b(1\d{3}|2\d{3})\s*(m\.|metais)\b",
                lambda m: kelintinis(int(m.group(1)), "m", "Idgs") + " metais", t)
@@ -480,8 +585,27 @@ def isplesk(t):
     # above: skip the risky ones rather than be confidently wrong.
     t = re.sub(r"\b(nuo|iki|ligi|be|dėl|iš|tarp|virš|šalia|arti)\s+(\d{1,9})\b",
                lambda m: m.group(1) + " " + kiekinis(int(m.group(2)), "K"), t)
-    # "minus N" already reads naturally for temperatures; anything left over
-    # becomes a plain nominative cardinal.
+    # Feminine nouns in the nominative after a number: "2 minutės", "1
+    # valanda", "21 minutė", "2 lemputės". Home Assistant's timer answers are
+    # made of exactly these ("Laikmatis nustatytas 2 minutės") and they came
+    # out masculine ("du minutės"). The ending decides, and it has to fit the
+    # number: after 1, 21, 31 ... the singular -a/-ė, after 2-9 the plural
+    # -os/-ės. That fit is what keeps verbs out - "dar 5 sužeidė" (five more
+    # were wounded) has a past tense in -ė, which no noun after 5 can have.
+    # Numbers glued to letters or a hyphen are names (F-35, COVID-19), and
+    # "yra" and adverbs like "tada" are not nouns. Masculine nouns with these
+    # endings (dėdė) are rare enough to accept.
+    def _moteriska(m):
+        n, zodis = int(m.group(1)), m.group(3)
+        d10, d100 = n % 10, n % 100
+        if d10 == 0 or 11 <= d100 <= 19:
+            return m.group(0)                      # the same word in both genders
+        if (d10 == 1) != zodis.endswith(("a", "ė")):
+            return m.group(0)
+        return kiekinis(n, "V", "_f") + m.group(2) + zodis
+    t = re.sub(r"(?<![\w-])(\d{1,9})(\s+)(?!(?:yra|tada|kada|visada|niekada|kažkada)\b)"
+               r"([a-ząčęėįšųūž]+(?:a|ė|os|ės))\b", _moteriska, t)
+    # Anything left over becomes a plain nominative cardinal.
     t = re.sub(r"\b\d{1,9}\b", lambda m: kiekinis(int(m.group(0))), t)
     return re.sub(r"\s{2,}", " ", t)
 
