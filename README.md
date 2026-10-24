@@ -57,7 +57,8 @@ modulis turi stovėti prieš modelį. Abu diegimo keliai žemiau jį įtraukia.
 | Kelias | Kas tai |
 |---|---|
 | `phonemize_lithuanian.py` | Fonemizatorius: espeak-ng IPA po žodį → kirtis iš žodyno → trys priegaidės ženklai (`ˈ ˌ ˋ`). Parašytas Piperio `phonemize_japanese.py` pavidalu, skirtas pateikti kaip PR. |
-| `lt_kirciai.tsv` | Kirčių žodynas, 189 247 žodžių formos, 3 MB. Antras stulpelis — kelinta balsių grupė kirčiuota, trečias — priegaidės ženklas. |
+| `lt_kirciai.tsv` | Kirčių žodynas, 189 262 žodžių formos, 3 MB. Antras stulpelis — kelinta balsių grupė kirčiuota, trečias — priegaidės ženklas. |
+| `lt_raides.tsv`, `lt_kreipiniai.tsv` | Dar dvi fonemizatoriaus lentelės: raidžių vardai, kai žodis skaitomas paraidžiui (espeak z ir ž taria vienodai), ir kreipiniai (šauksmininkas: „mãma" kreipiantis, „mamà" apie ją). Laikykite šalia fonemizatoriaus. |
 | `zodziai_trumpi.txt` | Trumpų žodžių sąrašas skaičių ir santrumpų plėtikliui. |
 | `skaiciu_pletiklis.py` | Skaičiai, laikas, mato vienetai ir santrumpos — teisingais linksniais, prieš fonemizaciją. Be jo espeak „5000 eurų" perskaito su ne tais galūnėmis. |
 | `synth_reginute.py` | Sintezės receptas: skaido ties sakinio skyryba, lygina kalbėjimo greitį gabaluose, kerpa tylą, `normalize_audio=False`. |
@@ -322,7 +323,7 @@ Ji šio projekto neinicijavo, jo nekuravo ir už jį neatsako.
 Kirčių žodynas sudarytas iš
 [`svogunas/g2p-lt-lexicon`](https://huggingface.co/datasets/svogunas/g2p-lt-lexicon),
 **Arūno Smaliuko** darbo (CC BY 4.0). Beveik kiekvienas kirčiuotas šio balso
-žodis stovi ant jo darbo — 176 637 iš 189 247 įrašų.
+žodis stovi ant jo darbo — 176 637 iš 189 262 įrašų.
 
 ### Ausys
 

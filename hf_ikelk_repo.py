@@ -19,8 +19,8 @@ HF = os.path.join(CIA, "hf")
 VARDAS = "lt_LT-reginute1-medium"
 REPO = "RobertasTa/" + VARDAS
 BUTINI = (VARDAS + ".onnx", VARDAS + ".onnx.json", "MODEL_CARD", "README.md", "SHA256SUMS",
-          "phonemize_lithuanian.py", "lt_kirciai.tsv", "skaiciu_pletiklis.py",
-          "zodziai_trumpi.txt", "synth_reginute.py",
+          "phonemize_lithuanian.py", "lt_kirciai.tsv", "lt_raides.tsv", "lt_kreipiniai.tsv",
+          "skaiciu_pletiklis.py", "zodziai_trumpi.txt", "synth_reginute.py", "wyoming_reginute.py",
           os.path.join("samples", "speaker_0.mp3"))
 
 

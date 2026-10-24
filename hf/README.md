@@ -18,6 +18,8 @@ pipeline_tag: text-to-speech
 
 ![Reginutė — Lietuviškai. Vietoje. Nemokamai.](https://raw.githubusercontent.com/RobertasTa/reginute/main/docs/baneris.png)
 
+**[Project page](https://robertasta.github.io/reginute/)** — an audio sample and what this is, on one page (in Lithuanian). Her younger sister Ingutė has [her own page](https://robertasta.github.io/ingute/).
+
 The first Lithuanian voice for [Piper](https://github.com/OHF-Voice/piper1-gpl).
 Latvian has been in the Piper catalogue since October 2024 and Estonian since
 August 2026; Lithuanian never has.
@@ -33,10 +35,12 @@ August 2026; Lithuanian never has.
   one professional actress (studio recordings, 5 121 utterances, ~3 h)
 - Sample rate: 22 050 Hz · Quality: medium · Speakers: 1
 - Files: `lt_LT-reginute1-medium.onnx` + `lt_LT-reginute1-medium.onnx.json`
-  (**must stay together**) + `phonemize_lithuanian.py` + `lt_kirciai.tsv`
+  (**must stay together**) + `phonemize_lithuanian.py` with its three data
+  tables `lt_kirciai.tsv`, `lt_raides.tsv` and `lt_kreipiniai.tsv`
   (see below — the voice does not speak without them) + `skaiciu_pletiklis.py`
   with `zodziai_trumpi.txt` (text normalizer) + `synth_reginute.py` (the
-  recommended wrapper: sentence splitting, pauses, `normalize_audio=False`);
+  recommended wrapper: sentence splitting, pauses, `normalize_audio=False`)
+  + `wyoming_reginute.py` (Wyoming server for Home Assistant, see below);
   `SHA256SUMS` covers all of them
 
 ## ⚠️ This voice needs its phonemizer
@@ -46,13 +50,19 @@ stress on the **wrong syllable in roughly half of the words** when checked
 against the corpus' own gold annotation. So this voice is trained with
 `phoneme_type: text` on IPA plus three accent marks (`ˈ ˌ ˋ`), and the text
 must be phonemized by `phonemize_lithuanian.py` together with the stress
-dictionary `lt_kirciai.tsv` (189 247 word forms, built from the LIEPA
-annotations and Arūnas Smaliukas' `g2p-lt-lexicon`).
+dictionary `lt_kirciai.tsv` (189 262 word forms, built from the LIEPA
+annotations and Arūnas Smaliukas' `g2p-lt-lexicon`). Two small tables sit
+beside it: `lt_raides.tsv` for letter names espeak-ng gets wrong when a word
+is spelled out (it calls both z and ž ʑˈee, so "Z." and "Ž." were read the
+same), and `lt_kreipiniai.tsv` for the vocative - Lithuanian spells "mama"
+the same whether you speak about her or to her, but accents it differently,
+and a dictionary holding one entry per spelling cannot express that.
 
 Plain Piper with a `text` voice feeds the model **raw letters, not IPA**, and
 will not produce Lithuanian. A `PhonemeType.LITHUANIAN` contribution to
-piper1-gpl (in the shape of `phonemize_japanese`) is being prepared; until it
-lands, ship the two files next to the model.
+piper1-gpl (in the shape of `phonemize_japanese`) has been merged and is
+expected in Piper 1.9.0, which is not released yet; until then, ship those
+files next to the model.
 
 The phonemizer also normalizes text before phonemizing — numbers with the
 right case endings, clock times, units and letter-by-letter abbreviations
@@ -64,6 +74,63 @@ text the same way, so this is the usual Piper arrangement, not an extra layer.
 
 Recommended: **`normalize_audio=False`** — Piper's default (`True`) clips this
 voice.
+
+## Home Assistant
+
+**Today — through Wyoming, about five minutes.** Reginutė runs as a separate
+Wyoming service beside your existing Piper add-on; nothing that already works is
+touched.
+
+Any Linux, as root (otherwise with `sudo`); tested on 2026-10-24 on a clean Ubuntu 24.04 container:
+
+```bash
+apt install -y python3-venv
+python3 -m venv /opt/reginute/venv
+/opt/reginute/venv/bin/pip install piper-tts==1.8.0 wyoming huggingface_hub
+# every voice file and the server — from this repository (~65 MB)
+/opt/reginute/venv/bin/python -c "from huggingface_hub import snapshot_download as s; s('RobertasTa/lt_LT-reginute1-medium', local_dir='/opt/reginute/voice')"
+# to try it
+/opt/reginute/venv/bin/python /opt/reginute/voice/wyoming_reginute.py --model /opt/reginute/voice/lt_LT-reginute1-medium.onnx --uri tcp://0.0.0.0:10250
+```
+
+Always run the **venv's** Python (by full path, as above): if `pip` installed into one
+Python and `python3` is another, you get `No module named 'piper'` although `piper-tts`
+is installed. To have it start by itself — `/etc/systemd/system/reginute.service`:
+
+```ini
+[Unit]
+Description=Reginute - Lithuanian Piper voice over Wyoming
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/opt/reginute/venv/bin/python /opt/reginute/voice/wyoming_reginute.py --model /opt/reginute/voice/lt_LT-reginute1-medium.onnx --uri tcp://0.0.0.0:10250
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+systemctl daemon-reload && systemctl enable --now reginute
+```
+
+The log should say
+`reginute1 klauso tcp://0.0.0.0:10250 (tempas 1.3 iš konfigo, plėtiklis: taip)`
+("listening… speed 1.3 from the config"). In Home Assistant: **Settings →
+Devices & Services → Add integration → Wyoming Protocol**, the host and port
+10250 — the voice appears as `reginute1`; pick it as the text-to-speech engine of
+your Assist pipeline. Speed and voice name come from the model and its config;
+there is nothing to set.
+
+Once Piper 1.9.0 is released, Reginutė should work straight from the Home
+Assistant Piper add-on, and this server will no longer be needed. That is our
+expectation — we will check it when it is out.
+
+**Ears** (speech → text) in Lithuanian, on a CPU —
+[LT_ausys](https://huggingface.co/RobertasTa/lt-ausys): ~0.2 s per command,
+connected the same Wyoming way.
 
 ## Licence and lineage
 
@@ -95,20 +162,6 @@ voice.
   by **MEL DYNAMICS, MB**.
   (LIEPA-3, led by **prof. Gražina Korvel**, is a different and much larger
   corpus — it is what the ASR model below is trained on, not this voice.)
-* **The mother of this voice** — **prof. Gražina Korvel** (Vilnius University,
-  Institute of Data Science and Digital Technologies). A title granted by the
-  author of this voice in his own name, not an official one, and it rests on
-  her work rather than on courtesy: she has worked on Lithuanian speech
-  **synthesis** since her 2013 doctorate on dynamic models of Lithuanian
-  phonemes; her group's paper on VITS for Lithuanian (Lėveris & Korvel, VU
-  Open Series 2026, [doi:10.15388/LMITT.2026.15](https://doi.org/10.15388/LMITT.2026.15))
-  measured that a multi-speaker model makes Lithuanian quality worse with
-  ~3 h of data (MCD +36 %), which removed that branch from this voice's plans
-  and gave it its only close reference point (MCD 18.61 dB, F0 RMSE
-  22.67 Hz); and she leads LIEPA-3, the corpus behind the ears this voice is
-  paired with. She did not initiate this project and is not responsible for
-  it. Full reasoning in the
-  [repository README](https://github.com/RobertasTa/reginute/blob/main/README_EN.md#the-mother-of-this-voice).
 * **Stress dictionary** — derived from
   [`svogunas/g2p-lt-lexicon`](https://huggingface.co/datasets/svogunas/g2p-lt-lexicon)
   by **Arūnas Smaliukas** (CC BY 4.0), and from the LIEPA annotations.
@@ -171,10 +224,16 @@ merged into Piper.
 
 ## Status
 
-Trained and in daily use in a real Home Assistant installation (Wyoming TTS,
-Lithuanian voice assistant beside a Russian one). Submitted on 2026-09-06 to the
-official `rhasspy/piper-voices` catalogue
+In the official Piper catalogue since 2026-09-17
 ([PR #103](https://huggingface.co/rhasspy/piper-voices/discussions/103)); the
-phonemizer is submitted to piper1-gpl as
-[PR #296](https://github.com/OHF-Voice/piper1-gpl/pull/296). Until both are
-merged the voice is not in the catalogue — install from this repo.
+phonemizer was merged into piper1-gpl on 2026-09-15
+([PR #296](https://github.com/OHF-Voice/piper1-gpl/pull/296)) and ships with
+Piper 1.9.0 — from that release plain `piper` speaks with this voice. Until then,
+use the files and the wrapper in this repo.
+
+## Used in
+
+- [SpeakDream](https://github.com/RobertasTa/speakdream) — offline voice
+  interpreter, meeting secretary and language practice for Windows; Reginutė is
+  its Lithuanian voice.
+- A Home Assistant voice assistant (Wyoming TTS), in daily use.

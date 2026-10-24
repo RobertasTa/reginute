@@ -312,7 +312,9 @@ espeak-ng data; nothing extra to install.
 | `lt_LT-reginute1-medium.onnx` | model (63 MB, Release/HF, not in git) | both paths |
 | `lt_LT-reginute1-medium.onnx.json` | config: `phoneme_type: text`, 167-entry `phoneme_id_map`, `sample_rate 22050`, `inference: length_scale 1.3, noise_scale 0.667, noise_w 0.8` | both |
 | `phonemize_lithuanian.py` | the phonemizer | both |
-| `lt_kirciai.tsv` | stress dictionary, 189 247 lines, TSV: word, vowel-group index, accent mark | both |
+| `lt_kirciai.tsv` | stress dictionary, 189 262 lines, TSV: word, vowel-group index, accent mark | both |
+| `lt_raides.tsv` | letter names for spelled-out words (z and ž are the same in espeak) | both |
+| `lt_kreipiniai.tsv` | nouns used in direct address (vocative accent shift) | both |
 | `skaiciu_pletiklis.py` + `zodziai_trumpi.txt` | number/abbreviation expander; picked up automatically when present | both (optional but strongly recommended) |
 | `synth_reginute.py` | `ReginuteSynth` — sentence splitting, pauses, rate levelling, silence trim, `normalize_audio=False` | both |
 | `wyoming_reginute.py` | Wyoming TTS server | path B only |

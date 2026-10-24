@@ -60,7 +60,8 @@ include it.
 | Path | What it is |
 |---|---|
 | `phonemize_lithuanian.py` | The phonemizer: espeak-ng IPA per word → dictionary stress → three accent marks (`ˈ ˌ ˋ`). Written in the shape of Piper's `phonemize_japanese.py`, intended as a PR to piper1-gpl. |
-| `lt_kirciai.tsv` | Stress dictionary, 189 247 word forms, 3 MB. Column 2 = index of the stressed vowel group, column 3 = accent mark. |
+| `lt_kirciai.tsv` | Stress dictionary, 189 262 word forms, 3 MB. Column 2 = index of the stressed vowel group, column 3 = accent mark. |
+| `lt_raides.tsv`, `lt_kreipiniai.tsv` | Two more phonemizer tables: letter names for spelled-out words (espeak says z and ž the same) and vocatives ("mãma" when you speak to her, "mamà" about her). Keep them next to the phonemizer. |
 | `zodziai_trumpi.txt` | Short word list used by the number/abbreviation expander. |
 | `synth_reginute.py` | Synthesis recipe: splits at sentence punctuation, levels speaking rate per fragment, trims silence, `normalize_audio=False`. |
 | `wyoming_reginute.py` | Wyoming TTS server around the voice — what Home Assistant talks to. |
@@ -334,7 +335,7 @@ responsible for it.
 Stress dictionary derived from
 [`svogunas/g2p-lt-lexicon`](https://huggingface.co/datasets/svogunas/g2p-lt-lexicon)
 by **Arūnas Smaliukas** (CC BY 4.0). Nearly every stressed word this voice
-speaks stands on his work — 176 637 of the 189 247 entries.
+speaks stands on his work — 176 637 of the 189 262 entries.
 
 ### The ears
 

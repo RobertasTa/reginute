@@ -144,11 +144,16 @@ def main():
     # 09-05 nothing copied them in - hf/ shipped a voice that could not talk.
     # zodziai_trumpi.txt: skaiciu_pletiklis looks for it beside itself;
     # synth_reginute.py: the recommended wrapper (brief: "both").
+    # lt_raides.tsv / lt_kreipiniai.tsv: the phonemizer's other two tables (letter
+    # names, vocatives) - left out of this list when they were added, so a rebuilt
+    # package would have lacked them. wyoming_reginute.py: the Home Assistant server,
+    # shipped on Hugging Face since 2026-10-24.
     for fn in ("phonemize_lithuanian.py", "skaiciu_pletiklis.py", "lt_kirciai.tsv",
-               "zodziai_trumpi.txt", "synth_reginute.py"):
+               "lt_raides.tsv", "lt_kreipiniai.tsv", "zodziai_trumpi.txt", "synth_reginute.py",
+               "wyoming_reginute.py"):
         shutil.copyfile(os.path.join(CIA, fn), os.path.join(HF, fn))
-    print("2b) phonemize_lithuanian.py, skaiciu_pletiklis.py, lt_kirciai.tsv, "
-          "zodziai_trumpi.txt, synth_reginute.py -> hf/")
+    print("2b) phonemize_lithuanian.py, skaiciu_pletiklis.py, lt_kirciai.tsv, lt_raides.tsv, "
+          "lt_kreipiniai.tsv, zodziai_trumpi.txt, synth_reginute.py, wyoming_reginute.py -> hf/")
 
     # 3. SHA256SUMS for everything in hf/ except the list itself.
     # Found while rehearsing the submission: a backup copy of the config had
