@@ -11,6 +11,9 @@
 <meta property="og:image" content="https://robertasta.github.io/reginute/baneris.png">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="lt_LT">
+<link rel="alternate" hreflang="lt" href="https://robertasta.github.io/reginute/">
+<link rel="alternate" hreflang="en" href="https://robertasta.github.io/reginute/en/">
+<link rel="alternate" hreflang="x-default" href="https://robertasta.github.io/reginute/en/">
 <style>
   :root{
     --bg:#010d24; --bg2:#06173a; --card:#0b1f47;
@@ -50,9 +53,13 @@
   .padekos p+p{margin-top:12px}
   footer{padding:36px 0 48px;text-align:center;color:var(--muted);font-size:.92rem;border-top:1px solid var(--line)}
   footer .sig{color:var(--amber);font-style:italic;margin-top:6px}
+  .kalba{display:flex;justify-content:flex-end;gap:8px;padding-top:16px;font-size:.92rem;color:var(--muted)}
+  .kalba b{color:var(--amber)}
 </style>
 </head>
 <body>
+
+<nav class="kalba wrap" aria-label="Language / Kalba"><b>LT</b> · <a href="en/" hreflang="en" lang="en">EN</a></nav>
 
 <header class="wrap">
   <img class="baneris" src="baneris.png" alt="Reginutė — lietuviškas balsas Piper sintezatoriui">
@@ -63,7 +70,6 @@
     <a class="btn btn-amber" href="https://huggingface.co/RobertasTa/lt_LT-reginute1-medium">Atsisiųsti balsą</a>
     <a class="btn btn-ghost" href="https://github.com/RobertasTa/reginute">Kodas GitHub'e</a>
   </div>
-  <p class="lang">In English: <a href="https://github.com/RobertasTa/reginute/blob/main/README_EN.md">README_EN.md</a></p>
 </header>
 
 <section class="wrap">
@@ -82,10 +88,10 @@
   <h2>Kas tai</h2>
   <div class="grid">
     <div class="card"><h3>Veikia be interneto</h3><p>Balsas gyvena jūsų kompiuteryje ar namų serveryje. Jokios paskyros, jokio API rakto, jokio mėnesinio mokesčio, jokio simbolių limito. Tekstas niekur neišeina.</p></div>
-    <div class="card"><h3>Kirčiuoja</h3><p>Lietuvių kalba turi tris priegaides, o standartinis espeak-ng kirtį deda ne tame skiemenyje maždaug pusėje žodžių. Todėl šis balsas espeak kirčiavimo nenaudoja: kirtis imamas iš 189 247 žodžių formų žodyno.</p></div>
+    <div class="card"><h3>Kirčiuoja</h3><p>Lietuvių kalba turi tris priegaides, o standartinis espeak-ng kirtį deda ne tame skiemenyje maždaug pusėje žodžių. Todėl šis balsas espeak kirčiavimo nenaudoja: kirtis imamas iš 189 262 žodžių formų žodyno.</p></div>
     <div class="card"><h3>Skaičiai teisingais linksniais</h3><p>„Kompensacija nuo 2000 eurų“, „15:30“, „25 °C“ — skaičiai, laikas, matai ir santrumpos išplečiami į žodžius prieš sintezę, o ne skaitomi po skaitmenį.</p></div>
     <div class="card"><h3>Home Assistant</h3><p>Prisijungia per Wyoming protokolą savo portu, šalia esamo Piper priedo — nieko, kas jau veikia, neliečia. Patikrinta gyvai su Voice PE kolonėle.</p></div>
-    <div class="card"><h3>Piper kataloge lietuvių nebuvo</h3><p>Latvių balsas ten yra nuo 2024 m. spalio, estų — nuo 2026 m. rugpjūčio. Lietuvių nebuvo niekada. Šis balsas pateiktas į katalogą ir kol kas laukia eilėje.</p></div>
+    <div class="card"><h3>Piper kataloge lietuvių nebuvo</h3><p>Latvių balsas ten yra nuo 2024 m. spalio, estų — nuo 2026 m. rugpjūčio. Lietuvių nebuvo niekada — iki 2026 m. rugsėjo 17-osios, kai Reginutė tapo pirmuoju lietuvišku balsu oficialiame kataloge. Home Assistant Piper priede ji turėtų atsirasti su Piper 1.9.0 (dar neišleistas).</p></div>
     <div class="card"><h3>Atvira licencija</h3><p>Kodas — GPL-3.0, balsas — CC-BY-4.0, paveldėta iš garsyno. Galima naudoti, keisti ir platinti, nurodžius kilmę. Modelis atsisiunčiamas visas, o ne nuomojamas.</p></div>
   </div>
 </section>

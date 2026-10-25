@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="google-site-verification" content="ngCuEME8a9C8od6O7mw1EHMId6BzZqJE9-xi-NIyy-Y" />
+<title>Reginutė — a Lithuanian voice that speaks on your own computer</title>
+<meta name="description" content="Free, open Lithuanian text-to-speech voice for Piper and Home Assistant. Runs offline — no account, no fees. Takes the stress from a dictionary of 189,000 word forms with all three pitch accents. Trained on the LIEPA corpus of Vilnius University.">
+<meta property="og:title" content="Reginutė — a Lithuanian voice">
+<meta property="og:description" content="Lithuanian. Local. Free. A voice that speaks on your own computer, without the internet.">
+<meta property="og:image" content="https://robertasta.github.io/reginute/baneris.png">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
+<link rel="alternate" hreflang="lt" href="https://robertasta.github.io/reginute/">
+<link rel="alternate" hreflang="en" href="https://robertasta.github.io/reginute/en/">
+<link rel="alternate" hreflang="x-default" href="https://robertasta.github.io/reginute/en/">
+<style>
+  :root{
+    --bg:#010d24; --bg2:#06173a; --card:#0b1f47;
+    --text:#f5f7fc; --muted:#bcc4d6; --amber:#e8b84b; --line:#1d3560;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,sans-serif;line-height:1.6}
+  a{color:var(--amber)}
+  .wrap{max-width:860px;margin:0 auto;padding:0 20px}
+  header{padding:48px 0 36px;text-align:center}
+  header img.baneris{width:100%;max-width:820px;border-radius:10px;border:1px solid var(--line);margin-bottom:26px}
+  h1{font-size:2.4rem;font-weight:700;letter-spacing:.5px}
+  .tagline{font-size:1.25rem;color:var(--muted);margin-top:10px}
+  .amber{color:var(--amber);font-style:italic;margin-top:8px}
+  .actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:30px 0 8px}
+  .btn{display:inline-block;padding:12px 26px;border-radius:8px;font-weight:600;text-decoration:none}
+  .btn-amber{background:var(--amber);color:#1a1200}
+  .btn-ghost{border:1px solid var(--line);color:var(--text)}
+  .lang{color:var(--muted);font-size:.92rem;margin-top:14px}
+  section{padding:36px 0;border-top:1px solid var(--line)}
+  h2{font-size:1.4rem;margin-bottom:18px}
+  .klausyk{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:24px;text-align:center}
+  .klausyk audio{width:100%;max-width:480px;margin-top:14px}
+  .klausyk p{color:var(--muted)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px}
+  .card h3{font-size:1.02rem;margin-bottom:6px}
+  .card p{color:var(--muted);font-size:.95rem}
+  .ask{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:24px}
+  .ask p{color:var(--muted)}
+  .ask p+p{margin-top:12px}
+  .ask code{overflow-wrap:anywhere}
+  pre{background:#00081a;border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.9rem}
+  code{font-family:Consolas,"Courier New",monospace}
+  .zyma{color:var(--muted);font-size:.95rem;border-left:3px solid var(--amber);padding-left:14px;margin-top:18px}
+  .padekos p{color:var(--muted);font-size:.95rem}
+  .padekos p+p{margin-top:12px}
+  footer{padding:36px 0 48px;text-align:center;color:var(--muted);font-size:.92rem;border-top:1px solid var(--line)}
+  footer .sig{color:var(--amber);font-style:italic;margin-top:6px}
+  .kalba{display:flex;justify-content:flex-end;gap:8px;padding-top:16px;font-size:.92rem;color:var(--muted)}
+  .kalba b{color:var(--amber)}
+</style>
+</head>
+<body>
+
+<nav class="kalba wrap" aria-label="Language / Kalba"><a href="../" hreflang="lt" lang="lt">LT</a> · <b>EN</b></nav>
+
+<header class="wrap">
+  <img class="baneris" src="../baneris.png" alt="Reginutė — a Lithuanian voice for the Piper synthesizer">
+  <h1>Reginutė</h1>
+  <p class="tagline">A Lithuanian voice that speaks on your own computer.</p>
+  <p class="amber">Lithuanian. Local. Free.</p>
+  <div class="actions">
+    <a class="btn btn-amber" href="https://huggingface.co/RobertasTa/lt_LT-reginute1-medium">Download the voice</a>
+    <a class="btn btn-ghost" href="https://github.com/RobertasTa/reginute">Code on GitHub</a>
+  </div>
+  <p class="lang">Full documentation in English: <a href="https://github.com/RobertasTa/reginute/blob/main/README_EN.md">README_EN.md</a></p>
+</header>
+
+<section class="wrap">
+  <div class="klausyk">
+    <h2>Listen</h2>
+    <p>This is how she sounds. Synthesis, not a recording.</p>
+    <audio controls preload="none" src="../pavyzdys.mp3">Your browser cannot play audio — <a href="../pavyzdys.mp3">download the file</a>.</audio>
+  </div>
+  <p class="zyma"><b>This is a synthetic voice.</b> All audio samples are generated by AI; they are not
+  recordings of a person. If you publish content voiced with it, check whether it needs an AI
+  label (EU AI Act, Article 50, applicable since 2 August 2026).</p>
+</section>
+
+<section class="wrap">
+  <h2>What it is</h2>
+  <div class="grid">
+    <div class="card"><h3>Works offline</h3><p>The voice lives on your computer or home server. No account, no API key, no monthly fee, no character limit. Your text goes nowhere.</p></div>
+    <div class="card"><h3>Gets the stress right</h3><p>Lithuanian has three pitch accents, and standard espeak-ng puts the stress on the wrong syllable in about half of the words. So this voice does not use espeak's stress: it takes it from a dictionary of 189,262 word forms.</p></div>
+    <div class="card"><h3>Numbers in the right case</h3><p>„Kompensacija nuo 2000 eurų“, „15:30“, „25 °C“ — numbers, times, units and abbreviations are expanded into words with the right Lithuanian endings before synthesis, not read digit by digit.</p></div>
+    <div class="card"><h3>Home Assistant</h3><p>Connects over the Wyoming protocol on its own port, next to your existing Piper add-on — nothing that already works is touched. Tested live with a Voice PE speaker.</p></div>
+    <div class="card"><h3>The first Lithuanian voice in Piper</h3><p>Latvian has been in the Piper catalogue since October 2024, Estonian since August 2026. Lithuanian never was — until 17 September 2026, when Reginutė became the first Lithuanian voice in the official catalogue. In the Home Assistant Piper add-on she is expected with Piper 1.9.0 (not released yet).</p></div>
+    <div class="card"><h3>Open licence</h3><p>Code — GPL-3.0, voice — CC-BY-4.0, inherited from the corpus. Use it, change it and share it, with attribution. You download the whole model; nothing is rented.</p></div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>What it is made of</h2>
+  <p>The voice is trained on the synthesis part of the <b>LIEPA</b> corpus of <b>Vilnius University</b> —
+  studio recordings of a professional actress (~3 h, CC-BY-4.0). These are the same recordings that
+  the 2015 LIEPA synthesizer for blind people was built from; Reginutė is a digital daughter of
+  that voice, not a competitor.</p>
+  <p class="zyma">Everything you hear is still hers: her timbre, her pace, her way of ending a sentence.
+  The model only learned to rearrange it.</p>
+</section>
+
+<section class="wrap">
+  <h2>How to start</h2>
+  <p>You need the released <code>piper-tts</code> wheel — no fork, no patches. The voice also needs
+  the stress-aware phonemizer from the same folder: without it Piper would feed the model bare
+  letters and it would not speak Lithuanian.</p>
+  <p>Two paths, both tested on a clean Linux container. <b>Home Assistant</b> — a Wyoming server: its own
+  Python environment, every file from Hugging Face and a systemd service, about 5 minutes —
+  <a href="https://github.com/RobertasTa/reginute/blob/main/README_EN.md#install-path-b--home-assistant-via-wyoming">README_EN, “Install path B”</a>.
+  <b>Plain Piper</b> (one Python function) —
+  <a href="https://github.com/RobertasTa/reginute/blob/main/README_EN.md#install-path-a--plain-piper-no-home-assistant">“Install path A”</a>.</p>
+</section>
+
+<section class="wrap">
+  <h2>News: Lithuanian ears — LT_ausys</h2>
+  <p>A voice assistant has two halves: a <b>mouth</b> and <b>ears</b>. Since 24 October 2026 there are ears that are fast on an
+  ordinary CPU: <a href="https://github.com/RobertasTa/lt-ausys"><b>LT_ausys</b></a>. It is <b>Kristijonas Jakubsonas</b>'s model
+  <i>kmynas</i> (NVIDIA Parakeet, trained on LIEPA-3), converted by us to ONNX and compressed so that it runs without a graphics card.
+  Model on <a href="https://huggingface.co/RobertasTa/lt-ausys">Hugging Face</a>, licence CC BY 4.0. Together with this voice it
+  makes a complete Lithuanian voice assistant for Home Assistant that runs entirely at home.</p>
+  <div class="grid">
+    <div class="card"><h3>Lightning fast</h3><p>Recognises a voice command in 0.21 s. Whisper-family models (Paprika included) take 3.55 s on the same mini PC: they encode a 30-second window for every phrase, however short.</p></div>
+    <div class="card"><h3>No graphics card</h3><p>4 CPU cores and 4 GB of RAM are enough — a mini PC or a Proxmox container. The model is 0.9 GB.</p></div>
+    <div class="card"><h3>More accurate</h3><p>On read speech (FLEURS) it gets 10.6 % of words wrong, Paprika 12.0 %. Home Assistant's default Whisper <i>base</i> in Lithuanian: 88 %.</p></div>
+    <div class="card"><h3>At home, not in the cloud</h3><p>Everything runs on your own machine; nothing is sent anywhere. Home Assistant connects the ears the same Wyoming way as the voice.</p></div>
+    <div class="card"><h3>A different engine — started differently</h3><p>Paprika is a Whisper model: it runs on <code>faster-whisper</code>, the same engine as the usual Home Assistant Whisper add-on. LT_ausys is a different kind of model (Parakeet, ONNX), and that add-on does not offer it by itself — our proposal to add it is still waiting for review. So the ears run in their own small Wyoming server (Python environment or Docker, about 5 minutes, <a href="https://github.com/RobertasTa/lt-ausys#b-wyoming-server-any-linux-tested-in-a-proxmox-lxc-container">recipe</a>) and are added to Home Assistant as a separate Wyoming service. Paprika can stay next to it as a backup.</p></div>
+    <div class="card"><h3>In our home</h3><p>Our speaker, Alisa, has been listening with them since 24 October 2026. First day: 13 commands out of 13, each in about 0.3 s, without any extra training on the owner's voice. One home's experience, not a measurement.</p></div>
+  </div>
+  <p>Before that our ears were <a href="https://huggingface.co/kristijonas/paprika-whisper-lt-v3"><b>Paprika</b></a> —
+  also by Kristijonas Jakubsonas, a Lithuanian Whisper; it stays our choice for long dictation
+  (<a href="https://github.com/RobertasTa/diktuokle">Diktuoklė</a>). On our own test bench: generic
+  <code>whisper-large-v3-turbo</code> — 25.95 % WER, Paprika — 7.63 % (an in-domain figure: the test set comes from the same corpus).</p>
+</section>
+
+<section class="wrap">
+  <h2>Stuck? Ask an AI</h2>
+  <div class="ask">
+    <p><b>Not a programmer?</b> You don't need to understand a single command. Paste this into any AI chat
+    (Claude, ChatGPT or another) and keep asking in your own words:</p>
+    <p><code>Read https://raw.githubusercontent.com/RobertasTa/reginute/main/AI_CONSULTANT_BRIEF.md
+    and help me install the Lithuanian voice Reginutė.</code></p>
+    <p>That file lists what the assistant must ask before advising and what it must not claim —
+    so that the advice rests on facts, not guesses. Among other things it says that “the first Lithuanian speech synthesizer” would be untrue: the first was LIEPA, in 2015.</p>
+  </div>
+</section>
+
+<section class="wrap padekos">
+  <h2>Thank you</h2>
+  <p><b>Vilnius University</b> and the LIEPA team led by <b>Prof. Laimutis Telksnys</b> — for a corpus
+  that was published rather than kept. Ten years of recordings, given away for the price of a citation.</p>
+  <p><b>Prof. Gražina Korvel</b> — this voice's mother. Her group's work on VITS synthesis for Lithuanian
+  changed this voice's path before the first training evening.</p>
+  <p><b>Arūnas Smaliukas</b> — for the stress dictionary that nearly every stressed word of this voice
+  stands on. <b>Kristijonas Jakubsonas</b> — for the ears. <b>Michael Hansen</b> and the
+  <b>Open Home Foundation</b> — for a synthesizer open enough that the language of three million people
+  could join it without asking for permission.</p>
+  <p>None of them has seen this project; no institution sponsors it. Full credits with every name and
+  licence — <a href="https://github.com/RobertasTa/reginute/blob/main/README_EN.md#attribution">at the end of the README</a>.</p>
+</section>
+
+<footer class="wrap">
+  <p><a href="https://github.com/RobertasTa/reginute">GitHub</a> ·
+     <a href="https://huggingface.co/RobertasTa/lt_LT-reginute1-medium">Hugging Face</a> ·
+     <a href="https://github.com/RobertasTa/reginute/blob/main/LICENSE">GPL v3</a> ·
+     <a href="https://github.com/RobertasTa/reginute/blob/main/LICENSE-VOICE">Voice CC-BY-4.0</a></p>
+  <p class="sig">A gift from Claude and Robertas</p>
+</footer>
+
+</body>
+</html>
