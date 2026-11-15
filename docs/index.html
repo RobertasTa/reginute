@@ -167,20 +167,20 @@
 <section class="wrap">
   <h2>Naujiena: lietuviškos ausys — LT_ausys</h2>
   <p>Balso asistentui reikia dviejų pusių: <b>burnos</b> ir <b>ausų</b>. Nuo 2026-10-24 turim ausis, kurios greitos ant paprasto
-  procesoriaus: <a href="https://github.com/RobertasTa/lt-ausys"><b>LT_ausys</b></a>. Tai <b>Kristijono Jakubsono</b> modelis
-  <i>kmynas</i> (NVIDIA Parakeet, mokytas su LIEPA-3), mūsų perkeltas į ONNX ir suspaustas, kad suktųsi be vaizdo plokštės.
-  Modelis — <a href="https://huggingface.co/RobertasTa/lt-ausys">Hugging Face</a>, licencija CC BY 4.0.</p>
+  procesoriaus: <a href="https://github.com/RobertasTa/lt-ausys"><b>LT_ausys</b></a>. Nuo 2026-11-15 tai <b>Datolabs</b> modelis
+  <i>Upelis</i> (NVIDIA Nemotron, mokytas su LIEPA-3 ir Common Voice), iki tol — Kristijono Jakubsono <i>kmynas</i>; abu mūsų perkelti į ONNX ir suspausti, kad suktųsi be vaizdo plokštės.
+  Modelis — <a href="https://huggingface.co/RobertasTa/lt-ausys">Hugging Face</a>, licencija OpenMDW-1.1 (kmynas — CC BY 4.0).</p>
   <div class="grid">
-    <div class="card"><h3>Žaibiškai</h3><p>Balso komandą atpažįsta per 0,21 s. Whisper šeimos modeliai (ir Paprika) tame pačiame mini PC užtrunka 3,55 s: jie kiekvienai, net trumpiausiai frazei koduoja 30 sekundžių langą.</p></div>
-    <div class="card"><h3>Be vaizdo plokštės</h3><p>Užtenka 4 procesoriaus branduolių ir 4 GB atminties — mini PC ar Proxmox konteinerio. Modelis — 0,9 GB.</p></div>
-    <div class="card"><h3>Tiksliau</h3><p>Skaitomoje kalboje (FLEURS) klysta 10,6 % žodžių, Paprika — 12,0 %. Home Assistant numatytasis Whisper <i>base</i> lietuviškai — 88 %.</p></div>
+    <div class="card"><h3>Žaibiškai</h3><p>Balso komandą atpažįsta per 0,18 s. Whisper šeimos modeliai (ir Paprika) tame pačiame mini PC užtrunka 3,55 s: jie kiekvienai, net trumpiausiai frazei koduoja 30 sekundžių langą.</p></div>
+    <div class="card"><h3>Be vaizdo plokštės</h3><p>Užtenka 4 procesoriaus branduolių ir 4 GB atminties — mini PC ar Proxmox konteinerio. Modelis — 0,7 GB.</p></div>
+    <div class="card"><h3>Tiksliau</h3><p>Skaitomoje kalboje (FLEURS) klysta 8,3 % žodžių, Paprika — 12,0 %. Home Assistant numatytasis Whisper <i>base</i> lietuviškai — 88 %.</p></div>
     <div class="card"><h3>Namie, ne debesyje</h3><p>Viskas sukasi jūsų kompiuteryje, niekur nieko nesiunčiama. Home Assistant ausis prijungia tuo pačiu Wyoming keliu kaip ir balsą.</p></div>
-    <div class="card"><h3>Kitas variklis — kitaip paleidžiama</h3><p>Paprika yra Whisper: ją leidžia <code>faster-whisper</code>, tas pats variklis, kurį naudoja įprastas Home Assistant Whisper priedas. LT_ausys — kito tipo modelis (Parakeet, ONNX), ir to priedo jis savaime nesiūlo: mūsų pasiūlymas tai pridėti dar laukia peržiūros. Todėl ausys leidžiamos savu mažu Wyoming serveriu (Python aplinka arba Docker, apie 5 minutes, <a href="https://github.com/RobertasTa/lt-ausys/blob/main/README_lt.md#b-wyoming-serveris-bet-koks-linux-išbandyta-proxmox-lxc-konteineryje">receptas</a>) ir Home Assistant pridedamos kaip atskira Wyoming tarnyba. Paprika gali likti šalia kaip atsarga.</p></div>
+    <div class="card"><h3>Kitas variklis — kitaip paleidžiama</h3><p>Paprika yra Whisper: ją leidžia <code>faster-whisper</code>, tas pats variklis, kurį naudoja įprastas Home Assistant Whisper priedas. LT_ausys — kito tipo modelis (transduseris, ONNX), ir to priedo jis savaime nesiūlo: mūsų pasiūlymas tai pridėti dar laukia peržiūros. Todėl ausys leidžiamos savu mažu Wyoming serveriu (Python aplinka arba Docker, apie 5 minutes, <a href="https://github.com/RobertasTa/lt-ausys/blob/main/README_lt.md#b-wyoming-serveris-bet-koks-linux-išbandyta-proxmox-lxc-konteineryje">receptas</a>) ir Home Assistant pridedamos kaip atskira Wyoming tarnyba. Paprika gali likti šalia kaip atsarga.</p></div>
     <div class="card"><h3>Mūsų namuose</h3><p>Nuo 2026-10-24 jomis klauso mūsų kolonėlė Alisa. Pirmą parą — 13 komandų iš 13, kiekviena per ~0,3 s, šeimininko balso papildomai nemokant. Tai vienų namų patirtis, ne matavimas.</p></div>
   </div>
   <p>Iki tol mūsų ausys buvo <a href="https://huggingface.co/kristijonas/paprika-whisper-lt-v3"><b>Paprika</b></a> —
-  irgi Kristijono Jakubsono, lietuviškas Whisper; ji lieka mūsų pasirinkimas ilgam diktavimui
-  (<a href="https://github.com/RobertasTa/diktuokle">Diktuoklė</a>). Mūsų stende: bendrasis
+  Kristijono Jakubsono lietuviškas Whisper; ilgam diktavimui dabar naudojam jo <i>kmyną</i>
+  (<a href="https://github.com/RobertasTa/diktuokle">Diktuoklė</a>) — jis geriausiai deda taškus. Mūsų stende: bendrasis
   <code>whisper-large-v3-turbo</code> — 25,95 % WER, Paprika — 7,63 % (savos srities skaičius: testo aibė iš to paties garsyno).</p>
   <p style="margin-top:18px">Plačiau apie lietuvišką balso atpažinimą — kaip prijungti prie Home Assistant, skaičiai ir dažni klausimai — <a href="https://robertasta.github.io/lt-ausys/"><b>LT_ausys puslapyje</b></a>.</p>
 </section>
